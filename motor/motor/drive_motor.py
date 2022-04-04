@@ -32,23 +32,6 @@ ANGULAR_SPPEED_MAX = 1.0  # rad/s
 ANGULAR_SPPEED_MIN = -ANGULAR_SPPEED_MAX  # rad/s
 ANGULAR_SPPEED_STEP = ANGULAR_SPPEED_MAX / STEP  # rad/s
 
-DASHBOARD = """
-Control Your Turtlebot!
----------------------------
-Moving around:
-        w    
-    a   s   d
-        x    
-
-w/x : increase/decrease linear speed by {} m/s
-a/d : increase/decrease angular speed by {} rad/s
-s : force stop
-
-CTRL-C to quit
-""".format(
-    round(LINEAR_SPEED_STEP, 2), round(ANGULAR_SPPEED_STEP, 2)
-)
-
 msgInfo = ""
 twist = Twist()
 key = None
@@ -58,13 +41,39 @@ target_angular_velocity = 0.0
 control_linear_velocity = 0.0
 control_angular_velocity = 0.0
 
+DASHBOARD = """
+Manually Control ServingBot!
+---------------------------
+MAX LINEAR VELOCITY : {} m/s
+MAX ANGULAR VELOCITY : {} rad/s
+
+Moving around:
+        w    
+    a   s   d
+        x    
+
+w/x : increase/decrease linear speed by {} m/s
+a/d : increase/decrease angular speed by {} rad/s
+s : force stop
+
+q: quit
+
+---------------------------
+
+""".format(
+    round(LINEAR_SPEED_MAX, 2),
+    round(ANGULAR_SPPEED_MAX, 2),
+    round(LINEAR_SPEED_STEP, 2),
+    round(ANGULAR_SPPEED_STEP, 2),
+)
+
 
 def checkParametersCondition():
     if PUBLISH_FREQUENCY <= 0:
         raise Exception("PUBLISH_FREQUENCY is smaller than zero (Default: 10).")
 
 
-def displayDasboard():
+def displayInstruction():
     CLEAR()
     print(DASHBOARD)
 
@@ -180,23 +189,27 @@ class Publisher(Node):
     def __init__(self):
         super().__init__("minimal_publisher")
         self.publisher_ = self.create_publisher(Twist, TOPIC, 10)
-        timer_period = 0.01  # seconds
+        timer_period = 1 / PUBLISH_FREQUENCY  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def timer_callback(self):
-        driveMotors()
-        updateMessage()
+        # driveMotors()
+        # updateMessage()
         self.publisher_.publish(twist)
-        displayDasboard()
-        self.get_logger().info("twist.linear.x = " + str(twist.linear.x))
-        self.get_logger().info("twist.angular.z = " + str(twist.angular.z))
+        displayInstruction()
+        self.get_logger().info(
+            "twist.linear.x = " + str(round(twist.linear.x, 2)) + " m/s"
+        )
+        self.get_logger().info(
+            "twist.angular.z = " + str(round(twist.angular.z, 2)) + " rad/s"
+        )
 
 
 def main(args=None):
     checkParametersCondition()
-
     rclpy.init(args=args)
 
+    displayInstruction()
     initializeTwist()
     minimal_publisher = Publisher()
 
