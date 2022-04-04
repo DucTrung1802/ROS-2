@@ -177,7 +177,6 @@ class Publisher(Node):
     def timer_callback(self):
         driveMotors()
         updateMessage()
-        updateRosInfo()
         self.publisher_.publish(twist)
         self.get_logger().info(msgInfo)
 
