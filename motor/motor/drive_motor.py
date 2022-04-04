@@ -44,6 +44,9 @@ control_angular_velocity = 0.0
 DASHBOARD = """
 Manually Control ServingBot!
 ---------------------------
+MAX LINEAR VELOCITY : {} m/s
+MAX ANGULAR VELOCITY : {} rad/s
+
 Moving around:
         w    
     a   s   d
@@ -55,15 +58,13 @@ s : force stop
 
 q: quit
 
-Current Linear Celocity: {} m/s
-Current angular velocity: {} rad/s
 ---------------------------
 
 """.format(
+    round(LINEAR_SPEED_MAX, 2),
+    round(ANGULAR_SPPEED_MAX, 2),
     round(LINEAR_SPEED_STEP, 2),
     round(ANGULAR_SPPEED_STEP, 2),
-    round(twist.linear.x, 2),
-    round(twist.angular.z, 2),
 )
 
 
@@ -197,10 +198,10 @@ class Publisher(Node):
         self.publisher_.publish(twist)
         displayInstruction()
         self.get_logger().info(
-            "twist.linear.x = " + str(round(twist.linear.x), 2) + " m/s"
+            "twist.linear.x = " + str(round(twist.linear.x, 2)) + " m/s"
         )
         self.get_logger().info(
-            "twist.angular.z = " + str(round(twist.angular.z), 2) + " rad/s"
+            "twist.angular.z = " + str(round(twist.angular.z, 2)) + " rad/s"
         )
 
 
