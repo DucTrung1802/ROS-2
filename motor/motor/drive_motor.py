@@ -32,8 +32,17 @@ ANGULAR_SPPEED_MAX = 1.0  # rad/s
 ANGULAR_SPPEED_MIN = -ANGULAR_SPPEED_MAX  # rad/s
 ANGULAR_SPPEED_STEP = ANGULAR_SPPEED_MAX / STEP  # rad/s
 
+msgInfo = ""
+twist = Twist()
+key = None
+status = 0
+target_linear_velocity = 0.0
+target_angular_velocity = 0.0
+control_linear_velocity = 0.0
+control_angular_velocity = 0.0
+
 DASHBOARD = """
-Control Your Turtlebot!
+Manually Control ServingBot!
 ---------------------------
 Moving around:
         w    
@@ -44,19 +53,18 @@ w/x : increase/decrease linear speed by {} m/s
 a/d : increase/decrease angular speed by {} rad/s
 s : force stop
 
-CTRL-C to quit
-""".format(
-    round(LINEAR_SPEED_STEP, 2), round(ANGULAR_SPPEED_STEP, 2)
-)
+q: quit
 
-msgInfo = ""
-twist = Twist()
-key = None
-status = 0
-target_linear_velocity = 0.0
-target_angular_velocity = 0.0
-control_linear_velocity = 0.0
-control_angular_velocity = 0.0
+Current Linear Celocity: {} m/s
+Current angular velocity: {} rad/s
+---------------------------
+
+""".format(
+    round(LINEAR_SPEED_STEP, 2),
+    round(ANGULAR_SPPEED_STEP, 2),
+    round(twist.linear.x, 2),
+    round(twist.angular.z, 2),
+)
 
 
 def checkParametersCondition():
@@ -188,8 +196,12 @@ class Publisher(Node):
         updateMessage()
         self.publisher_.publish(twist)
         displayInstruction()
-        self.get_logger().info("twist.linear.x = " + str(twist.linear.x))
-        self.get_logger().info("twist.angular.z = " + str(twist.angular.z))
+        self.get_logger().info(
+            "twist.linear.x = " + str(round(twist.linear.x), 2) + " m/s"
+        )
+        self.get_logger().info(
+            "twist.angular.z = " + str(round(twist.angular.z), 2) + " rad/s"
+        )
 
 
 def main(args=None):
