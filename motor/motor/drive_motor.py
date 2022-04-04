@@ -193,9 +193,9 @@ class Publisher(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def timer_callback(self):
-        # driveMotors()
-        # updateMessage()
         self.publisher_.publish(twist)
+        driveMotors()
+        updateMessage()
         displayInstruction()
         self.get_logger().info(
             "twist.linear.x = " + str(round(twist.linear.x, 2)) + " m/s"
@@ -211,6 +211,7 @@ def main(args=None):
 
     displayInstruction()
     initializeTwist()
+
     minimal_publisher = Publisher()
 
     rclpy.spin(minimal_publisher)
