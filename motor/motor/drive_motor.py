@@ -3,10 +3,9 @@
 # adapted from https://github.com/recantha/EduKit3-RC-Keyboard/blob/master/rc_keyboard.py
 
 import sys, termios, tty, os, time
-from motor.motor.ros1_telekey_control_publisher_speed import TOPIC
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
+from geometry_msgs.msg import Twist
 from pathlib import Path
 
 # Node parameters
@@ -45,6 +44,29 @@ CTRL-C to quit
 """.format(
     round(LINEAR_SPEED_STEP, 2), round(ANGULAR_SPPEED_STEP, 2)
 )
+
+msgInfo = ""
+twist = Twist()
+key = None
+status = 0
+target_linear_velocity = 0.0
+target_angular_velocity = 0.0
+control_linear_velocity = 0.0
+control_angular_velocity = 0.0
+
+
+def displayInstruction():
+    print(DISPLAY_INSTRUCTION)
+
+
+def resetTwist():
+    global twist
+    twist.linear.x = 0.0
+    twist.linear.y = 0.0
+    twist.linear.z = 0.0
+    twist.angular.x = 0.0
+    twist.angular.y = 0.0
+    twist.angular.z = 0.0
 
 
 def getKey():
@@ -88,39 +110,56 @@ def checkAngularLimitVelocity(input):
 
 
 def driveMotors():
-    try:
-        while True:
-            key = getKey()
+    global key
+    key = getKey()
 
-            # Increase linear velocity
-            if key == "w":
-                print(key)
+    # Increase linear velocity
+    if key == "w":
+        target_linear_velocity = checkLinearLimitVelocity(
+            target_linear_velocity + LINEAR_SPEED_STEP
+        )
 
-            # Decrease linear velocity
-            elif key == "x":
-                print(key)
+    # Decrease linear velocity
+    elif key == "x":
+        target_linear_velocity = checkLinearLimitVelocity(
+            target_linear_velocity - LINEAR_SPEED_STEP
+        )
 
-            # Increase angular velocity - Turn left
-            elif key == "a":
-                print(key)
+    # Increase angular velocity - Turn left
+    elif key == "a":
+        target_angular_velocity = checkAngularLimitVelocity(
+            target_angular_velocity + ANGULAR_SPPEED_STEP
+        )
 
-            # Decrease angular velocity - Turn right
-            elif key == "a":
-                print(key)
+    # Decrease angular velocity - Turn right
+    elif key == "d":
+        target_angular_velocity = checkAngularLimitVelocity(
+            target_angular_velocity - ANGULAR_SPPEED_STEP
+        )
 
-            # Stop immediately
-            elif key == "s":
-                print(key)
+    # Stop immediately
+    elif key == "s":
+        target_linear_velocity = 0.0
+        target_angular_velocity = 0.0
+        control_linear_velocity = 0.0
+        control_angular_velocity = 0.0
 
-            # Terminate node
-            elif key == "p":
-                print("Terminate the node!")
-                exit(0)
+    # Terminate node
+    elif key == "p":
+        print("Terminate the node!")
+        exit(0)
 
-            time.sleep(BUTTON_DELAY)
+    time.sleep(BUTTON_DELAY)
 
-    except:
-        pass
+
+def updateMessage():
+    global twist
+    twist.linear.x = target_linear_velocity
+    twist.angular.z = target_angular_velocity
+
+
+def updateRosInfo():
+    pass
 
 
 class Publisher(Node):
@@ -129,23 +168,19 @@ class Publisher(Node):
         self.publisher_ = self.create_publisher(String, TOPIC, 10)
         timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
 
     def timer_callback(self):
-        msg = String()
-        key = getKey()
-        if key == "p":
-            exit(0)
-        msg.data = "Key pressed: " + key
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
+        driveMotors()
+        updateMessage()
+        msg = updateRosInfo()
+        self.publisher_.publish(twist)
+        self.get_logger().info(msg)
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    driveMotors()
+    resetTwist()
     minimal_publisher = Publisher()
 
     rclpy.spin(minimal_publisher)
