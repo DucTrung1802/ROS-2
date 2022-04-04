@@ -59,6 +59,34 @@ def getKey():
     return ch
 
 
+def checkLinearLimitVelocity(input):
+
+    if input <= LINEAR_SPEED_MIN:
+        input = LINEAR_SPEED_MIN
+    elif input >= LINEAR_SPEED_MAX:
+        input = LINEAR_SPEED_MAX
+    elif abs(input) < (LINEAR_SPEED_STEP / 20):
+        input = 0
+    else:
+        input = input
+
+    return input
+
+
+def checkAngularLimitVelocity(input):
+
+    if input <= ANGULAR_SPPEED_MIN:
+        input = ANGULAR_SPPEED_MIN
+    elif input >= ANGULAR_SPPEED_MAX:
+        input = ANGULAR_SPPEED_MAX
+    elif abs(input) < (ANGULAR_SPPEED_STEP / 20):
+        input = 0
+    else:
+        input = input
+
+    return input
+
+
 def driveMotors():
     try:
         while True:
@@ -66,32 +94,30 @@ def driveMotors():
 
             # Increase linear velocity
             if key == "w":
-                print("Stop!")
-                exit(0)
+                print(key)
 
             # Decrease linear velocity
             elif key == "x":
-                print("Left pressed")
-                time.sleep(BUTTON_DELAY)
+                print(key)
 
             # Increase angular velocity - Turn left
             elif key == "a":
-                print("Right pressed")
-                time.sleep(BUTTON_DELAY)
+                print(key)
 
             # Decrease angular velocity - Turn right
             elif key == "a":
-                print("Up pressed")
-                time.sleep(BUTTON_DELAY)
+                print(key)
 
             # Stop immediately
             elif key == "s":
-                print("Down pressed")
-                time.sleep(BUTTON_DELAY)
+                print(key)
 
             # Terminate node
             elif key == "p":
-                pass
+                print("Terminate the node!")
+                exit(0)
+
+            time.sleep(BUTTON_DELAY)
 
     except:
         pass
