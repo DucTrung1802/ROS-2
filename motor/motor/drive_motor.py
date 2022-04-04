@@ -94,7 +94,7 @@ def checkLinearLimitVelocity(input):
     elif input >= LINEAR_SPEED_MAX:
         input = LINEAR_SPEED_MAX
     elif abs(input) < (LINEAR_SPEED_STEP / 20):
-        input = 0
+        input = 0.0
     else:
         input = input
 
@@ -108,7 +108,7 @@ def checkAngularLimitVelocity(input):
     elif input >= ANGULAR_SPPEED_MAX:
         input = ANGULAR_SPPEED_MAX
     elif abs(input) < (ANGULAR_SPPEED_STEP / 20):
-        input = 0
+        input = 0.0
     else:
         input = input
 
