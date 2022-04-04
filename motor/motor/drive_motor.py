@@ -193,8 +193,8 @@ class Publisher(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def timer_callback(self):
-        driveMotors()
-        updateMessage()
+        # driveMotors()
+        # updateMessage()
         self.publisher_.publish(twist)
         displayInstruction()
         self.get_logger().info(
