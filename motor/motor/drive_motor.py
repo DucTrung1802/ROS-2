@@ -162,9 +162,9 @@ def updateMessage():
     twist.angular.z = target_angular_velocity
 
 
-def updateRosInfo(rosInfo):
-    info = rosInfo
-    return info
+def updateRosInfo(msg):
+    global msgInfo
+    msgInfo = msg
 
 
 class Publisher(Node):
@@ -177,9 +177,9 @@ class Publisher(Node):
     def timer_callback(self):
         driveMotors()
         updateMessage()
-        msg = updateRosInfo()
+        updateRosInfo()
         self.publisher_.publish(twist)
-        self.get_logger().info(msg)
+        self.get_logger().info(msgInfo)
 
 
 def main(args=None):
