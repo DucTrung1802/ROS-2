@@ -64,7 +64,7 @@ def checkParametersCondition():
         raise Exception("PUBLISH_FREQUENCY is smaller than zero (Default: 10).")
 
 
-def displayDasboard():
+def displayInstruction():
     CLEAR()
     print(DASHBOARD)
 
@@ -187,16 +187,16 @@ class Publisher(Node):
         driveMotors()
         updateMessage()
         self.publisher_.publish(twist)
-        displayDasboard()
+        displayInstruction()
         self.get_logger().info("twist.linear.x = " + str(twist.linear.x))
         self.get_logger().info("twist.angular.z = " + str(twist.angular.z))
 
 
 def main(args=None):
     checkParametersCondition()
-
     rclpy.init(args=args)
 
+    displayInstruction()
     initializeTwist()
     minimal_publisher = Publisher()
 
