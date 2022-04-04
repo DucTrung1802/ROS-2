@@ -178,7 +178,8 @@ class Publisher(Node):
         driveMotors()
         updateMessage()
         self.publisher_.publish(twist)
-        self.get_logger().info(msgInfo)
+        self.get_logger().info("twist.linear.x = " + twist.linear.x)
+        self.get_logger().info("twist.angular.z = " + twist.angular.z)
 
 
 def main(args=None):
