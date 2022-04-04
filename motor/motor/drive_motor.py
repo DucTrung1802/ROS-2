@@ -146,9 +146,10 @@ def driveMotors():
 
     # Terminate node
     elif key == "p":
-        print("Terminate the node!")
+        updateRosInfo("Terminated the node!")
         exit(0)
 
+    updateRosInfo(key)
     time.sleep(BUTTON_DELAY)
 
 
@@ -158,8 +159,9 @@ def updateMessage():
     twist.angular.z = target_angular_velocity
 
 
-def updateRosInfo():
-    pass
+def updateRosInfo(rosInfo):
+    info = rosInfo
+    return info
 
 
 class Publisher(Node):
