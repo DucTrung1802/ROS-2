@@ -116,7 +116,7 @@ def checkAngularLimitVelocity(input):
 
 
 def driveMotors():
-    global key
+    global key, target_linear_velocity, target_angular_velocity
     key = getKey()
 
     # Increase linear velocity
@@ -145,10 +145,7 @@ def driveMotors():
 
     # Stop immediately
     elif key == "s":
-        target_linear_velocity = 0.0
-        target_angular_velocity = 0.0
-        control_linear_velocity = 0.0
-        control_angular_velocity = 0.0
+        resetTwist()
 
     # Terminate node
     elif key == "p":
@@ -186,6 +183,8 @@ class Publisher(Node):
 
 
 def main(args=None):
+    checkParametersCondition()
+
     rclpy.init(args=args)
 
     resetTwist()
