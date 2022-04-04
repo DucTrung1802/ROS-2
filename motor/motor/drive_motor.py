@@ -65,7 +65,7 @@ def displayInstruction():
     print(DISPLAY_INSTRUCTION)
 
 
-def resetTwist():
+def initializeTwist():
     global twist
     twist.linear.x = 0.0
     twist.linear.y = 0.0
@@ -124,35 +124,40 @@ def driveMotors():
         target_linear_velocity = checkLinearLimitVelocity(
             target_linear_velocity + LINEAR_SPEED_STEP
         )
+        updateRosInfo(key)
 
     # Decrease linear velocity
     elif key == "x":
         target_linear_velocity = checkLinearLimitVelocity(
             target_linear_velocity - LINEAR_SPEED_STEP
         )
+        updateRosInfo(key)
 
     # Increase angular velocity - Turn left
     elif key == "a":
         target_angular_velocity = checkAngularLimitVelocity(
             target_angular_velocity + ANGULAR_SPPEED_STEP
         )
+        updateRosInfo(key)
 
     # Decrease angular velocity - Turn right
     elif key == "d":
         target_angular_velocity = checkAngularLimitVelocity(
             target_angular_velocity - ANGULAR_SPPEED_STEP
         )
+        updateRosInfo(key)
 
     # Stop immediately
     elif key == "s":
-        resetTwist()
+        target_linear_velocity = 0.0
+        target_angular_velocity = 0.0
+        updateRosInfo(key)
 
     # Terminate node
     elif key == "p":
-        updateRosInfo("Terminated the node!")
+        print("Terminated the node!")
         exit(0)
 
-    updateRosInfo(key)
     time.sleep(BUTTON_DELAY)
 
 
@@ -187,7 +192,7 @@ def main(args=None):
 
     rclpy.init(args=args)
 
-    resetTwist()
+    initializeTwist()
     minimal_publisher = Publisher()
 
     rclpy.spin(minimal_publisher)
