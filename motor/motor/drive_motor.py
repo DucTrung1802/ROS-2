@@ -8,6 +8,9 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from pathlib import Path
 
+# OS parameters
+CLEAR = lambda: os.system("clear")
+
 # Node parameters
 NODE_NAME = Path(__file__).stem
 PUBLISH_FREQUENCY = 10
@@ -29,7 +32,7 @@ ANGULAR_SPPEED_MAX = 1.0  # rad/s
 ANGULAR_SPPEED_MIN = -ANGULAR_SPPEED_MAX  # rad/s
 ANGULAR_SPPEED_STEP = ANGULAR_SPPEED_MAX / STEP  # rad/s
 
-DISPLAY_INSTRUCTION = """
+DASHBOARD = """
 Control Your Turtlebot!
 ---------------------------
 Moving around:
@@ -61,8 +64,9 @@ def checkParametersCondition():
         raise Exception("PUBLISH_FREQUENCY is smaller than zero (Default: 10).")
 
 
-def displayInstruction():
-    print(DISPLAY_INSTRUCTION)
+def displayDasboard():
+    CLEAR()
+    print(DASHBOARD)
 
 
 def initializeTwist():
@@ -183,6 +187,7 @@ class Publisher(Node):
         driveMotors()
         updateMessage()
         self.publisher_.publish(twist)
+        displayDasboard()
         self.get_logger().info("twist.linear.x = " + str(twist.linear.x))
         self.get_logger().info("twist.angular.z = " + str(twist.angular.z))
 
