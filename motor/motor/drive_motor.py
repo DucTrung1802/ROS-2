@@ -3,14 +3,20 @@
 # adapted from https://github.com/recantha/EduKit3-RC-Keyboard/blob/master/rc_keyboard.py
 
 import sys, termios, tty, os, time
+from motor.motor.ros1_telekey_control_publisher_speed import TOPIC
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from pathlib import Path
 
-BUTTON_DELAY = 0.001
+# Node parameters
 NODE_NAME = Path(__file__).stem
+TOPIC = "/cmd_vel"
 
+# Key parameters
+BUTTON_DELAY = 0.001
+
+# Controling parameters
 STEP = 3
 
 # Velocity: m/s
@@ -53,30 +59,39 @@ def getKey():
     return ch
 
 
-def keyDetecter():
+def driveMotors():
     try:
         while True:
             key = getKey()
 
+            # Increase linear velocity
             if key == "w":
                 print("Stop!")
                 exit(0)
 
+            # Decrease linear velocity
             elif key == "x":
                 print("Left pressed")
                 time.sleep(BUTTON_DELAY)
 
-            elif key == "d":
+            # Increase angular velocity - Turn left
+            elif key == "a":
                 print("Right pressed")
                 time.sleep(BUTTON_DELAY)
 
+            # Decrease angular velocity - Turn right
             elif key == "a":
                 print("Up pressed")
                 time.sleep(BUTTON_DELAY)
 
+            # Stop immediately
             elif key == "s":
                 print("Down pressed")
                 time.sleep(BUTTON_DELAY)
+
+            # Terminate node
+            elif key == "p":
+                pass
 
     except:
         pass
@@ -85,7 +100,7 @@ def keyDetecter():
 class Publisher(Node):
     def __init__(self):
         super().__init__("minimal_publisher")
-        self.publisher_ = self.create_publisher(String, "topic", 10)
+        self.publisher_ = self.create_publisher(String, TOPIC, 10)
         timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
@@ -104,6 +119,7 @@ class Publisher(Node):
 def main(args=None):
     rclpy.init(args=args)
 
+    driveMotors()
     minimal_publisher = Publisher()
 
     rclpy.spin(minimal_publisher)
