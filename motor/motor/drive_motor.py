@@ -10,6 +10,7 @@ from pathlib import Path
 
 # Node parameters
 NODE_NAME = Path(__file__).stem
+PUBLISH_FREQUENCY = 10
 TOPIC = "/cmd_vel"
 
 # Key parameters
@@ -53,6 +54,11 @@ target_linear_velocity = 0.0
 target_angular_velocity = 0.0
 control_linear_velocity = 0.0
 control_angular_velocity = 0.0
+
+
+def checkParametersCondition():
+    if PUBLISH_FREQUENCY <= 0:
+        raise Exception("PUBLISH_FREQUENCY is smaller than zero (Default: 10).")
 
 
 def displayInstruction():
@@ -167,7 +173,7 @@ def updateRosInfo(rosInfo):
 class Publisher(Node):
     def __init__(self):
         super().__init__("minimal_publisher")
-        self.publisher_ = self.create_publisher(String, TOPIC, 10)
+        self.publisher_ = self.create_publisher(Twist, TOPIC, 10)
         timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
