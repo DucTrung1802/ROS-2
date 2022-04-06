@@ -17,5 +17,10 @@ setup(
     description="TODO: Package description",
     license="TODO: License declaration",
     tests_require=["pytest"],
-    entry_points={"console_scripts": ["drive_motor = motor.drive_motor:main"]},
+    entry_points={
+        "console_scripts": [
+            "drive_motor = motor.drive_motor:main",
+            "teleop_key = motor.teleop_key:main",
+        ]
+    },
 )
