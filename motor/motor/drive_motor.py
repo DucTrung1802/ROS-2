@@ -167,7 +167,7 @@ def driveMotors():
         updateRosInfo(key)
 
     # Terminate node
-    elif key == "p":
+    elif key == "p" or key == "\x03":
         print("Terminated the node!")
         exit(0)
 
