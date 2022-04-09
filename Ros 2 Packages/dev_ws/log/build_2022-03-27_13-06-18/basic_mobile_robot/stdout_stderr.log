@@ -1,0 +1,16 @@
+-- Configuring incomplete, errors occurred!
+See also "/home/ubuntu/dev_ws/build/basic_mobile_robot/CMakeFiles/CMakeOutput.log".
+CMake Error at CMakeLists.txt:1 (kcmake_minimum_required):
+  Unknown CMake command "kcmake_minimum_required".
+
+
+CMake Warning (dev) in CMakeLists.txt:
+  No cmake_minimum_required command is present.  A line of code such as
+
+    cmake_minimum_required(VERSION 3.16)
+
+  should be added at the top of the file.  The version specified may be lower
+  if you wish to support older CMake versions for this project.  For more
+  information run "cmake --help-policy CMP0000".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+

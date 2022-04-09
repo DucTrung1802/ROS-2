@@ -1,0 +1,46 @@
+[0.054s] Invoking command in '/home/ubuntu/dev_ws/build/my_package': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake /home/ubuntu/dev_ws/src/my_package -DCMAKE_INSTALL_PREFIX=/home/ubuntu/dev_ws/install/my_package
+[1.654s] -- The C compiler identification is GNU 9.4.0
+[2.513s] -- The CXX compiler identification is GNU 9.4.0
+[2.552s] -- Check for working C compiler: /usr/bin/cc
+[2.930s] -- Check for working C compiler: /usr/bin/cc -- works
+[2.936s] -- Detecting C compiler ABI info
+[3.274s] -- Detecting C compiler ABI info - done
+[3.316s] -- Detecting C compile features
+[3.318s] -- Detecting C compile features - done
+[3.332s] -- Check for working CXX compiler: /usr/bin/c++
+[3.708s] -- Check for working CXX compiler: /usr/bin/c++ -- works
+[3.713s] -- Detecting CXX compiler ABI info
+[4.061s] -- Detecting CXX compiler ABI info - done
+[4.105s] -- Detecting CXX compile features
+[4.107s] -- Detecting CXX compile features - done
+[4.153s] -- Found ament_cmake: 0.9.9 (/opt/ros/foxy/share/ament_cmake/cmake)
+[4.317s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.8.10", minimum required is "3") 
+[4.318s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[5.452s] -- Found ament_lint_auto: 0.9.6 (/opt/ros/foxy/share/ament_lint_auto/cmake)
+[5.920s] -- Added test 'copyright' to check source files copyright and LICENSE
+[5.936s] -- Added test 'lint_cmake' to check CMake code style
+[5.944s] -- Added test 'xmllint' to check XML markup files
+[5.961s] -- Configuring done
+[5.971s] -- Generating done
+[5.975s] -- Build files have been written to: /home/ubuntu/dev_ws/build/my_package
+[5.988s] Invoked command in '/home/ubuntu/dev_ws/build/my_package' returned '0': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake /home/ubuntu/dev_ws/src/my_package -DCMAKE_INSTALL_PREFIX=/home/ubuntu/dev_ws/install/my_package
+[5.999s] Invoking command in '/home/ubuntu/dev_ws/build/my_package': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake --build /home/ubuntu/dev_ws/build/my_package -- -j4 -l4
+[6.190s] Invoked command in '/home/ubuntu/dev_ws/build/my_package' returned '0': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake --build /home/ubuntu/dev_ws/build/my_package -- -j4 -l4
+[6.346s] Invoking command in '/home/ubuntu/dev_ws/build/my_package': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake --install /home/ubuntu/dev_ws/build/my_package
+[6.381s] -- Install configuration: ""
+[6.382s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/ament_index/resource_index/package_run_dependencies/my_package
+[6.384s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/ament_index/resource_index/parent_prefix_path/my_package
+[6.385s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/environment/ament_prefix_path.sh
+[6.386s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/environment/ament_prefix_path.dsv
+[6.387s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/environment/path.sh
+[6.388s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/environment/path.dsv
+[6.389s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/local_setup.bash
+[6.390s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/local_setup.sh
+[6.391s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/local_setup.zsh
+[6.392s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/local_setup.dsv
+[6.393s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/package.dsv
+[6.394s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/ament_index/resource_index/packages/my_package
+[6.396s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/cmake/my_packageConfig.cmake
+[6.396s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/cmake/my_packageConfig-version.cmake
+[6.397s] -- Installing: /home/ubuntu/dev_ws/install/my_package/share/my_package/package.xml
+[6.405s] Invoked command in '/home/ubuntu/dev_ws/build/my_package' returned '0': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake --install /home/ubuntu/dev_ws/build/my_package
