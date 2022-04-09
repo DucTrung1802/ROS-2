@@ -10,12 +10,20 @@ SKIP_SERIAL_LINES = 12
 LIDAR_USB_NAME = "FTDI USB Serial Device"
 MCU_USB_NAME = "cp210x"
 BAUD_RATE = 115200
+FREQUENCY = 1
+RECEIVING_PERIOD = 1
 
 timer = time.time();
 MCUSerialObject = None
 foundMCU = False
 foundLidar = False
 serialData = ""
+
+def checkFrequency():
+    global FREQUENCY
+    if (FREQUENCY <= 0):
+        FREQUENCY = 1
+    RECEIVING_PERIOD = 1/ FREQUENCY
 
 def getMCUSerial():
     global foundMCU, foundLidar
@@ -89,6 +97,7 @@ def manuallyWrite():
 
 
 def setup():
+    checkFrequency();
     initializeSerial()
 
 
@@ -96,8 +105,9 @@ def loop():
     try:
         while True:
             manuallyWrite()
-            if (time.time() - timer >= 1):
+            if (time.time() - timer >= RECEIVING_PERIOD):
                 readSerialData()
+                print(serialData)
                 timer = time.time()
 
     except KeyboardInterrupt:
