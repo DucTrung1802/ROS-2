@@ -102,6 +102,7 @@ def setup():
 
 
 def loop():
+    global timer
     try:
         while True:
             manuallyWrite()
