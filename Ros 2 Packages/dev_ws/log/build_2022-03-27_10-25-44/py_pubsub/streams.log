@@ -1,0 +1,32 @@
+[6.011s] Invoking command in '/home/ubuntu/dev_ws/build/py_pubsub': PYTHONPATH=/home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --prefix /home/ubuntu/dev_ws/install/py_pubsub --uninstall --editable --build-directory /home/ubuntu/dev_ws/build/py_pubsub/build
+[7.526s] running develop
+[8.522s] Removing /home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages/py-pubsub.egg-link (link to .)
+[8.675s] Invoked command in '/home/ubuntu/dev_ws/build/py_pubsub' returned '0': PYTHONPATH=/home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py develop --prefix /home/ubuntu/dev_ws/install/py_pubsub --uninstall --editable --build-directory /home/ubuntu/dev_ws/build/py_pubsub/build
+[8.693s] Invoking command in '/home/ubuntu/dev_ws/src/py_pubsub': PYTHONPATH=/home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/py_pubsub build --build-base /home/ubuntu/dev_ws/build/py_pubsub/build install --prefix /home/ubuntu/dev_ws/install/py_pubsub --record /home/ubuntu/dev_ws/build/py_pubsub/install.log --single-version-externally-managed
+[9.998s] running egg_info
+[10.000s] writing ../../build/py_pubsub/py_pubsub.egg-info/PKG-INFO
+[10.001s] writing dependency_links to ../../build/py_pubsub/py_pubsub.egg-info/dependency_links.txt
+[10.002s] writing entry points to ../../build/py_pubsub/py_pubsub.egg-info/entry_points.txt
+[10.003s] writing requirements to ../../build/py_pubsub/py_pubsub.egg-info/requires.txt
+[10.004s] writing top-level names to ../../build/py_pubsub/py_pubsub.egg-info/top_level.txt
+[10.189s] reading manifest file '../../build/py_pubsub/py_pubsub.egg-info/SOURCES.txt'
+[10.194s] writing manifest file '../../build/py_pubsub/py_pubsub.egg-info/SOURCES.txt'
+[10.195s] running build
+[10.195s] running build_py
+[10.199s] running install
+[10.203s] running install_lib
+[10.208s] creating /home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages/py_pubsub
+[10.208s] copying /home/ubuntu/dev_ws/build/py_pubsub/build/lib/py_pubsub/__init__.py -> /home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages/py_pubsub
+[10.209s] copying /home/ubuntu/dev_ws/build/py_pubsub/build/lib/py_pubsub/my_subscriber_node.py -> /home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages/py_pubsub
+[10.210s] copying /home/ubuntu/dev_ws/build/py_pubsub/build/lib/py_pubsub/my_publisher_node.py -> /home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages/py_pubsub
+[10.214s] byte-compiling /home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages/py_pubsub/__init__.py to __init__.cpython-38.pyc
+[10.219s] byte-compiling /home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages/py_pubsub/my_subscriber_node.py to my_subscriber_node.cpython-38.pyc
+[10.221s] byte-compiling /home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages/py_pubsub/my_publisher_node.py to my_publisher_node.cpython-38.pyc
+[10.223s] running install_data
+[10.227s] running install_egg_info
+[10.234s] Copying ../../build/py_pubsub/py_pubsub.egg-info to /home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages/py_pubsub-0.0.0-py3.8.egg-info
+[10.241s] running install_scripts
+[10.320s] Installing my_publisher script to /home/ubuntu/dev_ws/install/py_pubsub/lib/py_pubsub
+[10.321s] Installing my_subscriber script to /home/ubuntu/dev_ws/install/py_pubsub/lib/py_pubsub
+[10.323s] writing list of installed files to '/home/ubuntu/dev_ws/build/py_pubsub/install.log'
+[10.438s] Invoked command in '/home/ubuntu/dev_ws/src/py_pubsub' returned '0': PYTHONPATH=/home/ubuntu/dev_ws/install/py_pubsub/lib/python3.8/site-packages:${PYTHONPATH} /usr/bin/python3 setup.py egg_info --egg-base ../../build/py_pubsub build --build-base /home/ubuntu/dev_ws/build/py_pubsub/build install --prefix /home/ubuntu/dev_ws/install/py_pubsub --record /home/ubuntu/dev_ws/build/py_pubsub/install.log --single-version-externally-managed

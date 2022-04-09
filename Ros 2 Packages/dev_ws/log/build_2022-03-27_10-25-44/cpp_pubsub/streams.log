@@ -1,0 +1,54 @@
+[0.345s] Invoking command in '/home/ubuntu/dev_ws/build/cpp_pubsub': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake /home/ubuntu/dev_ws/src/cpp_pubsub -DCMAKE_INSTALL_PREFIX=/home/ubuntu/dev_ws/install/cpp_pubsub
+[0.769s] -- Found ament_cmake: 0.9.9 (/opt/ros/foxy/share/ament_cmake/cmake)
+[1.024s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[2.921s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[3.085s] -- Found rclcpp: 2.4.1 (/opt/ros/foxy/share/rclcpp/cmake)
+[3.959s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[4.056s] -- Found rosidl_adapter: 1.2.1 (/opt/ros/foxy/share/rosidl_adapter/cmake)
+[5.949s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[6.503s] -- Found rmw_implementation_cmake: 1.0.3 (/opt/ros/foxy/share/rmw_implementation_cmake/cmake)
+[6.531s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[7.403s] -- Found ament_lint_auto: 0.9.6 (/opt/ros/foxy/share/ament_lint_auto/cmake)
+[7.856s] -- Added test 'copyright' to check source files copyright and LICENSE
+[7.869s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[7.871s] -- Configured cppcheck include dirs: 
+[7.876s] -- Configured cppcheck exclude dirs and/or files: 
+[7.880s] -- Added test 'cpplint' to check C / C++ code against the Google style
+[7.882s] -- Configured cpplint exclude dirs and/or files: 
+[7.883s] -- Added test 'flake8' to check Python code syntax and style conventions
+[7.886s] -- Added test 'lint_cmake' to check CMake code style
+[7.888s] -- Added test 'pep257' to check Python code against some of the style conventions in PEP 257
+[7.897s] -- Added test 'uncrustify' to check C / C++ code style
+[7.897s] -- Configured uncrustify additional arguments: 
+[7.900s] -- Added test 'xmllint' to check XML markup files
+[7.925s] -- Configuring done
+[8.051s] -- Generating done
+[8.062s] -- Build files have been written to: /home/ubuntu/dev_ws/build/cpp_pubsub
+[8.109s] Invoked command in '/home/ubuntu/dev_ws/build/cpp_pubsub' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake /home/ubuntu/dev_ws/src/cpp_pubsub -DCMAKE_INSTALL_PREFIX=/home/ubuntu/dev_ws/install/cpp_pubsub
+[8.113s] Invoking command in '/home/ubuntu/dev_ws/build/cpp_pubsub': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake --build /home/ubuntu/dev_ws/build/cpp_pubsub -- -j4 -l4
+[8.783s] [ 33%] Built target my_publisher
+[8.838s] [ 66%] Built target pubsub_node
+[8.839s] [100%] Built target my_subscriber
+[8.924s] Invoked command in '/home/ubuntu/dev_ws/build/cpp_pubsub' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake --build /home/ubuntu/dev_ws/build/cpp_pubsub -- -j4 -l4
+[9.267s] Invoking command in '/home/ubuntu/dev_ws/build/cpp_pubsub': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake --install /home/ubuntu/dev_ws/build/cpp_pubsub
+[9.346s] -- Install configuration: ""
+[9.349s] -- Execute custom install script
+[9.351s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/lib/cpp_pubsub/my_publisher
+[9.353s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/lib/cpp_pubsub/my_subscriber
+[9.354s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/lib/cpp_pubsub/pubsub_node
+[9.357s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/ament_index/resource_index/package_run_dependencies/cpp_pubsub
+[9.361s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/ament_index/resource_index/parent_prefix_path/cpp_pubsub
+[9.365s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/environment/ament_prefix_path.sh
+[9.368s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/environment/ament_prefix_path.dsv
+[9.371s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/environment/path.sh
+[9.373s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/environment/path.dsv
+[9.376s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/local_setup.bash
+[9.379s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/local_setup.sh
+[9.381s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/local_setup.zsh
+[9.383s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/local_setup.dsv
+[9.384s] -- Symlinking: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/package.dsv
+[9.463s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/ament_index/resource_index/packages/cpp_pubsub
+[9.467s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/cmake/cpp_pubsubConfig.cmake
+[9.469s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/cmake/cpp_pubsubConfig-version.cmake
+[9.471s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/cpp_pubsub/share/cpp_pubsub/package.xml
+[9.484s] Invoked command in '/home/ubuntu/dev_ws/build/cpp_pubsub' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake --install /home/ubuntu/dev_ws/build/cpp_pubsub

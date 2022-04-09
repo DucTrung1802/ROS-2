@@ -1,0 +1,19 @@
+[0.269s] Invoking command in '/home/ubuntu/dev_ws/build/basic_mobile_robot': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake --build /home/ubuntu/dev_ws/build/basic_mobile_robot -- -j4 -l4
+[0.623s] CMake Error at CMakeLists.txt:1 (kcmake_minimum_required):
+[0.625s]   Unknown CMake command "kcmake_minimum_required".
+[0.626s] 
+[0.626s] 
+[0.627s] -- Configuring incomplete, errors occurred!
+[0.628s] See also "/home/ubuntu/dev_ws/build/basic_mobile_robot/CMakeFiles/CMakeOutput.log".
+[0.630s] CMake Warning (dev) in CMakeLists.txt:
+[0.631s]   No cmake_minimum_required command is present.  A line of code such as
+[0.631s] 
+[0.633s]     cmake_minimum_required(VERSION 3.16)
+[0.634s] 
+[0.635s]   should be added at the top of the file.  The version specified may be lower
+[0.636s]   if you wish to support older CMake versions for this project.  For more
+[0.636s]   information run "cmake --help-policy CMP0000".
+[0.638s] This warning is for project developers.  Use -Wno-dev to suppress it.
+[0.639s] 
+[0.639s] make: *** [Makefile:222: cmake_check_build_system] Error 1
+[1.790s] Invoked command in '/home/ubuntu/dev_ws/build/basic_mobile_robot' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake --build /home/ubuntu/dev_ws/build/basic_mobile_robot -- -j4 -l4

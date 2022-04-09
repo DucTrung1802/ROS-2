@@ -1,0 +1,60 @@
+[0.093s] Invoking command in '/home/ubuntu/dev_ws/build/cpp_pubsub': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake /home/ubuntu/dev_ws/src/cpp_pubsub -DCMAKE_INSTALL_PREFIX=/home/ubuntu/dev_ws/install/cpp_pubsub
+[1.179s] -- The C compiler identification is GNU 9.4.0
+[1.457s] -- The CXX compiler identification is GNU 9.4.0
+[1.474s] -- Check for working C compiler: /usr/bin/cc
+[1.796s] -- Check for working C compiler: /usr/bin/cc -- works
+[1.800s] -- Detecting C compiler ABI info
+[2.119s] -- Detecting C compiler ABI info - done
+[2.161s] -- Detecting C compile features
+[2.162s] -- Detecting C compile features - done
+[2.172s] -- Check for working CXX compiler: /usr/bin/c++
+[2.519s] -- Check for working CXX compiler: /usr/bin/c++ -- works
+[2.524s] -- Detecting CXX compiler ABI info
+[2.872s] -- Detecting CXX compiler ABI info - done
+[2.917s] -- Detecting CXX compile features
+[2.919s] -- Detecting CXX compile features - done
+[2.941s] -- Found ament_cmake: 0.9.9 (/opt/ros/foxy/share/ament_cmake/cmake)
+[3.075s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.8.10", minimum required is "3") 
+[3.076s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[4.524s] -- Found rclcpp: 2.4.1 (/opt/ros/foxy/share/rclcpp/cmake)
+[4.940s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[5.015s] -- Found rosidl_adapter: 1.2.1 (/opt/ros/foxy/share/rosidl_adapter/cmake)
+[5.763s] -- Found OpenSSL: /usr/lib/aarch64-linux-gnu/libcrypto.so (found version "1.1.1f")  
+[6.044s] -- Found FastRTPS: /opt/ros/foxy/include  
+[6.731s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[7.091s] -- Found rmw_implementation_cmake: 1.0.3 (/opt/ros/foxy/share/rmw_implementation_cmake/cmake)
+[7.100s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[7.108s] -- Looking for pthread.h
+[7.482s] -- Looking for pthread.h - found
+[7.483s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[7.817s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+[7.818s] -- Looking for pthread_create in pthreads
+[8.112s] -- Looking for pthread_create in pthreads - not found
+[8.112s] -- Looking for pthread_create in pthread
+[8.432s] -- Looking for pthread_create in pthread - found
+[8.436s] -- Found Threads: TRUE  
+[9.403s] -- Found ament_lint_auto: 0.9.6 (/opt/ros/foxy/share/ament_lint_auto/cmake)
+[9.816s] -- Added test 'copyright' to check source files copyright and LICENSE
+[9.822s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[9.823s] -- Configured cppcheck include dirs: 
+[9.823s] -- Configured cppcheck exclude dirs and/or files: 
+[9.829s] -- Added test 'cpplint' to check C / C++ code against the Google style
+[9.829s] -- Configured cpplint exclude dirs and/or files: 
+[9.833s] -- Added test 'lint_cmake' to check CMake code style
+[9.839s] -- Added test 'uncrustify' to check C / C++ code style
+[9.840s] -- Configured uncrustify additional arguments: 
+[9.842s] -- Added test 'xmllint' to check XML markup files
+[9.865s] -- Configuring done
+[9.907s] -- Generating done
+[9.914s] -- Build files have been written to: /home/ubuntu/dev_ws/build/cpp_pubsub
+[9.934s] Invoked command in '/home/ubuntu/dev_ws/build/cpp_pubsub' returned '0': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake /home/ubuntu/dev_ws/src/cpp_pubsub -DCMAKE_INSTALL_PREFIX=/home/ubuntu/dev_ws/install/cpp_pubsub
+[9.943s] Invoking command in '/home/ubuntu/dev_ws/build/cpp_pubsub': CMAKE_PREFIX_PATH=/opt/ros/foxy /usr/bin/cmake --build /home/ubuntu/dev_ws/build/cpp_pubsub -- -j4 -l4
+[10.121s] [35m[1mScanning dependencies of target my_subscriber[0m
+[10.121s] [35m[1mScanning dependencies of target my_publisher[0m
+[10.547s] [ 50%] [32mBuilding CXX object CMakeFiles/my_subscriber.dir/src/my_subscriber_node.cpp.o[0m
+[10.548s] [ 50%] [32mBuilding CXX object CMakeFiles/my_publisher.dir/src/my_publisher_node.cpp.o[0m
+[491.177s] make[2]: *** [CMakeFiles/my_subscriber.dir/build.make:63: CMakeFiles/my_subscriber.dir/src/my_subscriber_node.cpp.o] Interrupt
+[491.228s] make[2]: *** [CMakeFiles/my_publisher.dir/build.make:63: CMakeFiles/my_publisher.dir/src/my_publisher_node.cpp.o] Interrupt
+[491.229s] make[1]: *** [CMakeFiles/Makefile2:80: CMakeFiles/my_subscriber.dir/all] Interrupt
+[491.230s] make[1]: *** [CMakeFiles/Makefile2:107: CMakeFiles/my_publisher.dir/all] Interrupt
+[491.230s] make: *** [Makefile:141: all] Interrupt

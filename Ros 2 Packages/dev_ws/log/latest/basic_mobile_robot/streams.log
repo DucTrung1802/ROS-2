@@ -1,0 +1,49 @@
+[0.255s] Invoking command in '/home/ubuntu/dev_ws/build/basic_mobile_robot': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake --build /home/ubuntu/dev_ws/build/basic_mobile_robot -- -j4 -l4
+[1.899s] Invoked command in '/home/ubuntu/dev_ws/build/basic_mobile_robot' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake --build /home/ubuntu/dev_ws/build/basic_mobile_robot -- -j4 -l4
+[2.280s] Invoking command in '/home/ubuntu/dev_ws/build/basic_mobile_robot': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake --install /home/ubuntu/dev_ws/build/basic_mobile_robot
+[2.360s] -- Install configuration: ""
+[2.364s] -- Execute custom install script
+[2.369s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/config/ekf.yaml
+[2.373s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/launch/basic_mobile_bot_v1.launch.py
+[2.376s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/launch/basic_mobile_bot_v2.launch.py
+[2.379s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/launch/basic_mobile_bot_v3.launch.py
+[2.382s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/launch/basic_mobile_bot_v4.launch.py
+[2.384s] -- Symlinking: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/launch/basic_mobile_bot_v5.launch.py
+[2.476s] -- Symlinking: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/maps/smalltown_world.pgm
+[2.602s] -- Symlinking: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/maps/smalltown_world.yaml
+[2.729s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/meshes/arm_base.stl
+[2.730s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/meshes/bicep.stl
+[2.730s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/meshes/elbow.stl
+[2.732s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/meshes/robot_base.stl
+[2.732s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/meshes/wheel.stl
+[2.740s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/meshes/wrist.stl
+[2.741s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/models/basic_mobile_bot_description/meshes/arm_base.stl
+[2.745s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/models/basic_mobile_bot_description/meshes/bicep.stl
+[2.748s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/models/basic_mobile_bot_description/meshes/elbow.stl
+[2.754s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/models/basic_mobile_bot_description/meshes/robot_base.stl
+[2.757s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/models/basic_mobile_bot_description/meshes/wheel.stl
+[2.760s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/models/basic_mobile_bot_description/meshes/wrist.stl
+[2.763s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/models/basic_mobile_bot_description/model.config
+[2.766s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/models/basic_mobile_bot_description/model.sdf
+[2.767s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/models/basic_mobile_bot_v1.urdf
+[2.770s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/models/basic_mobile_bot_v2.urdf
+[2.773s] -- Symlinking: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/params/nav2_params.yaml
+[2.858s] -- Symlinking: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/rviz/nav2_config.rviz
+[2.956s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/rviz/urdf_config.rviz
+[2.961s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/worlds/basic_mobile_bot_world/smalltown.world
+[2.965s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/ament_index/resource_index/package_run_dependencies/basic_mobile_robot
+[2.973s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/ament_index/resource_index/parent_prefix_path/basic_mobile_robot
+[2.977s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/environment/ament_prefix_path.sh
+[2.980s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/environment/ament_prefix_path.dsv
+[2.993s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/environment/path.sh
+[2.996s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/environment/path.dsv
+[3.001s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/local_setup.bash
+[3.004s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/local_setup.sh
+[3.007s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/local_setup.zsh
+[3.011s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/local_setup.dsv
+[3.013s] -- Symlinking: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/package.dsv
+[3.099s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/ament_index/resource_index/packages/basic_mobile_robot
+[3.102s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/cmake/basic_mobile_robotConfig.cmake
+[3.105s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/cmake/basic_mobile_robotConfig-version.cmake
+[3.108s] -- Up-to-date symlink: /home/ubuntu/dev_ws/install/basic_mobile_robot/share/basic_mobile_robot/package.xml
+[3.125s] Invoked command in '/home/ubuntu/dev_ws/build/basic_mobile_robot' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/ubuntu/dev_ws/install/py_pubsub:/home/ubuntu/nav2_ws/install/nav2_gazebo_spawner:/opt/ros/foxy /usr/bin/cmake --install /home/ubuntu/dev_ws/build/basic_mobile_robot

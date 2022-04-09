@@ -1,0 +1,5 @@
+make[2]: *** [CMakeFiles/my_subscriber.dir/build.make:63: CMakeFiles/my_subscriber.dir/src/my_subscriber_node.cpp.o] Interrupt
+make[2]: *** [CMakeFiles/my_publisher.dir/build.make:63: CMakeFiles/my_publisher.dir/src/my_publisher_node.cpp.o] Interrupt
+make[1]: *** [CMakeFiles/Makefile2:80: CMakeFiles/my_subscriber.dir/all] Interrupt
+make[1]: *** [CMakeFiles/Makefile2:107: CMakeFiles/my_publisher.dir/all] Interrupt
+make: *** [Makefile:141: all] Interrupt
