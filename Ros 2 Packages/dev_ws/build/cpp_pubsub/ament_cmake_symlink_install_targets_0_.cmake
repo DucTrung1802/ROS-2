@@ -1,1 +1,0 @@
-ament_cmake_symlink_install_targets("TARGET_FILES" "/home/ubuntu/dev_ws/build/cpp_pubsub/my_publisher" "/home/ubuntu/dev_ws/build/cpp_pubsub/my_subscriber" "/home/ubuntu/dev_ws/build/cpp_pubsub/pubsub_node" "TARGETS" "my_publisher" "my_subscriber" "pubsub_node" "DESTINATION" "lib/cpp_pubsub")
