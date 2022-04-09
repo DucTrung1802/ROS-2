@@ -2,20 +2,33 @@
 
 import subprocess
 import time
+from turtle import left
 from click import prompt
 import serial
 import re
+import json
 
 SKIP_SERIAL_LINES = 12
 LIDAR_USB_NAME = "FTDI USB Serial Device"
 MCU_USB_NAME = "cp210x"
 BAUD_RATE = 115200
+FREQUENCY = 1
+RECEIVING_PERIOD = 1
 
-timer = time.time();
+timer = time.time()
 MCUSerialObject = None
 foundMCU = False
 foundLidar = False
 serialData = ""
+dictionaryData = {}
+
+
+def checkFrequency():
+    global FREQUENCY, RECEIVING_PERIOD
+    if FREQUENCY <= 0:
+        FREQUENCY = 1
+    RECEIVING_PERIOD = 1 / FREQUENCY
+
 
 def getMCUSerial():
     global foundMCU, foundLidar
@@ -72,12 +85,15 @@ def initializeSerial():
 
 
 def readSerialData():
-    global serialData
+    global serialData, dictionaryData
     rawData = MCUSerialObject.readline()
     serialData = rawData.decode("windows-1252")  # decode s
     serialData = serialData.rstrip()  # cut "\r\n" at last of string
-    serialData = re.sub("[^A-Za-z0-9\s]", "", serialData)  # filter regular characters
+    serialData = re.sub(
+        "[^A-Za-z0-9\s[]{}]", "", serialData
+    )  # filter regular characters
     # print(data)  # print string
+    dictionaryData = json.loads(serialData)
 
 
 def manuallyWrite():
@@ -87,20 +103,31 @@ def manuallyWrite():
     MCUSerialObject.write(command)
 
 
+def formSerialData(stringData):
+    stringData += "#"
+    data = bytes(stringData, "utf-8")
+    return data
+
 
 def setup():
+    checkFrequency()
     initializeSerial()
 
 
 def loop():
+    global timer
     try:
         while True:
-            manuallyWrite()
-            if (time.time() - timer >= 1):
+            # manuallyWrite()
+            if time.time() - timer >= RECEIVING_PERIOD:
+                MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
                 readSerialData()
+                print("left tick: " + str(dictionaryData["left_tick"]))
+                print("right tick: " + str(dictionaryData["right_tick"]))
                 timer = time.time()
 
     except KeyboardInterrupt:
+        MCUSerialObject.write(formSerialData("{pwm_pulse:[0,0]}"))
         MCUSerialObject.close()
 
 
