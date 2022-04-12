@@ -175,6 +175,8 @@ def loop():
 
                 STORE_POS_1 = dictionaryData["left_tick"]
                 STORE_POS_2 = dictionaryData["right_tick"]
+                print(STORE_POS_1)
+                print(STORE_POS_2)
 
                 rclpy.init()
                 publisher = Publisher()
