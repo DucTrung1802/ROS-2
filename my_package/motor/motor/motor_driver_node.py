@@ -166,15 +166,21 @@ def loop():
             if time.time() - receiving_timer >= RECEIVING_PERIOD:
                 MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
                 readSerialData()
+
                 # print("left tick: " + str(dictionaryData["left_tick"]))
                 # print("right tick: " + str(dictionaryData["right_tick"]))
+
+                # print(dictionaryData["left_tick"])
+                # print(type(dictionaryData["left_tick"]))
+
                 STORE_POS_1 = dictionaryData["left_tick"]
                 STORE_POS_2 = dictionaryData["right_tick"]
-                receiving_timer = time.time()
 
-            rclpy.init()
-            publisher = Publisher()
-            rclpy.spin(publisher)
+                rclpy.init()
+                publisher = Publisher()
+                rclpy.spin(publisher)
+
+                receiving_timer = time.time()
 
     except KeyboardInterrupt:
         MCUSerialObject.write(formSerialData("{pwm_pulse:[0,0]}"))
