@@ -159,7 +159,7 @@ def setup():
 
 
 def loop():
-    global timer, STORE_POS_1, STORE_POS_2, POS_1, POS_2
+    global receiving_timer, STORE_POS_1, STORE_POS_2, POS_1, POS_2
     try:
         while True:
             # manuallyWrite()
