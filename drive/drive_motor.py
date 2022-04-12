@@ -12,8 +12,7 @@ SKIP_SERIAL_LINES = 12
 LIDAR_USB_NAME = "FTDI USB Serial Device"
 MCU_USB_NAME = "cp210x"
 BAUD_RATE = 115200
-FREQUENCY = 1
-RECEIVING_PERIOD = 1
+FREQUENCY = 2000
 
 timer = time.time()
 MCUSerialObject = None
@@ -21,6 +20,8 @@ foundMCU = False
 foundLidar = False
 serialData = ""
 dictionaryData = {}
+
+RECEIVING_PERIOD = 1
 
 
 def checkFrequency():
@@ -83,18 +84,23 @@ def initializeSerial():
         MCUSerialObject.readline()
         skipLines = skipLines - 1
 
+    time.sleep(1)
+
 
 def readSerialData():
     global serialData, dictionaryData
     rawData = MCUSerialObject.readline()
+    # print(rawData)
     serialData = rawData.decode("windows-1252")  # decode s
     serialData = serialData.rstrip()  # cut "\r\n" at last of string
-    serialData = re.sub(
+    filteredSerialData = re.sub(
         "[^A-Za-z0-9\s[]{}]", "", serialData
     )  # filter regular characters
-    # print(data)  # print string
-    dictionaryData = json.loads(serialData)
-
+    # print(filteredSerialData)
+    try:
+        dictionaryData = json.loads(filteredSerialData)
+    except:
+        return
 
 def manuallyWrite():
     # A command is appended with "#" to mark as finish

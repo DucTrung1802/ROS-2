@@ -36,8 +36,8 @@ const uint8_t CHANNEL_PWMB = 2;
 // Config serial parameters
 const int BAUD_RATE = 115200;
 // Sending
-StaticJsonDocument<100> JSON_DOC_SEND;
-const unsigned int SENDING_FREQUENCY = 1; // Hz
+StaticJsonDocument<200> JSON_DOC_SEND;
+const unsigned int SENDING_FREQUENCY = 2000; // Hz
 double PERIOD; // milliseconds
 volatile unsigned long long timerPivot = 0; // milliseconds
 
@@ -48,7 +48,7 @@ String serialLine = "";
 // Inside the brackets, 200 is the capacity of the memory pool in bytes.
 // Don't forget to change this value to match your JSON document.
 // Use arduinojson.org/v6/assistant to compute the capacity.
-StaticJsonDocument<100> JSON_DOC_RECEIVE;
+StaticJsonDocument<200> JSON_DOC_RECEIVE;
 volatile int pwm_pulse[2] = {0, 0};
 
 
@@ -128,8 +128,10 @@ void initializeMotor()
 }
 
 void readEncoderTicks() {
+  noInterrupts();
   JSON_DOC_SEND["left_tick"] = POS_1;
   JSON_DOC_SEND["right_tick"] = POS_2;
+  interrupts();
 }
 
 void calculateSendingPeriod() {
@@ -182,7 +184,7 @@ void loop()
   while (Serial.available()) {
     serial_receive();
   }
-  
+
   readEncoderTicks();
   if (micros() - timerPivot >= PERIOD) {
     serializeJson(JSON_DOC_SEND, Serial);
