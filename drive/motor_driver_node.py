@@ -115,7 +115,7 @@ def initializeSerial():
 
     skipLines = SKIP_SERIAL_LINES
     MCUSerialObject.setDTR(False)
-    time.sleep(0.5)
+    time.sleep(0.1)
     MCUSerialObject.reset_input_buffer()
     MCUSerialObject.setDTR(True)
 
@@ -124,7 +124,7 @@ def initializeSerial():
         MCUSerialObject.readline()
         skipLines = skipLines - 1
 
-    time.sleep(1)
+    time.sleep(0.1)
 
 
 def readSerialData():
