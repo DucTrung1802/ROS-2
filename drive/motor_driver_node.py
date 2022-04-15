@@ -32,7 +32,10 @@ serialData = ""
 dictionaryData = {}
 
 RECEIVING_PERIOD = 1
-PUBLISH_PERIOD = 1
+
+""" The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided\
+    callback function will be called. For no delay, set it equal ZERO. """
+PUBLISH_PERIOD = 0
 
 STORE_POS_1 = 0
 STORE_POS_2 = 0
@@ -51,7 +54,7 @@ def checkFrequency():
     PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
 
 
-class Publisher(Node):
+class MotorDriverNode(Node):
     def __init__(self):
         super().__init__("motor_driver")
         self.left_ticks_pub = self.create_publisher(Int32, "left_ticks", 10)
@@ -140,6 +143,18 @@ def readSerialData():
         return
 
 
+def updateStorePosFromSerial():
+    global STORE_POS_1, STORE_POS_2
+    MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
+    readSerialData()
+    # print("left tick: " + str(dictionaryData["left_tick"]))
+    # print("right tick: " + str(dictionaryData["right_tick"]))
+    STORE_POS_1 = dictionaryData["left_tick"]
+    STORE_POS_2 = dictionaryData["right_tick"]
+
+def updatePosFromStorePos():
+    global
+
 def manuallyWrite():
     # A command is appended with "#" to mark as finish
     command = prompt("Command") + "#"
@@ -158,23 +173,22 @@ def setup():
     initializeSerial()
 
 
-def loop():
-    global timer, STORE_POS_1, STORE_POS_2, POS_1, POS_2
+def loop(args=None):
+    global receiving_timer, publish_timer, POS_1, POS_2
+    rclpy.init(args=args)
+    motor_driver_node = MotorDriverNode()
+    MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
+
+
     try:
         while True:
             # manuallyWrite()
             if time.time() - receiving_timer >= RECEIVING_PERIOD:
-                MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
-                readSerialData()
-                # print("left tick: " + str(dictionaryData["left_tick"]))
-                # print("right tick: " + str(dictionaryData["right_tick"]))
-                STORE_POS_1 = dictionaryData["left_tick"]
-                STORE_POS_2 = dictionaryData["right_tick"]
+                updateStorePosFromSerial()
                 receiving_timer = time.time()
 
-            rclpy.init()
-            publisher = Publisher()
-            rclpy.spin(publisher)
+            if time.time() - publish_timer >= PUBLISH_PERIOD:
+                rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:
         MCUSerialObject.write(formSerialData("{pwm_pulse:[0,0]}"))
