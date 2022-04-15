@@ -57,9 +57,9 @@ def checkFrequency():
 class MotorDriverNode(Node):
     def __init__(self):
         super().__init__("motor_driver")
-        self.left_ticks_pub = self.create_publisher(Int32, "left_ticks", 10)
-        self.right_ticks_pub = self.create_publisher(Int32, "right_ticks", 10)
-        self.timer = self.create_timer(PUBLISH_PERIOD, self.timer_callback)
+        self.left_ticks_pub = self.create_publisher(Int32, "left_ticks", 1)
+        self.right_ticks_pub = self.create_publisher(Int32, "right_ticks", 1)
+        self.timer = self.create_timer(0, self.timer_callback)
 
     def timer_callback(self):
         left_ticks = Int32()
@@ -192,6 +192,7 @@ def loop(args=None):
             if time.time() - publish_timer >= PUBLISH_PERIOD:
                 updatePosFromStorePos()
                 rclpy.spin_once(motor_driver_node)
+                publish_timer = time.time()
 
     except KeyboardInterrupt:
         MCUSerialObject.write(formSerialData("{pwm_pulse:[0,0]}"))
