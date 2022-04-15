@@ -64,8 +64,8 @@ class MotorDriverNode(Node):
     def timer_callback(self):
         left_ticks = Int32()
         right_ticks = Int32()
-        left_ticks.data = STORE_POS_1
-        right_ticks.data = STORE_POS_2
+        left_ticks.data = POS_1
+        right_ticks.data = POS_2
         self.left_ticks_pub.publish(left_ticks)
         self.right_ticks_pub.publish(right_ticks)
         # self.get_logger().info('Publishing: "%s"' % msg.data)
@@ -153,7 +153,9 @@ def updateStorePosFromSerial():
     STORE_POS_2 = dictionaryData["right_tick"]
 
 def updatePosFromStorePos():
-    global
+    global POS_1, POS_2
+    POS_1 = STORE_POS_1
+    POS_2 = STORE_POS_2
 
 def manuallyWrite():
     # A command is appended with "#" to mark as finish
@@ -188,6 +190,7 @@ def loop(args=None):
                 receiving_timer = time.time()
 
             if time.time() - publish_timer >= PUBLISH_PERIOD:
+                updatePosFromStorePos()
                 rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:
