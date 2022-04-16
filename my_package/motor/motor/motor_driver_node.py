@@ -62,7 +62,7 @@ def checkConditions():
     PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
 
 
-class Motor(object):
+class MotorDriver(object):
     def __init__(
         self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
     ):
@@ -79,7 +79,7 @@ class Motor(object):
     def __checkConditions(
         self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
     ):
-        """Check conditions of Motor parameters."""
+        """Check conditions of MotorDriver parameters."""
         self.__checkDiamater(diameter)
         self.__checkPulsePerRoundOfEncoder(pulse_per_round_of_encoder)
         self.__checkPwmFrequency(pwm_frequency)
@@ -130,7 +130,7 @@ class Motor(object):
         )
         self.__previous_RPM = self.__RPM
 
-    # Calculate RPM of motor
+    # Calculate RPM of Motor
     def __calculateRPM(self, current_tick):
         self.__encoder_count_per_second = (
             abs(current_tick - self.__previous_tick) / self.__sample_time
