@@ -10,6 +10,7 @@ import json
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32
+from geometry_msgs.msg import Twist
 
 # Serial parameters
 SKIP_SERIAL_LINES = 12
@@ -54,14 +55,23 @@ def checkFrequency():
     PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
 
 
+def controlMotors():
+    print("hello")
+
+
 class MotorDriverNode(Node):
     def __init__(self):
         super().__init__("motor_driver")
         self.left_ticks_pub = self.create_publisher(Int32, "left_ticks", 1)
         self.right_ticks_pub = self.create_publisher(Int32, "right_ticks", 1)
-        self.timer = self.create_timer(0, self.timer_callback)
+        self.timer = self.create_timer(0, self.publisherCallback)
 
-    def timer_callback(self):
+        self.controller_sub = self.create_subscription(
+            Twist, "cmd_vel", self.subscriberCallback, 1
+        )
+        self.controller_sub  # prevent unused variable warning
+
+    def publisherCallback(self):
         left_ticks = Int32()
         right_ticks = Int32()
         left_ticks.data = POS_1
@@ -69,6 +79,10 @@ class MotorDriverNode(Node):
         self.left_ticks_pub.publish(left_ticks)
         self.right_ticks_pub.publish(right_ticks)
         # self.get_logger().info('Publishing: "%s"' % msg.data)
+
+    def subscriberCallback(self):
+        controlMotors()
+        # self.get_logger().info('I heard: "%d"' % msg.linear.x)
 
 
 def getMCUSerial():
@@ -152,10 +166,12 @@ def updateStorePosFromSerial():
     STORE_POS_1 = dictionaryData["left_tick"]
     STORE_POS_2 = dictionaryData["right_tick"]
 
+
 def updatePosFromStorePos():
     global POS_1, POS_2
     POS_1 = STORE_POS_1
     POS_2 = STORE_POS_2
+
 
 def manuallyWrite():
     # A command is appended with "#" to mark as finish
@@ -179,8 +195,8 @@ def loop(args=None):
     global receiving_timer, publish_timer, POS_1, POS_2
     rclpy.init(args=args)
     motor_driver_node = MotorDriverNode()
-    MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
 
+    MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
 
     try:
         while True:

@@ -13,7 +13,7 @@ CLEAR = lambda: os.system("clear")
 
 # Node parameters
 NODE_NAME = Path(__file__).stem
-PUBLISH_FREQUENCY = 100
+PUBLISH_FREQUENCY = 1
 TOPIC = "/cmd_vel"
 
 # Key parameters
