@@ -13,7 +13,7 @@ CLEAR = lambda: os.system("clear")
 
 # Node parameters
 NODE_NAME = Path(__file__).stem
-PUBLISH_FREQUENCY = 10
+PUBLISH_FREQUENCY = 1
 TOPIC = "/cmd_vel"
 
 # Key parameters
@@ -56,7 +56,7 @@ w/x : increase/decrease linear speed by {} m/s
 a/d : increase/decrease angular speed by {} rad/s
 s : force stop
 
-q: quit
+p: quit
 
 ---------------------------
 

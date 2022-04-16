@@ -56,7 +56,7 @@ def checkFrequency():
 
 
 def controlMotors():
-    pass
+    print("hello")
 
 
 class MotorDriverNode(Node):
@@ -67,7 +67,7 @@ class MotorDriverNode(Node):
         self.timer = self.create_timer(0, self.publisherCallback)
 
         self.controller_sub = self.create_subscription(
-            Twist, "cmd_vel", self.subscriberCallback, 10
+            Twist, "cmd_vel", self.subscriberCallback, 1
         )
         self.controller_sub  # prevent unused variable warning
 
@@ -82,6 +82,7 @@ class MotorDriverNode(Node):
 
     def subscriberCallback(self):
         controlMotors()
+        # self.get_logger().info('I heard: "%d"' % msg.linear.x)
 
 
 def getMCUSerial():
@@ -194,6 +195,7 @@ def loop(args=None):
     global receiving_timer, publish_timer, POS_1, POS_2
     rclpy.init(args=args)
     motor_driver_node = MotorDriverNode()
+
     MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
 
     try:
