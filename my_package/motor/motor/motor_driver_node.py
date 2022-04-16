@@ -62,6 +62,18 @@ def checkConditions():
     PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
 
 
+class Kalman_Filter(object):
+    def update(self, Z):
+        self.Z = Z
+        self.K = self._P / (self._P + self.R)
+        self.X = self._X + self.K * (self.Z - self._X)
+        self.P = (1 - self.K) * self._P
+
+    def predict(self):
+        self._P = self.P + self.Q
+        self._X = self.X
+
+
 class MotorDriver(object):
     def __init__(
         self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
@@ -120,6 +132,8 @@ class MotorDriver(object):
         self.__RPM_coefficient = 0.0728
         self.__previous_RPM_coefficient = 0.0728
 
+        self.__KF = Kalman_Filter()
+
     # Low pass filter (smaller than 25Hz pass)
     def __lowPassFilter(self):
         """Filter high-frequency interference signal of the encoder."""
@@ -139,6 +153,7 @@ class MotorDriver(object):
             self.__encoder_count_per_second / self.__pulse_per_round_of_encoder * 60.0
         )
         self.__lowPassFilter()
+        # something with KF
 
     def changeCoefficientLowPassFilter(
         self, filtered_RPM_coefficient, RPM_coefficient, previous_RPM_coefficient
@@ -146,13 +161,16 @@ class MotorDriver(object):
         """Change coefficients of Low-pass Filter.
 
         Args:
-            filtered_RPM_coefficient (float): \n
-            RPM_coefficient (float): \n
-            previous_RPM_coefficient (float): \n
+            (float) filtered_RPM_coefficient = 0 \n
+            (float) RPM_coefficient = 0 \n
+            (float) previous_RPM_coefficient = 0 \n
         """
         self.__filtered_RPM_coefficient = filtered_RPM_coefficient
         self.__RPM_coefficient = RPM_coefficient
         self.__previous_RPM_coefficient = previous_RPM_coefficient
+
+    def changeCoefficientKalmanFilter():
+        pass
 
 
 class MotorDriverNode(Node):
