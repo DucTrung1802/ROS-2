@@ -2,32 +2,70 @@
 
 import subprocess
 import time
-from turtle import left
 from click import prompt
 import serial
 import re
 import json
 
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import Int32
+
+# Serial parameters
 SKIP_SERIAL_LINES = 12
 LIDAR_USB_NAME = "FTDI USB Serial Device"
 MCU_USB_NAME = "cp210x"
 BAUD_RATE = 115200
-FREQUENCY = 1
-RECEIVING_PERIOD = 1
+RECEIVING_FREQUENCY = 2000
 
-timer = time.time()
+
+# Publish parameters
+PUBLISH_FREQUENCY = 10
+
+# Non-configure parameters
+receiving_timer = time.time()
+publish_timer = time.time()
 MCUSerialObject = None
 foundMCU = False
 foundLidar = False
 serialData = ""
 dictionaryData = {}
 
+RECEIVING_PERIOD = 1
+PUBLISH_PERIOD = 1
+
+STORE_POS_1 = 0
+STORE_POS_2 = 0
+POS_1 = 0
+POS_2 = 0
+
 
 def checkFrequency():
-    global FREQUENCY, RECEIVING_PERIOD
-    if FREQUENCY <= 0:
-        FREQUENCY = 1
-    RECEIVING_PERIOD = 1 / FREQUENCY
+    global RECEIVING_PERIOD, PUBLISH_PERIOD
+    if RECEIVING_FREQUENCY <= 0:
+        raise Exception("RECEIVING_FREQUENCY must be an positive integer!")
+    RECEIVING_PERIOD = 1 / RECEIVING_FREQUENCY
+
+    if PUBLISH_FREQUENCY <= 0:
+        raise Exception("PUBLISH_FREQUENCY must be an positive integer!")
+    PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
+
+
+class Publisher(Node):
+    def __init__(self):
+        super().__init__("motor_driver")
+        self.left_ticks_pub = self.create_publisher(Int32, "left_ticks", 10)
+        self.right_ticks_pub = self.create_publisher(Int32, "right_ticks", 10)
+        self.timer = self.create_timer(PUBLISH_PERIOD, self.timer_callback)
+
+    def timer_callback(self):
+        left_ticks = Int32()
+        right_ticks = Int32()
+        left_ticks.data = STORE_POS_1
+        right_ticks.data = STORE_POS_2
+        self.left_ticks_pub.publish(left_ticks)
+        self.right_ticks_pub.publish(right_ticks)
+        # self.get_logger().info('Publishing: "%s"' % msg.data)
 
 
 def getMCUSerial():
@@ -83,17 +121,23 @@ def initializeSerial():
         MCUSerialObject.readline()
         skipLines = skipLines - 1
 
+    time.sleep(1)
+
 
 def readSerialData():
     global serialData, dictionaryData
     rawData = MCUSerialObject.readline()
+    # print(rawData)
     serialData = rawData.decode("windows-1252")  # decode s
     serialData = serialData.rstrip()  # cut "\r\n" at last of string
-    serialData = re.sub(
+    filteredSerialData = re.sub(
         "[^A-Za-z0-9\s[]{}]", "", serialData
     )  # filter regular characters
-    # print(data)  # print string
-    dictionaryData = json.loads(serialData)
+    # print(filteredSerialData)
+    try:
+        dictionaryData = json.loads(filteredSerialData)
+    except:
+        return
 
 
 def manuallyWrite():
@@ -115,16 +159,30 @@ def setup():
 
 
 def loop():
-    global timer
+    global receiving_timer, STORE_POS_1, STORE_POS_2, POS_1, POS_2
     try:
         while True:
             # manuallyWrite()
-            if time.time() - timer >= RECEIVING_PERIOD:
+            if time.time() - receiving_timer >= RECEIVING_PERIOD:
                 MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
                 readSerialData()
-                print("left tick: " + str(dictionaryData["left_tick"]))
-                print("right tick: " + str(dictionaryData["right_tick"]))
-                timer = time.time()
+
+                # print("left tick: " + str(dictionaryData["left_tick"]))
+                # print("right tick: " + str(dictionaryData["right_tick"]))
+
+                # print(dictionaryData["left_tick"])
+                # print(type(dictionaryData["left_tick"]))
+
+                STORE_POS_1 = dictionaryData["left_tick"]
+                STORE_POS_2 = dictionaryData["right_tick"]
+                print(STORE_POS_1)
+                print(STORE_POS_2)
+
+                rclpy.init()
+                publisher = Publisher()
+                rclpy.spin(publisher)
+
+                receiving_timer = time.time()
 
     except KeyboardInterrupt:
         MCUSerialObject.write(formSerialData("{pwm_pulse:[0,0]}"))
