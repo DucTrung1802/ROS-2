@@ -20,7 +20,7 @@ BAUD_RATE = 115200
 RECEIVING_FREQUENCY = 2000
 
 
-# Publish parameters
+# Spin (publish and subscribe) parameters
 PUBLISH_FREQUENCY = 10
 
 # Non-configure parameters
@@ -62,26 +62,32 @@ def controlMotors():
 class MotorDriverNode(Node):
     def __init__(self):
         super().__init__("motor_driver")
+        self.need_publish = True
         self.left_ticks_pub = self.create_publisher(Int32, "left_ticks", 1)
         self.right_ticks_pub = self.create_publisher(Int32, "right_ticks", 1)
         self.timer = self.create_timer(0, self.publisherCallback)
 
         self.controller_sub = self.create_subscription(
-            Twist, "cmd_vel", self.subscriberCallback, 10
+            Twist, "cmd_vel", self.subscriberCallback, 1
         )
         self.controller_sub  # prevent unused variable warning
 
     def publisherCallback(self):
-        left_ticks = Int32()
-        right_ticks = Int32()
-        left_ticks.data = POS_1
-        right_ticks.data = POS_2
-        self.left_ticks_pub.publish(left_ticks)
-        self.right_ticks_pub.publish(right_ticks)
-        # self.get_logger().info('Publishing: "%s"' % msg.data)
+        if self.need_publish:
+            left_ticks = Int32()
+            right_ticks = Int32()
+            left_ticks.data = POS_1
+            right_ticks.data = POS_2
+            self.left_ticks_pub.publish(left_ticks)
+            self.right_ticks_pub.publish(right_ticks)
+            # self.get_logger().info('Publishing: "%s"' % msg.data)
 
-    def subscriberCallback(self):
+    def subscriberCallback(self, msg):
         controlMotors()
+        self.get_logger().info("I heard: " + str(msg.linear.x))
+        data = {"pwm_pulse": [msg.linear.x * 1023 / 0.6, msg.linear.x * 1023 / 0.6]}
+        data = json.dumps(data)
+        MCUSerialObject.write(formSerialData(data))
 
 
 def getMCUSerial():
@@ -158,7 +164,7 @@ def readSerialData():
 
 def updateStorePosFromSerial():
     global STORE_POS_1, STORE_POS_2
-    MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
+    # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
     readSerialData()
     # print("left tick: " + str(dictionaryData["left_tick"]))
     # print("right tick: " + str(dictionaryData["right_tick"]))
@@ -194,6 +200,7 @@ def loop(args=None):
     global receiving_timer, publish_timer, POS_1, POS_2
     rclpy.init(args=args)
     motor_driver_node = MotorDriverNode()
+
     MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
 
     try:
@@ -205,8 +212,12 @@ def loop(args=None):
 
             if time.time() - publish_timer >= PUBLISH_PERIOD:
                 updatePosFromStorePos()
+                motor_driver_node.need_publish = True
                 rclpy.spin_once(motor_driver_node)
+                motor_driver_node.need_publish = False
                 publish_timer = time.time()
+
+            rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:
         MCUSerialObject.write(formSerialData("{pwm_pulse:[0,0]}"))
