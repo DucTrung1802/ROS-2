@@ -59,9 +59,10 @@ class MotorDriverNode(Node):
         super().__init__("motor_driver")
         self.left_ticks_pub = self.create_publisher(Int32, "left_ticks", 1)
         self.right_ticks_pub = self.create_publisher(Int32, "right_ticks", 1)
-        self.timer = self.create_timer(0, self.timer_callback)
+        self.controller_sub = self.create_subscription(Twist)
+        self.timer = self.create_timer(0, self.publisher_callback)
 
-    def timer_callback(self):
+    def publisher_callback(self):
         left_ticks = Int32()
         right_ticks = Int32()
         left_ticks.data = POS_1
@@ -69,6 +70,8 @@ class MotorDriverNode(Node):
         self.left_ticks_pub.publish(left_ticks)
         self.right_ticks_pub.publish(right_ticks)
         # self.get_logger().info('Publishing: "%s"' % msg.data)
+
+    def subscriber_callback(self):
 
 
 def getMCUSerial():
