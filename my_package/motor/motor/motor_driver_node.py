@@ -63,14 +63,51 @@ def checkConditions():
 
 
 class Motor(object):
-    def __init__(self, diameter, pulse_per_round_of_encoder, pwm_frequency=1000, sample_time=5e-3):
-        # Motor arameters
-        self.pwm_frequency = 
-        # Initialize Kalman Filter 
+    def __init__(
+        self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
+    ):
+        # Check conditions of Motor parameters
+        self.checkConditions(
+            diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
+        )
+
+        # Initialize Kalman Filter
 
         # Initialize PID controller
-        
-        
+
+    def checkConditions(
+        self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
+    ):
+        self.checkDiamater(diameter)
+        self.checkPulsePerRoundOfEncoder(pulse_per_round_of_encoder)
+        self.checkPwmFrequency(pwm_frequency)
+        self.checkSampleTime(sample_time)
+
+    def checkDiamater(self, diameter):
+        if float(diameter) and diameter > 0:
+            self.__diameter = diameter
+        else:
+            raise Exception("Invalid value of diameter!")
+
+    def checkPulsePerRoundOfEncoder(self, pulse_per_round_of_encoder):
+        if float(pulse_per_round_of_encoder) and pulse_per_round_of_encoder > 0:
+            self.__pulse_per_round_of_encoder = pulse_per_round_of_encoder
+        else:
+            raise Exception("Invalid value of pulse_per_round_of_encoder!")
+
+    def checkPwmFrequency(self, pwm_frequency):
+        if float(pwm_frequency) and pwm_frequency > 0:
+            self.__pwm_frequency = pwm_frequency
+        else:
+            raise Exception("Invalid value of pwm_frequency!")
+
+    def checkSampleTime(self, sample_time):
+        if float(sample_time) and sample_time > 0:
+            self.__sample_time = sample_time
+        else:
+            raise Exception("Invalid value of sample_time!")
+
+
 class MotorDriverNode(Node):
     def __init__(self):
         super().__init__("motor_driver")
