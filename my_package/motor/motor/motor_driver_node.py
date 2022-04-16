@@ -45,10 +45,10 @@ dictionaryData = {}
 
 # JSON parameters
 KEY = "pwm_pulse"
-STORE_POS_1 = 0
-STORE_POS_2 = 0
-POS_1 = 0
-POS_2 = 0
+STORE_TICK_1 = 0
+STORE_TICK_2 = 0
+TICK_1 = 0
+TICK_2 = 0
 
 
 def checkConditions():
@@ -66,52 +66,94 @@ class Motor(object):
     def __init__(
         self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
     ):
-        # Check conditions of Motor parameters
-        self.checkConditions(
+        self.__checkConditions(
             diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
         )
 
-        # Initialize private parameters
+        self.__initializeParameters()
 
         # Initialize Kalman Filter
 
         # Initialize PID controller
 
-    def checkConditions(
+    def __checkConditions(
         self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
     ):
-        self.checkDiamater(diameter)
-        self.checkPulsePerRoundOfEncoder(pulse_per_round_of_encoder)
-        self.checkPwmFrequency(pwm_frequency)
-        self.checkSampleTime(sample_time)
+        """Check conditions of Motor parameters."""
+        self.__checkDiamater(diameter)
+        self.__checkPulsePerRoundOfEncoder(pulse_per_round_of_encoder)
+        self.__checkPwmFrequency(pwm_frequency)
+        self.__checkSampleTime(sample_time)
 
-    def checkDiamater(self, diameter):
+    def __checkDiamater(self, diameter):
         if float(diameter) and diameter > 0:
             self.__diameter = diameter
         else:
             raise Exception("Invalid value of diameter!")
 
-    def checkPulsePerRoundOfEncoder(self, pulse_per_round_of_encoder):
+    def __checkPulsePerRoundOfEncoder(self, pulse_per_round_of_encoder):
         if float(pulse_per_round_of_encoder) and pulse_per_round_of_encoder > 0:
             self.__pulse_per_round_of_encoder = pulse_per_round_of_encoder
         else:
             raise Exception("Invalid value of pulse_per_round_of_encoder!")
 
-    def checkPwmFrequency(self, pwm_frequency):
+    def __checkPwmFrequency(self, pwm_frequency):
         if float(pwm_frequency) and pwm_frequency > 0:
             self.__pwm_frequency = pwm_frequency
         else:
             raise Exception("Invalid value of pwm_frequency!")
 
-    def checkSampleTime(self, sample_time):
+    def __checkSampleTime(self, sample_time):
         if float(sample_time) and sample_time > 0:
             self.__sample_time = sample_time
         else:
             raise Exception("Invalid value of sample_time!")
 
+    def __initializeParameters(self):
+        """Initialize private parameters."""
+        self.__filtered_RPM = 0
+
+        self.__previous_tick = 0
+        self.__previous_RPM = 0
+
+        self.__filtered_RPM_coefficient = 0.854
+        self.__RPM_coefficient = 0.0728
+        self.__previous_RPM_coefficient = 0.0728
+
+    # Low pass filter (smaller than 25Hz pass)
+    def __lowPassFilter(self):
+        """Filter high-frequency interference signal of the encoder."""
+        self.__filtered_RPM = (
+            self.__filtered_RPM_coefficient * self.__filtered_RPM
+            + self.__RPM_coefficient * self.__RPM
+            + self.__previous_RPM_coefficient * self.__previous_RPM
+        )
+        self.__previous_RPM = self.__RPM
+
     # Calculate RPM of motor
-    def calculateRPM():
-        
+    def __calculateRPM(self, current_tick):
+        self.__encoder_count_per_second = (
+            abs(current_tick - self.__previous_tick) / self.__sample_time
+        )
+        self.__RPM = (
+            self.__encoder_count_per_second / self.__pulse_per_round_of_encoder * 60.0
+        )
+        self.__lowPassFilter()
+
+    def changeCoefficientLowPassFilter(
+        self, filtered_RPM_coefficient, RPM_coefficient, previous_RPM_coefficient
+    ):
+        """Change coefficients of Low-pass Filter.
+
+        Args:
+            filtered_RPM_coefficient (float): \n
+            RPM_coefficient (float): \n
+            previous_RPM_coefficient (float): \n
+        """
+        self.__filtered_RPM_coefficient = filtered_RPM_coefficient
+        self.__RPM_coefficient = RPM_coefficient
+        self.__previous_RPM_coefficient = previous_RPM_coefficient
+
 
 class MotorDriverNode(Node):
     def __init__(self):
@@ -136,8 +178,8 @@ class MotorDriverNode(Node):
         if self.__need_publish:
             left_ticks = Int32()
             right_ticks = Int32()
-            left_ticks.data = POS_1
-            right_ticks.data = POS_2
+            left_ticks.data = TICK_1
+            right_ticks.data = TICK_2
             self.left_ticks_pub.publish(left_ticks)
             self.right_ticks_pub.publish(right_ticks)
             # self.get_logger().info('Publishing: "%s"' % msg.data)
@@ -229,19 +271,19 @@ def readSerialData():
 
 
 def updateStorePosFromSerial():
-    global STORE_POS_1, STORE_POS_2
+    global STORE_TICK_1, STORE_TICK_2
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
     readSerialData()
     # print("left tick: " + str(dictionaryData["left_tick"]))
     # print("right tick: " + str(dictionaryData["right_tick"]))
-    STORE_POS_1 = dictionaryData["left_tick"]
-    STORE_POS_2 = dictionaryData["right_tick"]
+    STORE_TICK_1 = dictionaryData["left_tick"]
+    STORE_TICK_2 = dictionaryData["right_tick"]
 
 
 def updatePosFromStorePos():
-    global POS_1, POS_2
-    POS_1 = STORE_POS_1
-    POS_2 = STORE_POS_2
+    global TICK_1, TICK_2
+    TICK_1 = STORE_TICK_1
+    TICK_2 = STORE_TICK_2
 
 
 def manuallyWrite():
@@ -263,7 +305,7 @@ def setup():
 
 
 def loop(args=None):
-    global receiving_timer, publish_timer, POS_1, POS_2
+    global receiving_timer, publish_timer, TICK_1, TICK_2
     rclpy.init(args=args)
     motor_driver_node = MotorDriverNode()
 
