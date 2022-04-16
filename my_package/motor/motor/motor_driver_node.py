@@ -7,11 +7,14 @@ import serial
 import re
 import json
 
+
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
 
+
+# =========== Configurable parameters =============
 # Serial parameters
 SKIP_SERIAL_LINES = 12
 LIDAR_USB_NAME = "FTDI USB Serial Device"
@@ -19,32 +22,36 @@ MCU_USB_NAME = "cp210x"
 BAUD_RATE = 115200
 RECEIVING_FREQUENCY = 2000
 
+# Node parameters
+PUBLISH_FREQUENCY = 100
 
-# Spin (publish and subscribe) parameters
-PUBLISH_FREQUENCY = 10
+# =================================================
 
 # Non-configure parameters
+# Node parameters
 receiving_timer = time.time()
 publish_timer = time.time()
+RECEIVING_PERIOD = 1
+""" The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided\
+    callback function will be called. For no delay, set it equal ZERO. """
+PUBLISH_PERIOD = 0
+
+# Serial parameters
 MCUSerialObject = None
 foundMCU = False
 foundLidar = False
 serialData = ""
 dictionaryData = {}
 
-RECEIVING_PERIOD = 1
-
-""" The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided\
-    callback function will be called. For no delay, set it equal ZERO. """
-PUBLISH_PERIOD = 0
-
+# JSON parameters
+KEY = "pwm_pulse"
 STORE_POS_1 = 0
 STORE_POS_2 = 0
 POS_1 = 0
 POS_2 = 0
 
 
-def checkFrequency():
+def checkConditions():
     global RECEIVING_PERIOD, PUBLISH_PERIOD
     if RECEIVING_FREQUENCY <= 0:
         raise Exception("RECEIVING_FREQUENCY must be an positive integer!")
@@ -55,14 +62,19 @@ def checkFrequency():
     PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
 
 
-def controlMotors():
-    pass
+class Motor(object):
+    def __init__(self, diameter, pulse_per_round_of_encoder, pwm_frequency=1000, sample_time=5e-3):
+        # Motor arameters
+        self.pwm_frequency = 
+        # Initialize Kalman Filter 
 
-
+        # Initialize PID controller
+        
+        
 class MotorDriverNode(Node):
     def __init__(self):
         super().__init__("motor_driver")
-        self.need_publish = True
+        self.__need_publish = True
         self.left_ticks_pub = self.create_publisher(Int32, "left_ticks", 1)
         self.right_ticks_pub = self.create_publisher(Int32, "right_ticks", 1)
         self.timer = self.create_timer(0, self.publisherCallback)
@@ -72,8 +84,14 @@ class MotorDriverNode(Node):
         )
         self.controller_sub  # prevent unused variable warning
 
+    def setNeedPublish(self):
+        self.__need_publish = True
+
+    def resetNeedPublish(self):
+        self.__need_publish = False
+
     def publisherCallback(self):
-        if self.need_publish:
+        if self.__need_publish:
             left_ticks = Int32()
             right_ticks = Int32()
             left_ticks.data = POS_1
@@ -83,11 +101,17 @@ class MotorDriverNode(Node):
             # self.get_logger().info('Publishing: "%s"' % msg.data)
 
     def subscriberCallback(self, msg):
-        controlMotors()
-        self.get_logger().info("I heard: " + str(msg.linear.x))
-        data = {"pwm_pulse": [msg.linear.x * 1023 / 0.6, msg.linear.x * 1023 / 0.6]}
-        data = json.dumps(data)
-        MCUSerialObject.write(formSerialData(data))
+        driveMotors(msg)
+
+
+def driveMotors(msg):
+    # Kalman Filter
+    # PID
+    # controlMotors()
+
+    data = {"pwm_pulse": [msg.linear.x * 1023 / 0.6, msg.linear.x * 1023 / 0.6]}
+    data = json.dumps(data)
+    MCUSerialObject.write(formSerialData(data))
 
 
 def getMCUSerial():
@@ -192,7 +216,7 @@ def formSerialData(stringData):
 
 
 def setup():
-    checkFrequency()
+    checkConditions()
     initializeSerial()
 
 
@@ -200,8 +224,6 @@ def loop(args=None):
     global receiving_timer, publish_timer, POS_1, POS_2
     rclpy.init(args=args)
     motor_driver_node = MotorDriverNode()
-
-    MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
 
     try:
         while True:
@@ -212,9 +234,9 @@ def loop(args=None):
 
             if time.time() - publish_timer >= PUBLISH_PERIOD:
                 updatePosFromStorePos()
-                motor_driver_node.need_publish = True
+                motor_driver_node.setNeedPublish()
                 rclpy.spin_once(motor_driver_node)
-                motor_driver_node.need_publish = False
+                motor_driver_node.resetNeedPublish()
                 publish_timer = time.time()
 
             rclpy.spin_once(motor_driver_node)
