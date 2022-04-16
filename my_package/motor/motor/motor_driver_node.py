@@ -71,6 +71,8 @@ class Motor(object):
             diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
         )
 
+        # Initialize private parameters
+
         # Initialize Kalman Filter
 
         # Initialize PID controller
@@ -107,6 +109,9 @@ class Motor(object):
         else:
             raise Exception("Invalid value of sample_time!")
 
+    # Calculate RPM of motor
+    def calculateRPM():
+        
 
 class MotorDriverNode(Node):
     def __init__(self):
