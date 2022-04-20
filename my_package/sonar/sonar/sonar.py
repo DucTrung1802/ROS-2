@@ -2,7 +2,7 @@
 import rclpy
 from rclpy.node import Node
 import time
-from std_msgs.msg import Float32
+from sensor_msgs.msg import Range
 import RPi.GPIO as GPIO
 import time
 
@@ -23,14 +23,19 @@ GPIO.setup(GPIO_ECHO, GPIO.IN)
 class MinimalPublisher(Node):
     def __init__(self):
         super().__init__("sonar_publisher")
-        self.publisher_1 = self.create_publisher(Float32, "sonar", 1)
+        self.publisher_1 = self.create_publisher(Range, "sonar", 1)
         self.timer1 = self.create_timer(0, self.timer_callback1)
 
     def timer_callback1(self):
-        msg = Float32()
-        msg.data = distance()
+        msg = Range()
+        msg.header.frame_id = "/base_link"
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.radiation_type = 0
+        msg.field_of_view = 0.78  # rad ~ 45 degree (according to feature of HC-SR 04)
+        msg.min_range = 0.04
+        msg.max_range = 2.0
+        msg.range = distance()
         self.publisher_1.publish(msg)
-        self.get_logger().info("Publishing: " + str(round(msg.data, 2)))
 
 
 def distance():
@@ -68,7 +73,7 @@ def main(args=None):
 
     try:
         while True:
-            if time.time() - timer1 >= 0.0001:
+            if time.time() - timer1 >= 0.05:
                 rclpy.spin_once(sonar)
                 timer1 = time.time()
 
