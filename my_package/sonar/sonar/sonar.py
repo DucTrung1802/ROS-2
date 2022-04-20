@@ -1,6 +1,12 @@
 # Libraries
+import rclpy
+from rclpy.node import Node
+import time
+from std_msgs.msg import Float32
 import RPi.GPIO as GPIO
 import time
+
+timer1 = time.time()
 
 # GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
@@ -12,6 +18,19 @@ GPIO_ECHO = 24
 # set GPIO direction (IN / OUT)
 GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
 GPIO.setup(GPIO_ECHO, GPIO.IN)
+
+
+class MinimalPublisher(Node):
+    def __init__(self):
+        super().__init__("sonar_publisher")
+        self.publisher_1 = self.create_publisher(Float32, "sonar", 1)
+        self.timer1 = self.create_timer(0, self.timer_callback1)
+
+    def timer_callback1(self):
+        msg = Float32()
+        msg.data = distance()
+        self.publisher_1.publish(msg)
+        self.get_logger().info("Publishing: " + str(round(msg.data, 2)))
 
 
 def distance():
@@ -42,14 +61,22 @@ def distance():
     return distance
 
 
-if __name__ == "__main__":
+def main(args=None):
+    global timer1
+    rclpy.init(args=args)
+    sonar = MinimalPublisher()
+
     try:
         while True:
-            dist = distance()
-            print("Measured Distance = %.1f cm" % dist)
-            time.sleep(0.01)
+            if time.time() - timer1 >= 0.0001:
+                rclpy.spin_once(sonar)
+                timer1 = time.time()
 
         # Reset by pressing CTRL + C
     except KeyboardInterrupt:
         print("Measurement stopped by User")
         GPIO.cleanup()
+
+
+if __name__ == "__main__":
+    main()
