@@ -6,10 +6,22 @@ from sensor_msgs.msg import Range
 import RPi.GPIO as GPIO
 import time
 
+# Node parameters
+PUBLISH_FREQUENCY = 100
+NODE_NAME = "sonar"
+
 timer1 = time.time()
 
 
-class MinimalPublisher(Node):
+def checkConditions():
+    global PUBLISH_PERIOD
+
+    if PUBLISH_FREQUENCY <= 0:
+        raise Exception("PUBLISH_FREQUENCY must be an positive integer!")
+    PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
+
+
+class SonarNode(Node):
     def __init__(self):
         super().__init__("sonar_publisher")
         self.publisher_1 = self.create_publisher(Range, "sonar", 1)
@@ -30,11 +42,11 @@ class MinimalPublisher(Node):
 def main(args=None):
     global timer1
     rclpy.init(args=args)
-    sonar = MinimalPublisher()
+    sonar = SonarNode()
 
     try:
         while True:
-            if time.time() - timer1 >= 0.05:
+            if time.time() - timer1 >= PUBLISH_PERIOD:
                 rclpy.spin_once(sonar)
                 timer1 = time.time()
 
