@@ -5,6 +5,7 @@ import time
 from sensor_msgs.msg import Range
 import RPi.GPIO as GPIO
 import time
+import Sonar
 
 # Node parameters
 PUBLISH_FREQUENCY = 100
@@ -22,8 +23,8 @@ def checkConditions():
 
 
 class SonarNode(Node):
-    def __init__(self):
-        super().__init__("sonar_publisher")
+    def __init__(self, node_name, sonar_instance):
+        super().__init__(node_name)
         self.publisher_1 = self.create_publisher(Range, "sonar", 1)
         self.timer1 = self.create_timer(0, self.timer_callback1)
 
@@ -38,11 +39,14 @@ class SonarNode(Node):
         msg.range = distance()
         self.publisher_1.publish(msg)
 
+def setup():
+    checkConditions()
 
-def main(args=None):
+def loop():
     global timer1
-    rclpy.init(args=args)
-    sonar = SonarNode()
+    rclpy.init()
+    sonar = Sonar(trigger_pin, echo_pin, min_range, max_range, field_of_view)
+    sonar_node = SonarNode(NODE_NAME, sonar)
 
     try:
         while True:
@@ -54,3 +58,12 @@ def main(args=None):
     except KeyboardInterrupt:
         print("Measurement stopped by User")
         GPIO.cleanup()
+
+
+def main():
+    setup()
+    loop()
+
+
+if __name__ == "__main__":
+    main()
