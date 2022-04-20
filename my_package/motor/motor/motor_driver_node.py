@@ -361,9 +361,9 @@ def setup():
     initializeSerial()
 
 
-def loop(args=None):
+def loop():
     global receiving_timer, publish_timer, TICK_1, TICK_2
-    rclpy.init(args=args)
+    rclpy.init()
     motor_driver_node = MotorDriverNode(NODE_NAME)
 
     try:
