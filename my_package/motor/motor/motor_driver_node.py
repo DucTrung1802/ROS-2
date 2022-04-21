@@ -24,6 +24,7 @@ RECEIVING_FREQUENCY = 2000
 
 # Node parameters
 PUBLISH_FREQUENCY = 100
+NODE_NAME = "motor_driver"
 
 # =================================================
 
@@ -97,7 +98,6 @@ class Kalman_Filter(object):
         self.__Pn_1 = self.__Pn + self.__Q
         self.__Xn_1 = self.__Xn
 
-
     def setupValues(self, X, P, R, Q):
         self.__Xn_1 = X
         self.__Pn_1 = P
@@ -111,7 +111,6 @@ class Kalman_Filter(object):
 
     def getCurrentStateEstimate(self):
         return self.__Xn
-
 
 
 class MotorDriver(object):
@@ -214,8 +213,8 @@ class MotorDriver(object):
 
 
 class MotorDriverNode(Node):
-    def __init__(self):
-        super().__init__("motor_driver")
+    def __init__(self, node_name):
+        super().__init__(node_name)
         self.__need_publish = True
         self.left_ticks_pub = self.create_publisher(Int32, "left_ticks", 1)
         self.right_ticks_pub = self.create_publisher(Int32, "right_ticks", 1)
@@ -362,10 +361,10 @@ def setup():
     initializeSerial()
 
 
-def loop(args=None):
+def loop():
     global receiving_timer, publish_timer, TICK_1, TICK_2
-    rclpy.init(args=args)
-    motor_driver_node = MotorDriverNode()
+    rclpy.init()
+    motor_driver_node = MotorDriverNode(NODE_NAME)
 
     try:
         while True:
