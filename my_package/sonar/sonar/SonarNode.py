@@ -5,7 +5,7 @@ import time
 from sensor_msgs.msg import Range
 import RPi.GPIO as GPIO
 import time
-import Sonar
+from sonar.SonarClass import Sonar
 
 # Node parameters
 PUBLISH_FREQUENCY = 100
@@ -46,7 +46,7 @@ class SonarNode(Node):
             )  # rad ~ 45 degree (according to feature of HC-SR 04)
             msg.min_range = 0.04
             msg.max_range = 2.0
-            msg.range = i + 1
+            msg.range = float(i + 1)
             self.array_publisher[i].publish(msg)
 
 
