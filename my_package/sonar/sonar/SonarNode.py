@@ -19,7 +19,7 @@ def checkConditions():
 
     # GPIO Mode (BOARD / BCM)
     GPIO.setmode(GPIO.BCM)
-    
+
     if PUBLISH_FREQUENCY <= 0:
         raise Exception("PUBLISH_FREQUENCY must be an positive integer!")
     PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
@@ -70,7 +70,7 @@ def loop():
     )
 
     sonar_array.append(sonar_1)
-    # sonar_array.append(sonar_2)
+    sonar_array.append(sonar_2)
 
 
     sonar_node = SonarNode(NODE_NAME, sonar_array)
