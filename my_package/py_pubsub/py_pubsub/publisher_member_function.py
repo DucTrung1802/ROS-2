@@ -14,16 +14,17 @@ class MinimalPublisher(Node):
         self.publisher_1 = self.create_publisher(String, "topic1", 10)
 
         timer_period1 = 0  # seconds
-        self.timer1 = self.create_timer(timer_period1, self.timer_callback1)
+        # bind = lambda x: self.timer_callback(x)
+        self.timer1 = self.create_timer(timer_period1, self.timer_callback)
 
-        self.i = 0
+        # self.i = 0
 
-    def timer_callback1(self):
+    def timer_callback(self):
         msg = String()
-        msg.data = "%d" % self.i
+        msg.data = str(99)
         self.publisher_1.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
+        self.get_logger().info("Publishing: " + str(99))
+        # self.i += 1
 
 
 def main(args=None):

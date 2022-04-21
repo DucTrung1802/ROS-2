@@ -24,24 +24,30 @@ def checkConditions():
 
 class SonarNode(Node):
     def __init__(self, node_name, sonar_array_instance):
+        if isinstance(sonar_array_instance, list) and len(sonar_array_instance) < 0:
+            raise Exception("There is no Sonar data!")
+
         super().__init__(node_name)
         self.array_publisher = []
         for i in range(len(sonar_array_instance)):
             self.array_publisher.append(
                 self.create_publisher(Range, "sonar_" + str(i + 1), 1)
             )
-        self.timer = self.create_timer(0, lambda x: self.timer_callback(x))
+        self.timer = self.create_timer(0, self.timer_callback)
 
     def timer_callback(self):
-        msg = Range()
-        msg.header.frame_id = "/base_link"
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.radiation_type = 0
-        msg.field_of_view = 0.78  # rad ~ 45 degree (according to feature of HC-SR 04)
-        msg.min_range = 0.04
-        msg.max_range = 2.0
-        msg.range = distance()
-        self.publisher_1.publish(msg)
+        for i in range(len(self.array_publisher)):
+            msg = Range()
+            msg.header.frame_id = "/base_link"
+            msg.header.stamp = self.get_clock().now().to_msg()
+            msg.radiation_type = 0
+            msg.field_of_view = (
+                0.78
+            )  # rad ~ 45 degree (according to feature of HC-SR 04)
+            msg.min_range = 0.04
+            msg.max_range = 2.0
+            msg.range = i + 1
+            self.array_publisher[i].publish(msg)
 
 
 def setup():
@@ -62,7 +68,7 @@ def loop():
     try:
         while True:
             if time.time() - timer1 >= PUBLISH_PERIOD:
-                rclpy.spin_once(sonar)
+                rclpy.spin_once(sonar_node)
                 timer1 = time.time()
 
         # Reset by pressing CTRL + C
