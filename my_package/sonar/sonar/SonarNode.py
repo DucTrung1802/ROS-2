@@ -23,12 +23,16 @@ def checkConditions():
 
 
 class SonarNode(Node):
-    def __init__(self, node_name, sonar_instance):
+    def __init__(self, node_name, sonar_array_instance):
         super().__init__(node_name)
-        self.publisher_1 = self.create_publisher(Range, "sonar", 1)
-        self.timer1 = self.create_timer(0, self.timer_callback1)
+        self.array_publisher = []
+        for i in range(len(sonar_array_instance)):
+            self.array_publisher.append(
+                self.create_publisher(Range, "sonar_" + str(i + 1), 1)
+            )
+        self.timer = self.create_timer(0, lambda x: self.timer_callback(x))
 
-    def timer_callback1(self):
+    def timer_callback(self):
         msg = Range()
         msg.header.frame_id = "/base_link"
         msg.header.stamp = self.get_clock().now().to_msg()
@@ -39,14 +43,21 @@ class SonarNode(Node):
         msg.range = distance()
         self.publisher_1.publish(msg)
 
+
 def setup():
     checkConditions()
+
 
 def loop():
     global timer1
     rclpy.init()
-    sonar = Sonar(trigger_pin, echo_pin, min_range, max_range, field_of_view)
-    sonar_node = SonarNode(NODE_NAME, sonar)
+    sonar_array = []
+    sonar_1 = Sonar(
+        trigger_pin=23, echo_pin=24, min_range=0.04, max_range=1.5, field_of_view=0.78
+    )
+    sonar_array.append(sonar_1)
+
+    sonar_node = SonarNode(NODE_NAME, sonar_array)
 
     try:
         while True:
