@@ -8,7 +8,7 @@ import time
 from sonar.SonarClass import Sonar
 
 # Node parameters
-PUBLISH_FREQUENCY = 100
+PUBLISH_FREQUENCY = 10
 NODE_NAME = "sonar"
 
 timer1 = time.time()
@@ -28,6 +28,7 @@ class SonarNode(Node):
             raise Exception("There is no Sonar data!")
 
         super().__init__(node_name)
+        self.array_sonar = sonar_array_instance
         self.array_publisher = []
         for i in range(len(sonar_array_instance)):
             self.array_publisher.append(
@@ -36,17 +37,15 @@ class SonarNode(Node):
         self.timer = self.create_timer(0, self.timer_callback)
 
     def timer_callback(self):
-        for i in range(len(self.array_publisher)):
+        for i in range(len(self.array_sonar)):
             msg = Range()
-            msg.header.frame_id = "/base_link"
+            msg.header.frame_id = "/sonar_frame_" + str(i+1)
             msg.header.stamp = self.get_clock().now().to_msg()
-            msg.radiation_type = 0
-            msg.field_of_view = (
-                0.78
-            )  # rad ~ 45 degree (according to feature of HC-SR 04)
-            msg.min_range = 0.04
-            msg.max_range = 2.0
-            msg.range = float(i + 1)
+            msg.radiation_type = self.array_sonar[i].getRadiationType()
+            msg.field_of_view = self.array_sonar[i].getFieldOfView()  # rad ~ 45 degree (according to feature of HC-SR 04)
+            msg.min_range = self.array_sonar[i].getMinRange()
+            msg.max_range = self.array_sonar[i].getMaxRange()
+            msg.range = self.array_sonar[i].getMeasureDistance()
             self.array_publisher[i].publish(msg)
 
 
@@ -58,10 +57,18 @@ def loop():
     global timer1
     rclpy.init()
     sonar_array = []
+
+    # Configure this when add more sonar sensors
     sonar_1 = Sonar(
         trigger_pin=23, echo_pin=24, min_range=0.04, max_range=1.5, field_of_view=0.78
     )
+    sonar_2 = Sonar(
+        trigger_pin=25, echo_pin=8, min_range=0.04, max_range=1.5, field_of_view=0.78
+    )
+
     sonar_array.append(sonar_1)
+    sonar_array.append(sonar_2)
+
 
     sonar_node = SonarNode(NODE_NAME, sonar_array)
 

@@ -43,7 +43,7 @@ class Sonar(object):
         range_condition = 0 < min_range <= max_range
         field_of_view_condition = field_of_view > 0
 
-        if trigger_pin_condition and echo_pin_condition and range_condition:
+        if trigger_pin_condition and echo_pin_condition and range_condition and field_of_view_condition:
             return True
         else:
             return False
