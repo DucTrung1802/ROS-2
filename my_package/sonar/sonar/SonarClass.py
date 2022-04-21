@@ -1,12 +1,11 @@
 # Libraries
-import rclpy
-from rclpy.node import Node
 import time
-from sensor_msgs.msg import Range
 import RPi.GPIO as GPIO
 import time
 
 timer1 = time.time()
+
+GPIO.setmode(GPIO.BCM)
 
 
 class Sonar(object):
@@ -31,6 +30,10 @@ class Sonar(object):
             self.__field_of_view = field_of_view
             self.__radiation_type = 0
 
+            # set GPIO direction (IN / OUT)
+            GPIO.setup(self.__trigger_pin, GPIO.OUT)
+            GPIO.setup(self.__echo_pin, GPIO.IN)
+
     def __checkCondition(
         self, trigger_pin, echo_pin, min_range, max_range, field_of_view
     ):
@@ -43,7 +46,12 @@ class Sonar(object):
         range_condition = 0 < min_range <= max_range
         field_of_view_condition = field_of_view > 0
 
-        if trigger_pin_condition and echo_pin_condition and range_condition and field_of_view_condition:
+        if (
+            trigger_pin_condition
+            and echo_pin_condition
+            and range_condition
+            and field_of_view_condition
+        ):
             return True
         else:
             return False
@@ -57,13 +65,6 @@ class Sonar(object):
             return index
 
     def getMeasureDistance(self):
-        # GPIO Mode (BOARD / BCM)
-        GPIO.setmode(GPIO.BCM)
-
-        # set GPIO direction (IN / OUT)
-        GPIO.setup(self.__trigger_pin, GPIO.OUT)
-        GPIO.setup(self.__echo_pin, GPIO.IN)
-
         # set Trigger to HIGH
         GPIO.output(self.__trigger_pin, True)
 
@@ -84,9 +85,9 @@ class Sonar(object):
 
         # time difference between start and arrival
         TimeElapsed = StopTime - StartTime
-        # multiply with the sonic speed (34300 cm/s)
+        # multiply with the sonic speed (343 m/s)
         # and divide by 2, because there and back
-        distance = (TimeElapsed * 34300) / 2
+        distance = (TimeElapsed * 343) / 2 
         distance = self.__saturate(distance, self.__min_range, self.__max_range)
         return distance
 
