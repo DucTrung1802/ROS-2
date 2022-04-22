@@ -42,10 +42,12 @@ class SonarNode(Node):
     def timer_callback(self):
         for i in range(len(self.array_sonar)):
             msg = Range()
-            msg.header.frame_id = "/sonar_frame_" + str(i+1)
+            msg.header.frame_id = "/sonar_frame_" + str(i + 1)
             msg.header.stamp = self.get_clock().now().to_msg()
             msg.radiation_type = self.array_sonar[i].getRadiationType()
-            msg.field_of_view = self.array_sonar[i].getFieldOfView()  # rad ~ 45 degree (according to feature of HC-SR 04)
+            msg.field_of_view = self.array_sonar[
+                i
+            ].getFieldOfView()  # rad ~ 45 degree (according to feature of HC-SR 04)
             msg.min_range = self.array_sonar[i].getMinRange()
             msg.max_range = self.array_sonar[i].getMaxRange()
             msg.range = self.array_sonar[i].getMeasureDistance()
@@ -63,15 +65,26 @@ def loop():
 
     # Configure this when add more sonar sensors
     sonar_1 = Sonar(
-        trigger_pin=23, echo_pin=24, min_range=0.04, max_range=1.5, field_of_view=0.78
+        trigger_pin=27, echo_pin=17, min_range=0.04, max_range=1.5, field_of_view=0.78
     )
     sonar_2 = Sonar(
-        trigger_pin=25, echo_pin=8, min_range=0.04, max_range=1.5, field_of_view=0.78
+        trigger_pin=10, echo_pin=9, min_range=0.04, max_range=1.5, field_of_view=0.78
+    )
+    sonar_3 = Sonar(
+        trigger_pin=5, echo_pin=6, min_range=0.04, max_range=1.5, field_of_view=0.78
+    )
+    sonar_4 = Sonar(
+        trigger_pin=13, echo_pin=19, min_range=0.04, max_range=1.5, field_of_view=0.78
+    )
+    sonar_5 = Sonar(
+        trigger_pin=23, echo_pin=24, min_range=0.04, max_range=1.5, field_of_view=0.78
     )
 
     sonar_array.append(sonar_1)
     sonar_array.append(sonar_2)
-
+    sonar_array.append(sonar_3)
+    sonar_array.append(sonar_4)
+    sonar_array.append(sonar_5)
 
     sonar_node = SonarNode(NODE_NAME, sonar_array)
 
