@@ -24,11 +24,11 @@ const uint8_t STBY = 13;
 
 
 // Config pwm parameters
-const int FREQ_PWM_1 = 2000;
+const int FREQ_PWM_1 = 1000;
 const int RESOLUTION_PWM_1 = 10; // bits (1 - 16 bits)
 const uint8_t CHANNEL_PWMA = 1;
 
-const int FREQ_PWM_2 = 2000;
+const int FREQ_PWM_2 = 1000;
 const int RESOLUTION_PWM_2 = 10; // bits (1 - 16 bits)
 const uint8_t CHANNEL_PWMB = 2;
 
@@ -72,10 +72,10 @@ bool deserializeJSON() {
 
 void drive_motors() {
   if (deserializeJSON()) {
-    pwm_frequency[0] = JSON_DOC_RECEIVE[KEY][0];
-    pwm_frequency[1] = JSON_DOC_RECEIVE[KEY][2];
-    pwm_pulse[0] = JSON_DOC_RECEIVE[KEY][1];
-    pwm_pulse[1] = JSON_DOC_RECEIVE[KEY][3];
+    pwm_frequency[0] = JSON_DOC_RECEIVE["motor_data"][0];
+    pwm_frequency[1] = JSON_DOC_RECEIVE["motor_data"][2];
+    pwm_pulse[0] = JSON_DOC_RECEIVE["motor_data"][1];
+    pwm_pulse[1] = JSON_DOC_RECEIVE["motor_data"][3];
     ledcSetup(CHANNEL_PWMA, pwm_frequency[0], RESOLUTION_PWM_1);
     ledcSetup(CHANNEL_PWMB, pwm_frequency[1], RESOLUTION_PWM_2);
     ledcWrite(CHANNEL_PWMA, pwm_pulse[0]);
@@ -173,8 +173,8 @@ void setup()
   pinMode(STBY, OUTPUT);
 
   // Setup PWM
-  //  ledcSetup(CHANNEL_PWMA, FREQ_PWM_1, RESOLUTION_PWM_1);
-  //  ledcSetup(CHANNEL_PWMB, FREQ_PWM_2, RESOLUTION_PWM_2);
+  ledcSetup(CHANNEL_PWMA, FREQ_PWM_1, RESOLUTION_PWM_1);
+  ledcSetup(CHANNEL_PWMB, FREQ_PWM_2, RESOLUTION_PWM_2);
 
   ledcAttachPin(PWMA, CHANNEL_PWMA);
   ledcAttachPin(PWMB, CHANNEL_PWMB);
