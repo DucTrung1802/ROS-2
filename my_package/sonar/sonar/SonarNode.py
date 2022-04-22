@@ -65,7 +65,7 @@ def loop():
 
     # Configure this when add more sonar sensors
     sonar_1 = Sonar(
-        trigger_pin=27, echo_pin=17, min_range=0.04, max_range=1.5, field_of_view=0.78
+        trigger_pin=17, echo_pin=27, min_range=0.04, max_range=1.5, field_of_view=0.78
     )
     sonar_2 = Sonar(
         trigger_pin=10, echo_pin=9, min_range=0.04, max_range=1.5, field_of_view=0.78
