@@ -89,7 +89,6 @@ class MotorDriver(object):
         )
         self.__lowPassFilter()
         # something with KF
-        return self.__RPM
 
     def changeCoefficientLowPassFilter(
         self, filtered_RPM_coefficient, RPM_coefficient, previous_RPM_coefficient
@@ -105,5 +104,8 @@ class MotorDriver(object):
         self.__RPM_coefficient = RPM_coefficient
         self.__previous_RPM_coefficient = previous_RPM_coefficient
 
-    def changeCoefficientKalmanFilter():
+    def changeCoefficientKalmanFilter(self):
         pass
+
+    def getRPM(self):
+        return
