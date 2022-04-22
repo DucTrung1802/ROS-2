@@ -5,6 +5,14 @@ class MotorDriver(object):
     def __init__(
         self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
     ):
+        """Motor driver class
+
+        Args:
+            diameter (float): diameter of wheel (m)
+            pulse_per_round_of_encoder (int): as name
+            pwm_frequency (int): pwm frequency
+            sample_time (float): sample time to drive motor
+        """
         self.__checkConditions(
             diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
         )
