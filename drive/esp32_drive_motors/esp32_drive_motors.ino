@@ -49,6 +49,8 @@ String serialLine = "";
 // Don't forget to change this value to match your JSON document.
 // Use arduinojson.org/v6/assistant to compute the capacity.
 StaticJsonDocument<200> JSON_DOC_RECEIVE;
+String KEY[15] = "motor_data";
+volatile int pwm_frequency[2] = {0, 0};
 volatile int pwm_pulse[2] = {0, 0};
 
 
@@ -70,8 +72,12 @@ bool deserializeJSON() {
 
 void drive_motors() {
   if (deserializeJSON()) {
-    pwm_pulse[0] = JSON_DOC_RECEIVE["pwm_pulse"][0];
-    pwm_pulse[1] = JSON_DOC_RECEIVE["pwm_pulse"][1];
+    pwm_frequency[0] = JSON_DOC_RECEIVE[KEY][0];
+    pwm_frequency[1] = JSON_DOC_RECEIVE[KEY][2];
+    pwm_pulse[0] = JSON_DOC_RECEIVE[KEY][1];
+    pwm_pulse[1] = JSON_DOC_RECEIVE[KEY][3];
+    ledcSetup(CHANNEL_PWMA, pwm_frequency[0], RESOLUTION_PWM_1);
+    ledcSetup(CHANNEL_PWMB, pwm_frequency[1], RESOLUTION_PWM_2);
     ledcWrite(CHANNEL_PWMA, pwm_pulse[0]);
     ledcWrite(CHANNEL_PWMB, pwm_pulse[1]);
     //    Serial.print("Left wheel pwm: ");
@@ -167,8 +173,8 @@ void setup()
   pinMode(STBY, OUTPUT);
 
   // Setup PWM
-  ledcSetup(CHANNEL_PWMA, FREQ_PWM_1, RESOLUTION_PWM_1);
-  ledcSetup(CHANNEL_PWMB, FREQ_PWM_2, RESOLUTION_PWM_2);
+  //  ledcSetup(CHANNEL_PWMA, FREQ_PWM_1, RESOLUTION_PWM_1);
+  //  ledcSetup(CHANNEL_PWMB, FREQ_PWM_2, RESOLUTION_PWM_2);
 
   ledcAttachPin(PWMA, CHANNEL_PWMA);
   ledcAttachPin(PWMB, CHANNEL_PWMB);
