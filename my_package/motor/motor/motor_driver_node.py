@@ -27,8 +27,12 @@ PUBLISH_FREQUENCY = 100
 NODE_NAME = "motor_driver"
 
 # Motor parameters
-MOTOR_1 = MotorDriver()
-MOTOR_2 = MotorDriver()
+MOTOR_1 = MotorDriver(
+    diameter=0.09, pulse_per_round_of_encoder=480, pwm_frequency=1000, sample_time=0.05
+)
+MOTOR_2 = MotorDriver(
+    diameter=0.09, pulse_per_round_of_encoder=480, pwm_frequency=1000, sample_time=0.05
+)
 
 # =================================================
 
@@ -108,7 +112,8 @@ def driveMotors(msg):
     # data = {"pwm_pulse": [msg.linear.x * 1023 / 0.6, msg.linear.x * 1023 / 0.6]}
     # data = json.dumps(data)
     # MCUSerialObject.write(formSerialData(data))
-    pass
+    print(MOTOR_1.getRPM())
+    print(MOTOR_2.getRPM())
 
 
 def getMCUSerial():
@@ -240,7 +245,8 @@ def loop():
             rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:
-        MCUSerialObject.write(formSerialData("{pwm_pulse:[0,0]}"))
+        # JSON
+        MCUSerialObject.write(formSerialData("{motor_data:[1000,0,1000,0]}"))
         MCUSerialObject.close()
 
 
