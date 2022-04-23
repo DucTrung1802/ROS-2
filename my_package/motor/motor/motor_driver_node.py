@@ -112,8 +112,8 @@ def driveMotors(msg):
     # data = {"pwm_pulse": [msg.linear.x * 1023 / 0.6, msg.linear.x * 1023 / 0.6]}
     # data = json.dumps(data)
     # MCUSerialObject.write(formSerialData(data))
-    print(MOTOR_1.getRPM())
-    print(MOTOR_2.getRPM())
+    print("RPM motor 1: " + str(MOTOR_1.getRPM(TICK_1)))
+    print("RPM motor 2: " + str(MOTOR_2.getRPM(TICK_2)))
 
 
 def getMCUSerial():
@@ -197,7 +197,7 @@ def updateStorePosFromSerial():
     STORE_TICK_1 = dictionaryData["left_tick"]
     STORE_TICK_2 = dictionaryData["right_tick"]
 
-
+# 
 def updatePosFromStorePos():
     global TICK_1, TICK_2
     TICK_1 = STORE_TICK_1
@@ -227,6 +227,7 @@ def loop():
     rclpy.init()
 
     motor_driver_node = MotorDriverNode(NODE_NAME)
+    MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
 
     try:
         while True:

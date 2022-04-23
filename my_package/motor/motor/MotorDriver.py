@@ -88,6 +88,7 @@ class MotorDriver(object):
             self.__encoder_count_per_second / self.__pulse_per_round_of_encoder * 60.0
         )
         self.__lowPassFilter()
+        self.__previous_tick = current_tick
         # something with KF
 
     def changeCoefficientLowPassFilter(
@@ -107,5 +108,7 @@ class MotorDriver(object):
     def changeCoefficientKalmanFilter(self):
         pass
 
-    def getRPM(self):
-        return
+    def getRPM(self, current_tick):
+        self.__calculateRPM(current_tick)
+        return self.__RPM
+
