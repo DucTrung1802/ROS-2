@@ -13,6 +13,7 @@ from std_msgs.msg import Int32
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 from motor.MotorDriver import MotorDriver
+from motor.DataRecoder import DataRecoder
 
 
 # =========== Configurable parameters =============
@@ -34,6 +35,9 @@ MOTOR_1 = MotorDriver(
 MOTOR_2 = MotorDriver(
     diameter=0.09, pulse_per_round_of_encoder=480, pwm_frequency=1000, sample_time=0.05
 )
+
+# DataRecorder parameters
+DATA_AMOUNT = 700
 
 # =================================================
 
@@ -247,6 +251,10 @@ def loop():
     rclpy.init()
 
     motor_driver_node = MotorDriverNode(NODE_NAME)
+
+    MOTOR_1.resetDataCount()
+    MOTOR_2.resetDataCount()
+
     # MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
     try:
         while True:
@@ -265,6 +273,12 @@ def loop():
             MOTOR_1.calculateRPM(TICK_1)
             MOTOR_2.calculateRPM(TICK_2)
             rclpy.spin_once(motor_driver_node)
+
+            if (
+                MOTOR_1.getDataCount() > DATA_AMOUNT
+                and MOTOR_2.getDataCount() > DATA_AMOUNT
+            ):
+                break
 
     except KeyboardInterrupt:
         # JSON

@@ -1,10 +1,3 @@
-import os
-import time
-
-clear = lambda: os.system("clear")
-
-print("hello")
-time.sleep(2)
-
-clear()
-
+a = 1
+a += 1
+print(a)
