@@ -3,6 +3,7 @@
 import subprocess
 import time
 from click import prompt
+from openpyxl import Workbook
 import serial
 import re
 import json
@@ -37,6 +38,7 @@ MOTOR_2 = MotorDriver(
 )
 
 # DataRecorder parameters
+WORKBOOK = DataRecoder("Motor_Data")
 DATA_AMOUNT = 700
 
 # =================================================
@@ -254,6 +256,7 @@ def loop():
 
     MOTOR_1.resetDataCount()
     MOTOR_2.resetDataCount()
+    WORKBOOK.configure(1023, 1000, 0.05)
 
     # Record data
     index = 0
@@ -279,16 +282,19 @@ def loop():
 
             if index != MOTOR_1.getDataCount():
                 index += 1
+                WORKBOOK.writeData(index + 5, 1, MOTOR_1.getRPM())
+                WORKBOOK.writeData(index + 5, 3, MOTOR_2.getRPM())
 
     except KeyboardInterrupt:
         # JSON
         MCUSerialObject.write(formSerialData("{motor_data:[1000,0,1000,0]}"))
         MCUSerialObject.close()
+        WORKBOOK.saveWorkBook()
 
     finally:
         MCUSerialObject.write(formSerialData("{motor_data:[1000,0,1000,0]}"))
         MCUSerialObject.close()
-
+        WORKBOOK.saveWorkBook()
 
 
 def main():
