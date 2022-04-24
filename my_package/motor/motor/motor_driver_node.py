@@ -33,9 +33,13 @@ NODE_NAME = "motor_driver"
 MOTOR_1 = MotorDriver(
     diameter=0.09, pulse_per_round_of_encoder=480, pwm_frequency=1000, sample_time=0.05
 )
+MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
+
 MOTOR_2 = MotorDriver(
     diameter=0.09, pulse_per_round_of_encoder=480, pwm_frequency=1000, sample_time=0.05
 )
+MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
+
 
 # DataRecorder parameters
 WORKBOOK = DataRecoder("Motor_Data")
