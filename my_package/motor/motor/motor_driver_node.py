@@ -108,13 +108,13 @@ def driveMotors(msg):
     # Kalman Filter
     # PID
     # controlMotors()
-
-    # data = {"pwm_pulse": [msg.linear.x * 1023 / 0.6, msg.linear.x * 1023 / 0.6]}
-    # data = json.dumps(data)
-    # MCUSerialObject.write(formSerialData(data))
-    print("RPM motor 1: " + str(MOTOR_1.getRPM(TICK_1)))
-    print("RPM motor 2: " + str(MOTOR_2.getRPM(TICK_2)))
-
+    # MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
+    pwm_freq_1 = MOTOR_1.getPWMFrequency()
+    pwm_freq_2 = MOTOR_2.getPWMFrequency()
+    data = {"motor_data": [pwm_freq_1, msg.linear.x * 1023 / 0.6, pwm_freq_2, msg.linear.x * 1023 / 0.6]}
+    data = json.dumps(data)
+    MCUSerialObject.write(formSerialData(data))
+    pass
 
 def getMCUSerial():
     global foundMCU, foundLidar
@@ -227,8 +227,7 @@ def loop():
     rclpy.init()
 
     motor_driver_node = MotorDriverNode(NODE_NAME)
-    MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
-
+    # MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
     try:
         while True:
             # manuallyWrite()
@@ -241,6 +240,8 @@ def loop():
                 motor_driver_node.setNeedPublish()
                 rclpy.spin_once(motor_driver_node)
                 motor_driver_node.resetNeedPublish()
+                print("RPM motor 1: " + str(MOTOR_1.getRPM(TICK_1)))
+                print("RPM motor 2: " + str(MOTOR_2.getRPM(TICK_2)))
                 publish_timer = time.time()
 
             rclpy.spin_once(motor_driver_node)
