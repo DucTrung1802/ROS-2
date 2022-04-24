@@ -255,9 +255,12 @@ def loop():
     MOTOR_1.resetDataCount()
     MOTOR_2.resetDataCount()
 
+    # Record data
+    index = 0
+
     # MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
     try:
-        while True:
+        while index < DATA_AMOUNT:
             # manuallyWrite()
             if time.time() - receiving_timer >= RECEIVING_PERIOD:
                 updateStorePosFromSerial()
@@ -274,16 +277,18 @@ def loop():
             MOTOR_2.calculateRPM(TICK_2)
             rclpy.spin_once(motor_driver_node)
 
-            if (
-                MOTOR_1.getDataCount() > DATA_AMOUNT
-                and MOTOR_2.getDataCount() > DATA_AMOUNT
-            ):
-                break
+            if index != MOTOR_1.getDataCount():
+                index += 1
 
     except KeyboardInterrupt:
         # JSON
         MCUSerialObject.write(formSerialData("{motor_data:[1000,0,1000,0]}"))
         MCUSerialObject.close()
+
+    finally:
+        MCUSerialObject.write(formSerialData("{motor_data:[1000,0,1000,0]}"))
+        MCUSerialObject.close()
+
 
 
 def main():
