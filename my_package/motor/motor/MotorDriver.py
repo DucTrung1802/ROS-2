@@ -83,7 +83,7 @@ class MotorDriver(object):
         self.__previous_RPM = self.__RPM
 
     # Calculate RPM of Motor
-    def __calculateRPM(self, current_tick):
+    def calculateRPM(self, current_tick):
         if time.time() - self.__timer >= self.__sample_time:
             self.__encoder_count_per_second = (
                 abs(current_tick - self.__previous_tick) / self.__sample_time
@@ -114,8 +114,7 @@ class MotorDriver(object):
     def changeCoefficientKalmanFilter(self):
         pass
 
-    def getRPM(self, current_tick):
-        self.__calculateRPM(current_tick)
+    def getRPM(self):
         return self.__lowPassFilteredRPM
 
     def getPWMFrequency(self):
