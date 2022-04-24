@@ -112,3 +112,5 @@ class MotorDriver(object):
         self.__calculateRPM(current_tick)
         return self.__RPM
 
+    def getPWMFrequency(self):
+        return self.__pwm_frequency
