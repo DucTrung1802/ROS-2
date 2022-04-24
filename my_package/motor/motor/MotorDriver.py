@@ -57,8 +57,9 @@ class MotorDriver(object):
         self.__timer = 0
         self.__data_count = 0
 
-        self.__lowPassFilteredRPM = 0.0
         self.__RPM = 0.0
+        self.__lowPassFilteredRPM = 0.0
+        self.__KalmanFilteredRPM = 0.0
 
         self.__previous_tick = 0
         self.__previous_RPM = 0
@@ -91,11 +92,15 @@ class MotorDriver(object):
                 * 60.0
             )
             self.__lowPassFilter()
-            self.__previous_tick = current_tick
+
             # something with KF
+            self.__KF.filter(self.__lowPassFilteredRPM)
+            self.__KalmanFilteredRPM = self.__KF.getCurrentStateEstimate()
+
+            self.__previous_tick = current_tick
 
             self.__incrementDataCount()
-            
+
             self.__timer = time.time()
 
     def changeCoefficientLowPassFilter(
@@ -116,7 +121,7 @@ class MotorDriver(object):
         pass
 
     def getRPM(self):
-        return self.__lowPassFilteredRPM
+        return self.__KalmanFilteredRPM
 
     def getPWMFrequency(self):
         return self.__pwm_frequency
@@ -126,6 +131,9 @@ class MotorDriver(object):
 
     def getDataCount(self):
         return self.__data_count
-    
+
     def __incrementDataCount(self):
         self.__data_count += 1
+
+    def setupValuesKF(self, X, P, R, Q):
+        self.__KF.setupValues(X, P, R, Q)
