@@ -1,6 +1,7 @@
 from motor.KalmanFilter import Kalman_Filter
 import time
 
+
 class MotorDriver(object):
     def __init__(
         self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
@@ -16,12 +17,7 @@ class MotorDriver(object):
         self.__checkConditions(
             diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
         )
-
         self.__initializeParameters()
-
-        # Initialize Kalman Filter
-
-        # Initialize PID controller
 
     def __checkConditions(
         self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
@@ -59,6 +55,7 @@ class MotorDriver(object):
     def __initializeParameters(self):
         """Initialize private parameters."""
         self.__timer = 0
+        self.__data_count = 0
 
         self.__lowPassFilteredRPM = 0.0
         self.__RPM = 0.0
@@ -89,12 +86,16 @@ class MotorDriver(object):
                 abs(current_tick - self.__previous_tick) / self.__sample_time
             )
             self.__RPM = (
-                self.__encoder_count_per_second / self.__pulse_per_round_of_encoder * 60.0
+                self.__encoder_count_per_second
+                / self.__pulse_per_round_of_encoder
+                * 60.0
             )
             self.__lowPassFilter()
             self.__previous_tick = current_tick
             # something with KF
 
+            self.__incrementDataCount()
+            
             self.__timer = time.time()
 
     def changeCoefficientLowPassFilter(
@@ -119,3 +120,12 @@ class MotorDriver(object):
 
     def getPWMFrequency(self):
         return self.__pwm_frequency
+
+    def resetDataCount(self):
+        self.__data_count = 0
+
+    def getDataCount(self):
+        return self.__data_count
+    
+    def __incrementDataCount(self):
+        self.__data_count += 1

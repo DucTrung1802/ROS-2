@@ -3,6 +3,7 @@
 import subprocess
 import time
 from click import prompt
+from openpyxl import Workbook
 import serial
 import re
 import json
@@ -13,6 +14,7 @@ from std_msgs.msg import Int32
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 from motor.MotorDriver import MotorDriver
+from motor.DataRecoder import DataRecoder
 
 
 # =========== Configurable parameters =============
@@ -34,6 +36,10 @@ MOTOR_1 = MotorDriver(
 MOTOR_2 = MotorDriver(
     diameter=0.09, pulse_per_round_of_encoder=480, pwm_frequency=1000, sample_time=0.05
 )
+
+# DataRecorder parameters
+WORKBOOK = DataRecoder("Motor_Data")
+DATA_AMOUNT = 500
 
 # =================================================
 
@@ -247,9 +253,17 @@ def loop():
     rclpy.init()
 
     motor_driver_node = MotorDriverNode(NODE_NAME)
-    # MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
+
+    MOTOR_1.resetDataCount()
+    MOTOR_2.resetDataCount()
+    WORKBOOK.configure(1023, 1000, 0.05)
+
+    # Record data
+    index = 0
+
+    MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
     try:
-        while True:
+        while index < DATA_AMOUNT:
             # manuallyWrite()
             if time.time() - receiving_timer >= RECEIVING_PERIOD:
                 updateStorePosFromSerial()
@@ -266,10 +280,22 @@ def loop():
             MOTOR_2.calculateRPM(TICK_2)
             rclpy.spin_once(motor_driver_node)
 
+            if index != MOTOR_1.getDataCount():
+                print(str(index) + "/" + str(DATA_AMOUNT))
+                index += 1
+                WORKBOOK.writeData(index + 5, 1, MOTOR_1.getRPM())
+                WORKBOOK.writeData(index + 5, 3, MOTOR_2.getRPM())
+
     except KeyboardInterrupt:
         # JSON
         MCUSerialObject.write(formSerialData("{motor_data:[1000,0,1000,0]}"))
         MCUSerialObject.close()
+        WORKBOOK.saveWorkBook()
+
+    finally:
+        MCUSerialObject.write(formSerialData("{motor_data:[1000,0,1000,0]}"))
+        MCUSerialObject.close()
+        WORKBOOK.saveWorkBook()
 
 
 def main():

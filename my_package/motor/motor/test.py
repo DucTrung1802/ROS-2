@@ -1,10 +1,6 @@
+from pathlib import Path
 import os
-import time
 
-clear = lambda: os.system("clear")
+# print(os.path.join(self.__folder_name, self.__name))
 
-print("hello")
-time.sleep(2)
-
-clear()
-
+print(Path.cwd())  # /home/skovorodkin/stack
