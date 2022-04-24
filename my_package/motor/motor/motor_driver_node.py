@@ -39,7 +39,7 @@ MOTOR_2 = MotorDriver(
 
 # DataRecorder parameters
 WORKBOOK = DataRecoder("Motor_Data")
-DATA_AMOUNT = 700
+DATA_AMOUNT = 500
 
 # =================================================
 
@@ -261,7 +261,7 @@ def loop():
     # Record data
     index = 0
 
-    # MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
+    MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
     try:
         while index < DATA_AMOUNT:
             # manuallyWrite()
@@ -281,6 +281,7 @@ def loop():
             rclpy.spin_once(motor_driver_node)
 
             if index != MOTOR_1.getDataCount():
+                print(str(index) + "/" + str(DATA_AMOUNT))
                 index += 1
                 WORKBOOK.writeData(index + 5, 1, MOTOR_1.getRPM())
                 WORKBOOK.writeData(index + 5, 3, MOTOR_2.getRPM())
