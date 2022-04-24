@@ -60,8 +60,8 @@ class MotorDriver(object):
         """Initialize private parameters."""
         self.__timer = 0
 
-        self.__lowPassFilteredRPM = 0
-        self.__RPM = 0
+        self.__lowPassFilteredRPM = 0.0
+        self.__RPM = 0.0
 
         self.__previous_tick = 0
         self.__previous_RPM = 0

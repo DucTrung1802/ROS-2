@@ -106,8 +106,8 @@ class MotorDriverNode(Node):
             right_RPM = Float32()
             left_RPM.data = MOTOR_1.getRPM()
             right_RPM.data = MOTOR_2.getRPM()
-            self.left_ticks_pub.publish(str(left_RPM.data))
-            self.right_ticks_pub.publish(str(right_RPM.data))
+            self.left_RPM_pub.publish(left_RPM)
+            self.right_RPM_pub.publish(right_RPM)
 
             # self.get_logger().info('Publishing: "%s"' % msg.data)
 
