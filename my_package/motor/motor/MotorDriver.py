@@ -1,5 +1,5 @@
 from motor.KalmanFilter import Kalman_Filter
-
+import time
 
 class MotorDriver(object):
     def __init__(
@@ -58,6 +58,9 @@ class MotorDriver(object):
 
     def __initializeParameters(self):
         """Initialize private parameters."""
+        self.__timer = 0
+
+        self.__lowPassFilteredRPM = 0
         self.__RPM = 0
 
         self.__previous_tick = 0
@@ -72,8 +75,8 @@ class MotorDriver(object):
     # Low pass filter (smaller than 25Hz pass)
     def __lowPassFilter(self):
         """Filter high-frequency interference signal of the encoder."""
-        self.__RPM = (
-            self.__filtered_RPM_coefficient * self.__RPM
+        self.__lowPassFilteredRPM = (
+            self.__filtered_RPM_coefficient * self.__lowPassFilteredRPM
             + self.__RPM_coefficient * self.__RPM
             + self.__previous_RPM_coefficient * self.__previous_RPM
         )
@@ -81,15 +84,18 @@ class MotorDriver(object):
 
     # Calculate RPM of Motor
     def __calculateRPM(self, current_tick):
-        self.__encoder_count_per_second = (
-            abs(current_tick - self.__previous_tick) / self.__sample_time
-        )
-        self.__RPM = (
-            self.__encoder_count_per_second / self.__pulse_per_round_of_encoder * 60.0
-        )
-        self.__lowPassFilter()
-        self.__previous_tick = current_tick
-        # something with KF
+        if time.time() - self.__timer >= self.__sample_time:
+            self.__encoder_count_per_second = (
+                abs(current_tick - self.__previous_tick) / self.__sample_time
+            )
+            self.__RPM = (
+                self.__encoder_count_per_second / self.__pulse_per_round_of_encoder * 60.0
+            )
+            self.__lowPassFilter()
+            self.__previous_tick = current_tick
+            # something with KF
+
+            self.__timer = time.time()
 
     def changeCoefficientLowPassFilter(
         self, filtered_RPM_coefficient, RPM_coefficient, previous_RPM_coefficient
@@ -110,7 +116,7 @@ class MotorDriver(object):
 
     def getRPM(self, current_tick):
         self.__calculateRPM(current_tick)
-        return self.__RPM
+        return self.__lowPassFilteredRPM
 
     def getPWMFrequency(self):
         return self.__pwm_frequency

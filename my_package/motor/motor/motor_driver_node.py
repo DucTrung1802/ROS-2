@@ -240,10 +240,10 @@ def loop():
                 motor_driver_node.setNeedPublish()
                 rclpy.spin_once(motor_driver_node)
                 motor_driver_node.resetNeedPublish()
-                print("RPM motor 1: " + str(MOTOR_1.getRPM(TICK_1)))
-                print("RPM motor 2: " + str(MOTOR_2.getRPM(TICK_2)))
                 publish_timer = time.time()
 
+            print("RPM motor 1: " + str(MOTOR_1.getRPM(TICK_1)))
+            print("RPM motor 2: " + str(MOTOR_2.getRPM(TICK_2)))
             rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:
