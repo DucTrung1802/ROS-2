@@ -10,6 +10,7 @@ import json
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32
+from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 from motor.MotorDriver import MotorDriver
 
@@ -77,6 +78,8 @@ class MotorDriverNode(Node):
         self.__need_publish = True
         self.left_ticks_pub = self.create_publisher(Int32, "left_ticks", 1)
         self.right_ticks_pub = self.create_publisher(Int32, "right_ticks", 1)
+        self.left_RPM_pub = self.create_publisher(Float32, "left_RPM", 1)
+        self.right_RPM_pub = self.create_publisher(Float32, "right_RPM", 1)
         self.timer = self.create_timer(0, self.publisherCallback)
 
         self.controller_sub = self.create_subscription(
@@ -92,12 +95,20 @@ class MotorDriverNode(Node):
 
     def publisherCallback(self):
         if self.__need_publish:
-            left_ticks = Int32()
-            right_ticks = Int32()
-            left_ticks.data = TICK_1
-            right_ticks.data = TICK_2
-            self.left_ticks_pub.publish(left_ticks)
-            self.right_ticks_pub.publish(right_ticks)
+            # left_ticks = Int32()
+            # right_ticks = Int32()
+            # left_ticks.data = TICK_1
+            # right_ticks.data = TICK_2
+            # self.left_ticks_pub.publish(left_ticks)
+            # self.right_ticks_pub.publish(right_ticks)
+
+            left_RPM = Float32()
+            right_RPM = Float32()
+            left_RPM.data = MOTOR_1.getRPM()
+            right_RPM.data = MOTOR_2.getRPM()
+            self.left_ticks_pub.publish(str(left_RPM.data))
+            self.right_ticks_pub.publish(str(right_RPM.data))
+
             # self.get_logger().info('Publishing: "%s"' % msg.data)
 
     def subscriberCallback(self, msg):
@@ -111,10 +122,18 @@ def driveMotors(msg):
     # MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
     pwm_freq_1 = MOTOR_1.getPWMFrequency()
     pwm_freq_2 = MOTOR_2.getPWMFrequency()
-    data = {"motor_data": [pwm_freq_1, msg.linear.x * 1023 / 0.6, pwm_freq_2, msg.linear.x * 1023 / 0.6]}
+    data = {
+        "motor_data": [
+            pwm_freq_1,
+            msg.linear.x * 1023 / 0.6,
+            pwm_freq_2,
+            msg.linear.x * 1023 / 0.6,
+        ]
+    }
     data = json.dumps(data)
     MCUSerialObject.write(formSerialData(data))
     pass
+
 
 def getMCUSerial():
     global foundMCU, foundLidar
@@ -197,7 +216,8 @@ def updateStorePosFromSerial():
     STORE_TICK_1 = dictionaryData["left_tick"]
     STORE_TICK_2 = dictionaryData["right_tick"]
 
-# 
+
+#
 def updatePosFromStorePos():
     global TICK_1, TICK_2
     TICK_1 = STORE_TICK_1
@@ -242,8 +262,8 @@ def loop():
                 motor_driver_node.resetNeedPublish()
                 publish_timer = time.time()
 
-            print("RPM motor 1: " + str(MOTOR_1.getRPM(TICK_1)))
-            print("RPM motor 2: " + str(MOTOR_2.getRPM(TICK_2)))
+            MOTOR_1.calculateRPM(TICK_1)
+            MOTOR_2.calculateRPM(TICK_2)
             rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:
