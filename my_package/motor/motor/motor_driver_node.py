@@ -117,8 +117,8 @@ class MotorDriverNode(Node):
 
             left_RPM = Float32()
             right_RPM = Float32()
-            left_RPM.data = MOTOR_1.getRPM()
-            right_RPM.data = MOTOR_2.getRPM()
+            left_RPM.data = MOTOR_1.getKalmanFilterRPM()
+            right_RPM.data = MOTOR_2.getKalmanFilterRPM()
             self.left_RPM_pub.publish(left_RPM)
             self.right_RPM_pub.publish(right_RPM)
 
