@@ -43,7 +43,7 @@ MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
 
 # Test data
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 500
+TEST_PWM = 700
 
 # DataRecorder parameters
 WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, MOTOR_1.getSampleTime())
@@ -271,12 +271,14 @@ def loop():
 
     # Record data
     index = 0
+    old_pwm_value = 0
+    pwm_value = 0
 
     # Test
-    test_dict = {
-        "motor_data": [TEST_PWM_FREQUENCY, TEST_PWM, TEST_PWM_FREQUENCY, TEST_PWM]
-    }
-    MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
+    # test_dict = {
+    #     "motor_data": [TEST_PWM_FREQUENCY, TEST_PWM, TEST_PWM_FREQUENCY, TEST_PWM]
+    # }
+    # MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
 
     try:
         while index <= DATA_AMOUNT:
@@ -292,13 +294,7 @@ def loop():
                 motor_driver_node.resetNeedPublish()
                 publish_timer = time.time()
 
-            # Vary PWM
-            if 0 < index <= DATA_AMOUNT / 3:
-                varyPWM(1023)
-            elif DATA_AMOUNT / 3 < index <= DATA_AMOUNT * 2 / 3:
-                varyPWM(714)
-            else:
-                varyPWM(510)
+            # varyPWM(1023)
 
             MOTOR_1.calculateRPM(TICK_1)
             MOTOR_2.calculateRPM(TICK_2)
@@ -307,6 +303,22 @@ def loop():
             if index != MOTOR_1.getDataCount():
                 print(str(index) + "/" + str(DATA_AMOUNT))
                 index += 1
+
+                # Vary PWM
+                if 0 < index <= DATA_AMOUNT / 3:
+                    pwm_value = 1023
+                elif DATA_AMOUNT / 3 < index <= DATA_AMOUNT * 2 / 3:
+                    pwm_value = 714
+                else:
+                    pwm_value = 510
+
+                if pwm_value != old_pwm_value:
+                    MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
+                    MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
+                    old_pwm_value = index
+
+                varyPWM(pwm_value)
+
                 WORKBOOK.writeData(index + 1, 1, MOTOR_1.getLowPassRPM())
                 WORKBOOK.writeData(index + 1, 2, MOTOR_1.getKalmanFilterRPM())
                 WORKBOOK.writeData(index + 1, 4, MOTOR_2.getLowPassRPM())
