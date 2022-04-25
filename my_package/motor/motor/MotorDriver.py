@@ -126,11 +126,14 @@ class MotorDriver(object):
     def getPWMFrequency(self):
         return self.__pwm_frequency
 
-    def resetDataCount(self):
-        self.__data_count = 0
-
     def getDataCount(self):
         return self.__data_count
+
+    def getSampleTime(self):
+        return self.__sample_time
+
+    def resetDataCount(self):
+        self.__data_count = 0
 
     def __incrementDataCount(self):
         self.__data_count += 1

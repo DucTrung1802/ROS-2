@@ -41,10 +41,13 @@ MOTOR_2 = MotorDriver(
 MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
 
 
-# DataRecorder parameters
-WORKBOOK = DataRecoder("Motor_Data")
-DATA_AMOUNT = 500
+# Test data
+TEST_PWM_FREQUENCY = 1000
+TEST_PWM = 1023
 
+# DataRecorder parameters
+WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, MOTOR_1.getSampleTime())
+DATA_AMOUNT = 500
 # =================================================
 
 # Non-configure parameters
@@ -260,12 +263,16 @@ def loop():
 
     MOTOR_1.resetDataCount()
     MOTOR_2.resetDataCount()
-    WORKBOOK.configure(1023, 1000, 0.05)
 
     # Record data
     index = 0
 
-    MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
+    # Test
+    test_dict = {
+        "motor_data": [TEST_PWM_FREQUENCY, TEST_PWM, TEST_PWM_FREQUENCY, TEST_PWM]
+    }
+    MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
+
     try:
         while index < DATA_AMOUNT:
             # manuallyWrite()
