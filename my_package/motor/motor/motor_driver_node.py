@@ -43,7 +43,7 @@ MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
 
 # Test data
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 1023
+TEST_PWM = 500
 
 # DataRecorder parameters
 WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, MOTOR_1.getSampleTime())
@@ -250,6 +250,11 @@ def formSerialData(stringData):
     return data
 
 
+def varyPWM(PWM):
+    test_dict = {"motor_data": [TEST_PWM_FREQUENCY, PWM, TEST_PWM_FREQUENCY, PWM]}
+    MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
+
+
 def setup():
     checkConditions()
     initializeSerial()
@@ -274,7 +279,7 @@ def loop():
     MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
 
     try:
-        while index < DATA_AMOUNT:
+        while index <= DATA_AMOUNT:
             # manuallyWrite()
             if time.time() - receiving_timer >= RECEIVING_PERIOD:
                 updateStorePosFromSerial()
@@ -287,6 +292,14 @@ def loop():
                 motor_driver_node.resetNeedPublish()
                 publish_timer = time.time()
 
+            # Vary PWM
+            if 0 < index <= DATA_AMOUNT / 3:
+                varyPWM(1023)
+            elif DATA_AMOUNT / 3 < index <= DATA_AMOUNT * 2 / 3:
+                varyPWM(714)
+            else:
+                varyPWM(510)
+
             MOTOR_1.calculateRPM(TICK_1)
             MOTOR_2.calculateRPM(TICK_2)
             rclpy.spin_once(motor_driver_node)
@@ -294,8 +307,10 @@ def loop():
             if index != MOTOR_1.getDataCount():
                 print(str(index) + "/" + str(DATA_AMOUNT))
                 index += 1
-                WORKBOOK.writeData(index + 5, 1, MOTOR_1.getRPM())
-                WORKBOOK.writeData(index + 5, 3, MOTOR_2.getRPM())
+                WORKBOOK.writeData(index + 1, 1, MOTOR_1.getLowPassRPM())
+                WORKBOOK.writeData(index + 1, 2, MOTOR_1.getKalmanFilterRPM())
+                WORKBOOK.writeData(index + 1, 4, MOTOR_2.getLowPassRPM())
+                WORKBOOK.writeData(index + 1, 5, MOTOR_2.getKalmanFilterRPM())
 
     except KeyboardInterrupt:
         # JSON

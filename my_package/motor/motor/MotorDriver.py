@@ -93,7 +93,7 @@ class MotorDriver(object):
             )
             self.__lowPassFilter()
 
-            # something with KF
+            # Kalman Filter
             self.__KF.filter(self.__lowPassFilteredRPM)
             self.__KalmanFilteredRPM = self.__KF.getCurrentStateEstimate()
 
@@ -120,7 +120,10 @@ class MotorDriver(object):
     def changeCoefficientKalmanFilter(self):
         pass
 
-    def getRPM(self):
+    def getLowPassRPM(self):
+        return self.__lowPassFilteredRPM
+
+    def getKalmanFilterRPM(self):
         return self.__KalmanFilteredRPM
 
     def getPWMFrequency(self):
