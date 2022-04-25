@@ -315,7 +315,8 @@ def loop():
                 if pwm_value != old_pwm_value:
                     MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
                     MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
-                    old_pwm_value = index
+                    old_pwm_value = pwm_value
+                    print("change")
 
                 varyPWM(pwm_value)
 
