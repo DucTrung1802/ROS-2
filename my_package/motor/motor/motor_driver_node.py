@@ -42,12 +42,14 @@ MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
 
 
 # Test data
+DIRECTION_LEFT = 1
+DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 700
+TEST_PWM = 0
 
 # DataRecorder parameters
 WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, MOTOR_1.getSampleTime())
-DATA_AMOUNT = 500
+DATA_AMOUNT = 300
 # =================================================
 
 # Non-configure parameters
@@ -251,7 +253,7 @@ def formSerialData(stringData):
 
 
 def varyPWM(PWM):
-    test_dict = {"motor_data": [TEST_PWM_FREQUENCY, PWM, TEST_PWM_FREQUENCY, PWM]}
+    test_dict = {"motor_data": [DIRECTION_LEFT, TEST_PWM_FREQUENCY, PWM, DIRECTION_RIGHT, TEST_PWM_FREQUENCY, PWM]}
     MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
 
 
@@ -272,7 +274,7 @@ def loop():
     # Record data
     index = 0
     old_pwm_value = 0
-    pwm_value = 0
+    pwm_value = 1023
 
     # Test
     # test_dict = {
@@ -305,12 +307,12 @@ def loop():
                 index += 1
 
                 # Vary PWM
-                if 0 < index <= DATA_AMOUNT / 3:
-                    pwm_value = 1023
-                elif DATA_AMOUNT / 3 < index <= DATA_AMOUNT * 2 / 3:
-                    pwm_value = 714
-                else:
-                    pwm_value = 510
+                # if 0 < index <= DATA_AMOUNT / 3:
+                #     pwm_value = 1023
+                # elif DATA_AMOUNT / 3 < index <= DATA_AMOUNT * 2 / 3:
+                #     pwm_value = 714
+                # else:
+                #     pwm_value = 510
 
                 if pwm_value != old_pwm_value:
                     MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
@@ -332,7 +334,7 @@ def loop():
         WORKBOOK.saveWorkBook()
 
     finally:
-        MCUSerialObject.write(formSerialData("{motor_data:[1000,0,1000,0]}"))
+        MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 
