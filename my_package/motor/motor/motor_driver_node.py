@@ -57,6 +57,7 @@ DATA_AMOUNT = 120
 # Node parameters
 receiving_timer = time.time()
 publish_timer = time.time()
+previous_linear_velocity = 0
 RECEIVING_PERIOD = 1
 """ The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided\
     callback function will be called. For no delay, set it equal ZERO. """
@@ -132,6 +133,7 @@ class MotorDriverNode(Node):
 
 
 def driveMotors(msg):
+    global previous_linear_velocity
     # Kalman Filter
     # PID
     # controlMotors()
@@ -143,6 +145,10 @@ def driveMotors(msg):
         direction = -1
     else:
         direction = 0
+
+    if msg.linear.x != previous_linear_velocity:
+        MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
+        MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
 
     pwm_freq_1 = MOTOR_1.getPWMFrequency()
     pwm_freq_2 = MOTOR_2.getPWMFrequency()
@@ -158,7 +164,8 @@ def driveMotors(msg):
     }
     data = json.dumps(data)
     MCUSerialObject.write(formSerialData(data))
-    pass
+
+    previous_linear_velocity = msg.linear.x
 
 
 def getMCUSerial():
