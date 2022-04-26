@@ -42,14 +42,15 @@ MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
 
 
 # Test data
+DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 0
+TEST_PWM = 510
 
 # DataRecorder parameters
 WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, MOTOR_1.getSampleTime())
-DATA_AMOUNT = 300
+DATA_AMOUNT = 120
 # =================================================
 
 # Non-configure parameters
@@ -271,65 +272,78 @@ def loop():
     MOTOR_1.resetDataCount()
     MOTOR_2.resetDataCount()
 
-    # Record data
-    index = 0
-    old_pwm_value = 0
-    pwm_value = 1023
-
-    # Test
-    # test_dict = {
-    #     "motor_data": [TEST_PWM_FREQUENCY, TEST_PWM, TEST_PWM_FREQUENCY, TEST_PWM]
-    # }
-    # MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
-
     try:
-        while index <= DATA_AMOUNT:
-            # manuallyWrite()
-            if time.time() - receiving_timer >= RECEIVING_PERIOD:
-                updateStorePosFromSerial()
-                receiving_timer = time.time()
+        if (DATA_RECORDING):
+            index = 0
+            old_pwm_value = 0
+            pwm_value = 714
 
-            if time.time() - publish_timer >= PUBLISH_PERIOD:
-                updatePosFromStorePos()
-                motor_driver_node.setNeedPublish()
+            while index <= DATA_AMOUNT:
+
+                # varyPWM(1023)
+
+                if time.time() - receiving_timer >= RECEIVING_PERIOD:
+                    updateStorePosFromSerial()
+                    receiving_timer = time.time()
+
+                if time.time() - publish_timer >= PUBLISH_PERIOD:
+                    updatePosFromStorePos()
+                    motor_driver_node.setNeedPublish()
+                    rclpy.spin_once(motor_driver_node)
+                    motor_driver_node.resetNeedPublish()
+                    publish_timer = time.time()
+
+                MOTOR_1.calculateRPM(TICK_1)
+                MOTOR_2.calculateRPM(TICK_2)
                 rclpy.spin_once(motor_driver_node)
-                motor_driver_node.resetNeedPublish()
-                publish_timer = time.time()
 
-            # varyPWM(1023)
+                if index != MOTOR_1.getDataCount():
+                    print(str(index) + "/" + str(DATA_AMOUNT))
+                    index += 1
 
-            MOTOR_1.calculateRPM(TICK_1)
-            MOTOR_2.calculateRPM(TICK_2)
-            rclpy.spin_once(motor_driver_node)
+                    # Vary PWM
+                    # if 0 < index <= DATA_AMOUNT / 3:
+                    #     pwm_value = 1023
+                    # elif DATA_AMOUNT / 3 < index <= DATA_AMOUNT * 2 / 3:
+                    #     pwm_value = 714
+                    # else:
+                    #     pwm_value = 510
 
-            if index != MOTOR_1.getDataCount():
-                print(str(index) + "/" + str(DATA_AMOUNT))
-                index += 1
+                    if pwm_value != old_pwm_value:
+                        MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
+                        MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
+                        old_pwm_value = pwm_value
+                        print("change")
 
-                # Vary PWM
-                # if 0 < index <= DATA_AMOUNT / 3:
-                #     pwm_value = 1023
-                # elif DATA_AMOUNT / 3 < index <= DATA_AMOUNT * 2 / 3:
-                #     pwm_value = 714
-                # else:
-                #     pwm_value = 510
+                    varyPWM(TEST_PWM)
 
-                if pwm_value != old_pwm_value:
-                    MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
-                    MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
-                    old_pwm_value = pwm_value
-                    print("change")
+                    WORKBOOK.writeData(index + 1, 1, MOTOR_1.getLowPassRPM())
+                    WORKBOOK.writeData(index + 1, 2, MOTOR_1.getKalmanFilterRPM())
+                    WORKBOOK.writeData(index + 1, 4, MOTOR_2.getLowPassRPM())
+                    WORKBOOK.writeData(index + 1, 5, MOTOR_2.getKalmanFilterRPM())
 
-                varyPWM(pwm_value)
+        else:
+            while True:
+                # manuallyWrite()
+                if time.time() - receiving_timer >= RECEIVING_PERIOD:
+                    updateStorePosFromSerial()
+                    receiving_timer = time.time()
 
-                WORKBOOK.writeData(index + 1, 1, MOTOR_1.getLowPassRPM())
-                WORKBOOK.writeData(index + 1, 2, MOTOR_1.getKalmanFilterRPM())
-                WORKBOOK.writeData(index + 1, 4, MOTOR_2.getLowPassRPM())
-                WORKBOOK.writeData(index + 1, 5, MOTOR_2.getKalmanFilterRPM())
+                if time.time() - publish_timer >= PUBLISH_PERIOD:
+                    updatePosFromStorePos()
+                    motor_driver_node.setNeedPublish()
+                    rclpy.spin_once(motor_driver_node)
+                    motor_driver_node.resetNeedPublish()
+                    publish_timer = time.time()
+
+                MOTOR_1.calculateRPM(TICK_1)
+                MOTOR_2.calculateRPM(TICK_2)
+                rclpy.spin_once(motor_driver_node)
+
 
     except KeyboardInterrupt:
         # JSON
-        MCUSerialObject.write(formSerialData("{motor_data:[1000,0,1000,0]}"))
+        MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 
