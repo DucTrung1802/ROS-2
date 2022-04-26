@@ -42,7 +42,7 @@ MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
 
 
 # Test data
-DATA_RECORDING = True
+DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
@@ -111,19 +111,19 @@ class MotorDriverNode(Node):
 
     def publisherCallback(self):
         if self.__need_publish:
-            # left_ticks = Int32()
-            # right_ticks = Int32()
-            # left_ticks.data = TICK_1
-            # right_ticks.data = TICK_2
-            # self.left_ticks_pub.publish(left_ticks)
-            # self.right_ticks_pub.publish(right_ticks)
+            left_ticks = Int32()
+            right_ticks = Int32()
+            left_ticks.data = TICK_1
+            right_ticks.data = TICK_2
+            self.left_ticks_pub.publish(left_ticks)
+            self.right_ticks_pub.publish(right_ticks)
 
-            left_RPM = Float32()
-            right_RPM = Float32()
-            left_RPM.data = MOTOR_1.getKalmanFilterRPM()
-            right_RPM.data = MOTOR_2.getKalmanFilterRPM()
-            self.left_RPM_pub.publish(left_RPM)
-            self.right_RPM_pub.publish(right_RPM)
+            # left_RPM = Float32()
+            # right_RPM = Float32()
+            # left_RPM.data = MOTOR_1.getKalmanFilterRPM()
+            # right_RPM.data = MOTOR_2.getKalmanFilterRPM()
+            # self.left_RPM_pub.publish(left_RPM)
+            # self.right_RPM_pub.publish(right_RPM)
 
             # self.get_logger().info('Publishing: "%s"' % msg.data)
 
@@ -135,13 +135,23 @@ def driveMotors(msg):
     # Kalman Filter
     # PID
     # controlMotors()
-    # MCUSerialObject.write(formSerialData("{motor_data:[1000,1023,1000,1023]}"))
+    # MCUSerialObject.write(formSerialData("{motor_data:[0,1000,1023,0,1000,1023]}"))
+    direction = 0
+    if msg.linear.x > 0:
+        direction = 1
+    elif msg.linear.x < 0:
+        direction = -1
+    else:
+        direction = 0
+
     pwm_freq_1 = MOTOR_1.getPWMFrequency()
     pwm_freq_2 = MOTOR_2.getPWMFrequency()
     data = {
         "motor_data": [
+            direction,
             pwm_freq_1,
             msg.linear.x * 1023 / 0.6,
+            direction,
             pwm_freq_2,
             msg.linear.x * 1023 / 0.6,
         ]
@@ -254,7 +264,16 @@ def formSerialData(stringData):
 
 
 def varyPWM(PWM):
-    test_dict = {"motor_data": [DIRECTION_LEFT, TEST_PWM_FREQUENCY, PWM, DIRECTION_RIGHT, TEST_PWM_FREQUENCY, PWM]}
+    test_dict = {
+        "motor_data": [
+            DIRECTION_LEFT,
+            TEST_PWM_FREQUENCY,
+            PWM,
+            DIRECTION_RIGHT,
+            TEST_PWM_FREQUENCY,
+            PWM,
+        ]
+    }
     MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
 
 
@@ -273,7 +292,7 @@ def loop():
     MOTOR_2.resetDataCount()
 
     try:
-        if (DATA_RECORDING):
+        if DATA_RECORDING:
             index = 0
             old_pwm_value = 0
             pwm_value = 714
@@ -339,7 +358,6 @@ def loop():
                 MOTOR_1.calculateRPM(TICK_1)
                 MOTOR_2.calculateRPM(TICK_2)
                 rclpy.spin_once(motor_driver_node)
-
 
     except KeyboardInterrupt:
         # JSON
