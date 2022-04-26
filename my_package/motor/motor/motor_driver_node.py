@@ -149,6 +149,7 @@ def driveMotors(msg):
     if msg.linear.x != previous_linear_velocity:
         MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
         MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
+        print("change")
         previous_linear_velocity = msg.linear.x
 
     pwm_freq_1 = MOTOR_1.getPWMFrequency()
