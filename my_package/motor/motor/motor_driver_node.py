@@ -153,6 +153,7 @@ def driveMotors(msg):
 
     pwm_freq_1 = MOTOR_1.getPWMFrequency()
     pwm_freq_2 = MOTOR_2.getPWMFrequency()
+    print(direction)
     data = {
         "motor_data": [
             direction,
