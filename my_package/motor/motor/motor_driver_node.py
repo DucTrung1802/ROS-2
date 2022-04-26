@@ -26,7 +26,7 @@ BAUD_RATE = 115200
 RECEIVING_FREQUENCY = 2000
 
 # Node parameters
-PUBLISH_FREQUENCY = 100
+PUBLISH_FREQUENCY = 1000
 NODE_NAME = "motor_driver"
 
 # Motor parameters
