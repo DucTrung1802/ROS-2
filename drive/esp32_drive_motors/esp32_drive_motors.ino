@@ -159,11 +159,11 @@ void ICACHE_RAM_ATTR readEncoder_2()
   int enc2_b = digitalRead(ENC2_B);
   if (enc2_b > 0)
   {
-    POS_2++;
+    POS_2--;
   }
   else
   {
-    POS_2--;
+    POS_2++;
   }
 }
 
