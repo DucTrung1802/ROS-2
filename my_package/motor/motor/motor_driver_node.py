@@ -260,10 +260,10 @@ def driveMotors(msg):
     print("---")
 
     # Control
+    direction = getDirection(msg.linear.x)
+
     pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
     pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
-
-    direction = getDirection(msg.linear.x)
 
     data = {
         "motor_data": [
