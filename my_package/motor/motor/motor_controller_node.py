@@ -188,7 +188,7 @@ def updateRosInfo(msg):
 class Publisher(Node):
     def __init__(self):
         super().__init__("motor_controller")
-        self.publisher_ = self.create_publisher(Twist, TOPIC, 10)
+        self.publisher_ = self.create_publisher(Twist, TOPIC, 1)
         timer_period = 1 / PUBLISH_FREQUENCY  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
