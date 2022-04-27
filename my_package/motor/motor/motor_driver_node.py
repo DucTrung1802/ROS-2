@@ -30,16 +30,26 @@ PUBLISH_FREQUENCY = 1000
 NODE_NAME = "motor_driver"
 
 # Motor parameters
-MOTOR_1 = MotorDriver(
-    diameter=0.09, pulse_per_round_of_encoder=480, pwm_frequency=1000, sample_time=0.05
-)
-MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
+MOTOR_LEFT_DIAMETER = 0.09  # m
+MOTOR_LEFT_PULSE_PER_ROUND_OF_ENCODER = 480
+MOTOR_LEFT_PWM_FREQUENCY = 1000
+MOTOR_LEFT_SAMPLE_TIME = 0.05
 
-MOTOR_2 = MotorDriver(
-    diameter=0.09, pulse_per_round_of_encoder=480, pwm_frequency=1000, sample_time=0.05
-)
-MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
+MOTOR_RIGHT_DIAMETER = 0.09  # m
+MOTOR_RIGHT_PULSE_PER_ROUND_OF_ENCODER = 480
+MOTOR_RIGHT_PWM_FREQUENCY = 1000
+MOTOR_RIGHT_SAMPLE_TIME = 0.05
 
+# Kalman Filter parameters
+MOTOR_LEFT_X = 0
+MOTOR_LEFT_P = 10000
+MOTOR_LEFT_Q = 0
+MOTOR_LEFT_R = 273
+
+MOTOR_RIGHT_X = 0
+MOTOR_RIGHT_P = 10000
+MOTOR_RIGHT_Q = 0
+MOTOR_RIGHT_R = 273
 
 # Test data
 DATA_RECORDING = False
@@ -49,15 +59,40 @@ TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 510
 
 # DataRecorder parameters
-WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, MOTOR_1.getSampleTime())
+WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, MOTOR_LEFT.getSampleTime())
 DATA_AMOUNT = 120
+
 # =================================================
 
 # Non-configure parameters
+# Motor instances
+MOTOR_LEFT = MotorDriver(
+    diameter=MOTOR_LEFT_DIAMETER,
+    pulse_per_round_of_encoder=MOTOR_LEFT_PULSE_PER_ROUND_OF_ENCODER,
+    pwm_frequency=MOTOR_LEFT_PWM_FREQUENCY,
+    sample_time=MOTOR_LEFT_SAMPLE_TIME,
+)
+
+MOTOR_RIGHT = MotorDriver(
+    diameter=MOTOR_RIGHT_DIAMETER,
+    pulse_per_round_of_encoder=MOTOR_RIGHT_PULSE_PER_ROUND_OF_ENCODER,
+    pwm_frequency=MOTOR_RIGHT_PWM_FREQUENCY,
+    sample_time=MOTOR_RIGHT_SAMPLE_TIME,
+)
+
+# Kalman Filter instances
+MOTOR_LEFT.setupValuesKF(X=MOTOR_LEFT_X, P=MOTOR_LEFT_P, Q=MOTOR_LEFT_Q, R=MOTOR_LEFT_R)
+MOTOR_RIGHT.setupValuesKF(
+    X=MOTOR_RIGHT_X, P=MOTOR_RIGHT_P, Q=MOTOR_RIGHT_Q, R=MOTOR_RIGHT_R
+)
+
+
 # Node parameters
 receiving_timer = time.time()
 publish_timer = time.time()
 previous_linear_velocity = 0
+current_state_is_straight = True
+previous_current_state_is_straight = True
 RECEIVING_PERIOD = 1
 """ The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided\
     callback function will be called. For no delay, set it equal ZERO. """
@@ -121,8 +156,8 @@ class MotorDriverNode(Node):
 
             # left_RPM = Float32()
             # right_RPM = Float32()
-            # left_RPM.data = MOTOR_1.getKalmanFilterRPM()
-            # right_RPM.data = MOTOR_2.getKalmanFilterRPM()
+            # left_RPM.data = MOTOR_LEFT.getKalmanFilterRPM()
+            # right_RPM.data = MOTOR_RIGHT.getKalmanFilterRPM()
             # self.left_RPM_pub.publish(left_RPM)
             # self.right_RPM_pub.publish(right_RPM)
 
@@ -132,9 +167,44 @@ class MotorDriverNode(Node):
         driveMotors(msg)
 
 
+def resetKF():
+    MOTOR_LEFT.setupValuesKF(
+        X=MOTOR_LEFT_X, P=MOTOR_LEFT_P, Q=MOTOR_LEFT_Q, R=MOTOR_LEFT_R
+    )
+    MOTOR_RIGHT.setupValuesKF(
+        X=MOTOR_RIGHT_X, P=MOTOR_RIGHT_P, Q=MOTOR_RIGHT_Q, R=MOTOR_RIGHT_R
+    )
+
+
 def driveMotors(msg):
-    global previous_linear_velocity
-    # Kalman Filter
+    global previous_linear_velocity, current_state_is_straight, previous_current_state_is_straight
+
+    # evaluate()
+    linear_velocity = msg.linear.x
+    angular_velocity = msg.angular.z
+
+    if linear_velocity != previous_linear_velocity:
+        resetKF()
+        previous_linear_velocity = linear_velocity
+
+    if angular_velocity:
+        current_state_is_straight = False
+    elif not angular_velocity:
+        current_state_is_straight = True
+
+    if current_state_is_straight != previous_current_state_is_straight:
+        resetKF()
+        previous_current_state_is_straight = current_state_is_straight
+
+    linear_velocity_left = msg.linear.x
+    linear_velocity_right = msg.linear.x
+
+    # Turn left
+    if angular_velocity >= 0:
+        
+
+    # control()
+
     # PID
     # controlMotors()
     # MCUSerialObject.write(formSerialData("{motor_data:[0,1000,1023,0,1000,1023]}"))
@@ -146,16 +216,17 @@ def driveMotors(msg):
     else:
         direction = 0
 
+    # Reset KF
     if msg.linear.x != previous_linear_velocity:
-        MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
-        MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
+        MOTOR_LEFT.setupValuesKF(X=0, P=10000, Q=0, R=273)
+        MOTOR_RIGHT.setupValuesKF(X=0, P=10000, Q=0, R=273)
         previous_linear_velocity = msg.linear.x
 
-    pwm_freq_1 = MOTOR_1.getPWMFrequency()
-    pwm_freq_2 = MOTOR_2.getPWMFrequency()
+    pwm_freq_1 = MOTOR_LEFT.getPWMFrequency()
+    pwm_freq_2 = MOTOR_RIGHT.getPWMFrequency()
 
     msg.linear.x = abs(msg.linear.x)
-    
+
     data = {
         "motor_data": [
             direction,
@@ -297,8 +368,8 @@ def loop():
 
     motor_driver_node = MotorDriverNode(NODE_NAME)
 
-    MOTOR_1.resetDataCount()
-    MOTOR_2.resetDataCount()
+    MOTOR_LEFT.resetDataCount()
+    MOTOR_RIGHT.resetDataCount()
 
     try:
         if DATA_RECORDING:
@@ -321,11 +392,11 @@ def loop():
                     motor_driver_node.resetNeedPublish()
                     publish_timer = time.time()
 
-                MOTOR_1.calculateRPM(TICK_1)
-                MOTOR_2.calculateRPM(TICK_2)
+                MOTOR_LEFT.calculateRPM(TICK_1)
+                MOTOR_RIGHT.calculateRPM(TICK_2)
                 rclpy.spin_once(motor_driver_node)
 
-                if index != MOTOR_1.getDataCount():
+                if index != MOTOR_LEFT.getDataCount():
                     print(str(index) + "/" + str(DATA_AMOUNT))
                     index += 1
 
@@ -338,17 +409,17 @@ def loop():
                     #     pwm_value = 510
 
                     if pwm_value != old_pwm_value:
-                        MOTOR_1.setupValuesKF(X=0, P=10000, Q=0, R=273)
-                        MOTOR_2.setupValuesKF(X=0, P=10000, Q=0, R=273)
+                        MOTOR_LEFT.setupValuesKF(X=0, P=10000, Q=0, R=273)
+                        MOTOR_RIGHT.setupValuesKF(X=0, P=10000, Q=0, R=273)
                         old_pwm_value = pwm_value
                         print("change")
 
                     varyPWM(TEST_PWM)
 
-                    WORKBOOK.writeData(index + 1, 1, MOTOR_1.getLowPassRPM())
-                    WORKBOOK.writeData(index + 1, 2, MOTOR_1.getKalmanFilterRPM())
-                    WORKBOOK.writeData(index + 1, 4, MOTOR_2.getLowPassRPM())
-                    WORKBOOK.writeData(index + 1, 5, MOTOR_2.getKalmanFilterRPM())
+                    WORKBOOK.writeData(index + 1, 1, MOTOR_LEFT.getLowPassRPM())
+                    WORKBOOK.writeData(index + 1, 2, MOTOR_LEFT.getKalmanFilterRPM())
+                    WORKBOOK.writeData(index + 1, 4, MOTOR_RIGHT.getLowPassRPM())
+                    WORKBOOK.writeData(index + 1, 5, MOTOR_RIGHT.getKalmanFilterRPM())
 
         else:
             while True:
@@ -364,8 +435,8 @@ def loop():
                     motor_driver_node.resetNeedPublish()
                     publish_timer = time.time()
 
-                MOTOR_1.calculateRPM(TICK_1)
-                MOTOR_2.calculateRPM(TICK_2)
+                MOTOR_LEFT.calculateRPM(TICK_1)
+                MOTOR_RIGHT.calculateRPM(TICK_2)
                 rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:
