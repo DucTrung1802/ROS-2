@@ -174,6 +174,15 @@ class MotorDriverNode(Node):
     def subscriberCallback(self, msg):
         driveMotors(msg)
 
+
+def MPStoRPM(mps):
+    return mps / (LEFT_MOTOR_DIAMETER * math.pi) * 60
+
+
+def RPMtoMPS(rpm):
+    return rpm * (LEFT_MOTOR_DIAMETER * math.pi) / 60
+
+
 def saturate(index, min, max):
     if index <= min:
         return min
@@ -181,6 +190,14 @@ def saturate(index, min, max):
         return max
     else:
         return index
+
+
+def getDirection(velocity):
+    if velocity >= 0:
+        return 1
+    else:
+        return -1
+
 
 def resetKF():
     LEFT_MOTOR.setupValuesKF(
@@ -190,8 +207,10 @@ def resetKF():
         X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
     )
 
+
 def differientialDriveLeft(angular_velocity):
     return left_wheel_RPM_for_1_rad_per_sec_of_robot * angular_velocity
+
 
 def differientialDriveRight(angular_velocity):
     return right_wheel_RPM_for_1_rad_per_sec_of_robot * angular_velocity
@@ -200,9 +219,10 @@ def differientialDriveRight(angular_velocity):
 def driveMotors(msg):
     global previous_linear_velocity, current_state_is_straight, previous_current_state_is_straight
 
-    # evaluate()
-    linear_velocity = msg.linear.x
-    angular_velocity = msg.angular.z
+    # Evaluate to have RPM value
+
+    linear_velocity = MPStoRPM(msg.linear.x)  # RPM
+    angular_velocity = msg.angular.z  # rad/s
 
     if linear_velocity != previous_linear_velocity:
         resetKF()
@@ -217,56 +237,37 @@ def driveMotors(msg):
         resetKF()
         previous_current_state_is_straight = current_state_is_straight
 
-    linear_velocity_left = msg.linear.x
-    linear_velocity_right = msg.linear.x
+    # Differential drive
+    linear_velocity_left = abs(linear_velocity)  # RPM
+    linear_velocity_right = abs(linear_velocity)  # RPM
 
-    # Turn left
     if angular_velocity >= 0:
-        linear_velocity_left -= differientialDriveLeft()
-        linear_velocity_right += differientialDriveRight()
+        linear_velocity_left -= differientialDriveLeft(msg.angular.z)
+        linear_velocity_right += differientialDriveRight(msg.angular.z)
     elif angular_velocity < 0:
-        linear_velocity_left += differientialDriveLeft()
-        linear_velocity_right -= differientialDriveRight()
+        linear_velocity_left += differientialDriveLeft(msg.angular.z)
+        linear_velocity_right -= differientialDriveRight(msg.angular.z)
 
-    saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
-    saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
+    linear_velocity_left = saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
+    linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
 
-    # control()
-    
-
-
-    # PID
-    # controlMotors()
-    # MCUSerialObject.write(formSerialData("{motor_data:[0,1000,1023,0,1000,1023]}"))
-    direction = 0
-    if msg.linear.x > 0:
-        direction = 1
-    elif msg.linear.x < 0:
-        direction = -1
-    else:
-        direction = 0
-
-    # Reset KF
-    if msg.linear.x != previous_linear_velocity:
-        LEFT_MOTOR.setupValuesKF(X=0, P=10000, Q=0, R=273)
-        RIGHT_MOTOR.setupValuesKF(X=0, P=10000, Q=0, R=273)
-        previous_linear_velocity = msg.linear.x
-
+    # Control
     pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
     pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-    msg.linear.x = abs(msg.linear.x)
+    direction = getDirection(msg.linear.x)
 
     data = {
         "motor_data": [
             direction,
             pwm_freq_1,
-            msg.linear.x * 1023 / 0.6,
+            linear_velocity_left * 1023 / MPStoRPM(LEFT_MOTOR_MAX_VELOCITY),
             direction,
             pwm_freq_2,
-            msg.linear.x * 1023 / 0.6,
+            linear_velocity_right * 1023 / MPStoRPM(RIGHT_MOTOR_MAX_VELOCITY),
         ]
     }
+    
     data = json.dumps(data)
     MCUSerialObject.write(formSerialData(data))
 
