@@ -38,11 +38,13 @@ LEFT_MOTOR_DIAMETER = 0.09  # m
 LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480
 LEFT_MOTOR_PWM_FREQUENCY = 1000
 LEFT_MOTOR_SAMPLE_TIME = 0.05
+left_wheel_RPM_for_1_rad_per_sec_of_robot = 100
 
 RIGHT_MOTOR_DIAMETER = 0.09  # m
 RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480
 RIGHT_MOTOR_PWM_FREQUENCY = 1000
 RIGHT_MOTOR_SAMPLE_TIME = 0.05
+right_wheel_RPM_for_1_rad_per_sec_of_robot = 100
 
 # Kalman Filter parameters
 LEFT_MOTOR_X = 0
@@ -63,7 +65,6 @@ TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 510
 
 # DataRecorder parameters
-WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
 DATA_AMOUNT = 120
 
 # =================================================
@@ -119,6 +120,9 @@ STORE_TICK_1 = 0
 STORE_TICK_2 = 0
 TICK_1 = 0
 TICK_2 = 0
+
+# Data recorder
+WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
 
 
 def checkConditions():
@@ -242,14 +246,18 @@ def driveMotors(msg):
     linear_velocity_right = abs(linear_velocity)  # RPM
 
     if angular_velocity >= 0:
-        linear_velocity_left -= differientialDriveLeft(msg.angular.z)
-        linear_velocity_right += differientialDriveRight(msg.angular.z)
+        linear_velocity_left -= differientialDriveLeft(abs(msg.angular.z))
+        linear_velocity_right += differientialDriveRight(abs(msg.angular.z))
     elif angular_velocity < 0:
-        linear_velocity_left += differientialDriveLeft(msg.angular.z)
-        linear_velocity_right -= differientialDriveRight(msg.angular.z)
+        linear_velocity_left -= differientialDriveLeft(abs(msg.angular.z))
+        linear_velocity_right += differientialDriveRight(abs(msg.angular.z))
 
     linear_velocity_left = saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
     linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
+
+    print("Left RPM: " + str(linear_velocity_left))
+    print("Right RPM: " + str(linear_velocity_right))
+    print("---")
 
     # Control
     pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
