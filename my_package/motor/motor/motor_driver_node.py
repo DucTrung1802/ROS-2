@@ -249,8 +249,8 @@ def driveMotors(msg):
         linear_velocity_left -= differientialDriveLeft(abs(msg.angular.z))
         linear_velocity_right += differientialDriveRight(abs(msg.angular.z))
     elif angular_velocity < 0:
-        linear_velocity_left -= differientialDriveLeft(abs(msg.angular.z))
-        linear_velocity_right += differientialDriveRight(abs(msg.angular.z))
+        linear_velocity_left += differientialDriveLeft(abs(msg.angular.z))
+        linear_velocity_right -= differientialDriveRight(abs(msg.angular.z))
 
     linear_velocity_left = saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
     linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
