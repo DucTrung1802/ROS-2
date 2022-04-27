@@ -267,7 +267,7 @@ def driveMotors(msg):
             linear_velocity_right * 1023 / MPStoRPM(RIGHT_MOTOR_MAX_VELOCITY),
         ]
     }
-    
+
     data = json.dumps(data)
     MCUSerialObject.write(formSerialData(data))
 
@@ -316,7 +316,7 @@ def initializeSerial():
 
     skipLines = SKIP_SERIAL_LINES
     MCUSerialObject.setDTR(False)
-    time.sleep(0.1)
+    time.sleep(0.01)
     MCUSerialObject.reset_input_buffer()
     MCUSerialObject.setDTR(True)
 
@@ -325,7 +325,7 @@ def initializeSerial():
         MCUSerialObject.readline()
         skipLines = skipLines - 1
 
-    time.sleep(0.1)
+    time.sleep(0.01)
 
 
 def readSerialData():
