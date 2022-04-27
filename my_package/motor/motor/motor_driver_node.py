@@ -7,6 +7,7 @@ from openpyxl import Workbook
 import serial
 import re
 import json
+import math
 
 import rclpy
 from rclpy.node import Node
@@ -30,26 +31,29 @@ PUBLISH_FREQUENCY = 1000
 NODE_NAME = "motor_driver"
 
 # Motor parameters
-MOTOR_LEFT_DIAMETER = 0.09  # m
-MOTOR_LEFT_PULSE_PER_ROUND_OF_ENCODER = 480
-MOTOR_LEFT_PWM_FREQUENCY = 1000
-MOTOR_LEFT_SAMPLE_TIME = 0.05
+LEFT_MOTOR_MAX_VELOCITY = 0.6
+RIGHT_MOTOR_MAX_VELOCITY = 0.6
 
-MOTOR_RIGHT_DIAMETER = 0.09  # m
-MOTOR_RIGHT_PULSE_PER_ROUND_OF_ENCODER = 480
-MOTOR_RIGHT_PWM_FREQUENCY = 1000
-MOTOR_RIGHT_SAMPLE_TIME = 0.05
+LEFT_MOTOR_DIAMETER = 0.09  # m
+LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480
+LEFT_MOTOR_PWM_FREQUENCY = 1000
+LEFT_MOTOR_SAMPLE_TIME = 0.05
+
+RIGHT_MOTOR_DIAMETER = 0.09  # m
+RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480
+RIGHT_MOTOR_PWM_FREQUENCY = 1000
+RIGHT_MOTOR_SAMPLE_TIME = 0.05
 
 # Kalman Filter parameters
-MOTOR_LEFT_X = 0
-MOTOR_LEFT_P = 10000
-MOTOR_LEFT_Q = 0
-MOTOR_LEFT_R = 273
+LEFT_MOTOR_X = 0
+LEFT_MOTOR_P = 10000
+LEFT_MOTOR_Q = 0
+LEFT_MOTOR_R = 273
 
-MOTOR_RIGHT_X = 0
-MOTOR_RIGHT_P = 10000
-MOTOR_RIGHT_Q = 0
-MOTOR_RIGHT_R = 273
+RIGHT_MOTOR_X = 0
+RIGHT_MOTOR_P = 10000
+RIGHT_MOTOR_Q = 0
+RIGHT_MOTOR_R = 273
 
 # Test data
 DATA_RECORDING = False
@@ -59,31 +63,35 @@ TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 510
 
 # DataRecorder parameters
-WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, MOTOR_LEFT.getSampleTime())
+WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
 DATA_AMOUNT = 120
 
 # =================================================
 
 # Non-configure parameters
 # Motor instances
-MOTOR_LEFT = MotorDriver(
-    diameter=MOTOR_LEFT_DIAMETER,
-    pulse_per_round_of_encoder=MOTOR_LEFT_PULSE_PER_ROUND_OF_ENCODER,
-    pwm_frequency=MOTOR_LEFT_PWM_FREQUENCY,
-    sample_time=MOTOR_LEFT_SAMPLE_TIME,
+LEFT_MOTOR = MotorDriver(
+    diameter=LEFT_MOTOR_DIAMETER,
+    pulse_per_round_of_encoder=LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER,
+    pwm_frequency=LEFT_MOTOR_PWM_FREQUENCY,
+    sample_time=LEFT_MOTOR_SAMPLE_TIME,
 )
 
-MOTOR_RIGHT = MotorDriver(
-    diameter=MOTOR_RIGHT_DIAMETER,
-    pulse_per_round_of_encoder=MOTOR_RIGHT_PULSE_PER_ROUND_OF_ENCODER,
-    pwm_frequency=MOTOR_RIGHT_PWM_FREQUENCY,
-    sample_time=MOTOR_RIGHT_SAMPLE_TIME,
+RIGHT_MOTOR = MotorDriver(
+    diameter=RIGHT_MOTOR_DIAMETER,
+    pulse_per_round_of_encoder=RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER,
+    pwm_frequency=RIGHT_MOTOR_PWM_FREQUENCY,
+    sample_time=RIGHT_MOTOR_SAMPLE_TIME,
 )
+
+# Motor parameters
+LEFT_MOTOR_MAX_RPM = LEFT_MOTOR_MAX_VELOCITY / (LEFT_MOTOR_DIAMETER * math.pi) * 60.0
+RIGHT_MOTOR_MAX_RPM = RIGHT_MOTOR_MAX_VELOCITY / (RIGHT_MOTOR_DIAMETER * math.pi) * 60.0
 
 # Kalman Filter instances
-MOTOR_LEFT.setupValuesKF(X=MOTOR_LEFT_X, P=MOTOR_LEFT_P, Q=MOTOR_LEFT_Q, R=MOTOR_LEFT_R)
-MOTOR_RIGHT.setupValuesKF(
-    X=MOTOR_RIGHT_X, P=MOTOR_RIGHT_P, Q=MOTOR_RIGHT_Q, R=MOTOR_RIGHT_R
+LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
+RIGHT_MOTOR.setupValuesKF(
+    X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
 )
 
 
@@ -156,8 +164,8 @@ class MotorDriverNode(Node):
 
             # left_RPM = Float32()
             # right_RPM = Float32()
-            # left_RPM.data = MOTOR_LEFT.getKalmanFilterRPM()
-            # right_RPM.data = MOTOR_RIGHT.getKalmanFilterRPM()
+            # left_RPM.data = LEFT_MOTOR.getKalmanFilterRPM()
+            # right_RPM.data = RIGHT_MOTOR.getKalmanFilterRPM()
             # self.left_RPM_pub.publish(left_RPM)
             # self.right_RPM_pub.publish(right_RPM)
 
@@ -166,14 +174,27 @@ class MotorDriverNode(Node):
     def subscriberCallback(self, msg):
         driveMotors(msg)
 
+def saturate(index, min, max):
+    if index <= min:
+        return min
+    elif index >= max:
+        return max
+    else:
+        return index
 
 def resetKF():
-    MOTOR_LEFT.setupValuesKF(
-        X=MOTOR_LEFT_X, P=MOTOR_LEFT_P, Q=MOTOR_LEFT_Q, R=MOTOR_LEFT_R
+    LEFT_MOTOR.setupValuesKF(
+        X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R
     )
-    MOTOR_RIGHT.setupValuesKF(
-        X=MOTOR_RIGHT_X, P=MOTOR_RIGHT_P, Q=MOTOR_RIGHT_Q, R=MOTOR_RIGHT_R
+    RIGHT_MOTOR.setupValuesKF(
+        X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
     )
+
+def differientialDriveLeft(angular_velocity):
+    return left_wheel_RPM_for_1_rad_per_sec_of_robot * angular_velocity
+
+def differientialDriveRight(angular_velocity):
+    return right_wheel_RPM_for_1_rad_per_sec_of_robot * angular_velocity
 
 
 def driveMotors(msg):
@@ -201,9 +222,18 @@ def driveMotors(msg):
 
     # Turn left
     if angular_velocity >= 0:
-        
+        linear_velocity_left -= differientialDriveLeft()
+        linear_velocity_right += differientialDriveRight()
+    elif angular_velocity < 0:
+        linear_velocity_left += differientialDriveLeft()
+        linear_velocity_right -= differientialDriveRight()
+
+    saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
+    saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
 
     # control()
+    
+
 
     # PID
     # controlMotors()
@@ -218,12 +248,12 @@ def driveMotors(msg):
 
     # Reset KF
     if msg.linear.x != previous_linear_velocity:
-        MOTOR_LEFT.setupValuesKF(X=0, P=10000, Q=0, R=273)
-        MOTOR_RIGHT.setupValuesKF(X=0, P=10000, Q=0, R=273)
+        LEFT_MOTOR.setupValuesKF(X=0, P=10000, Q=0, R=273)
+        RIGHT_MOTOR.setupValuesKF(X=0, P=10000, Q=0, R=273)
         previous_linear_velocity = msg.linear.x
 
-    pwm_freq_1 = MOTOR_LEFT.getPWMFrequency()
-    pwm_freq_2 = MOTOR_RIGHT.getPWMFrequency()
+    pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
+    pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
     msg.linear.x = abs(msg.linear.x)
 
@@ -368,8 +398,8 @@ def loop():
 
     motor_driver_node = MotorDriverNode(NODE_NAME)
 
-    MOTOR_LEFT.resetDataCount()
-    MOTOR_RIGHT.resetDataCount()
+    LEFT_MOTOR.resetDataCount()
+    RIGHT_MOTOR.resetDataCount()
 
     try:
         if DATA_RECORDING:
@@ -392,11 +422,11 @@ def loop():
                     motor_driver_node.resetNeedPublish()
                     publish_timer = time.time()
 
-                MOTOR_LEFT.calculateRPM(TICK_1)
-                MOTOR_RIGHT.calculateRPM(TICK_2)
+                LEFT_MOTOR.calculateRPM(TICK_1)
+                RIGHT_MOTOR.calculateRPM(TICK_2)
                 rclpy.spin_once(motor_driver_node)
 
-                if index != MOTOR_LEFT.getDataCount():
+                if index != LEFT_MOTOR.getDataCount():
                     print(str(index) + "/" + str(DATA_AMOUNT))
                     index += 1
 
@@ -409,17 +439,17 @@ def loop():
                     #     pwm_value = 510
 
                     if pwm_value != old_pwm_value:
-                        MOTOR_LEFT.setupValuesKF(X=0, P=10000, Q=0, R=273)
-                        MOTOR_RIGHT.setupValuesKF(X=0, P=10000, Q=0, R=273)
+                        LEFT_MOTOR.setupValuesKF(X=0, P=10000, Q=0, R=273)
+                        RIGHT_MOTOR.setupValuesKF(X=0, P=10000, Q=0, R=273)
                         old_pwm_value = pwm_value
                         print("change")
 
                     varyPWM(TEST_PWM)
 
-                    WORKBOOK.writeData(index + 1, 1, MOTOR_LEFT.getLowPassRPM())
-                    WORKBOOK.writeData(index + 1, 2, MOTOR_LEFT.getKalmanFilterRPM())
-                    WORKBOOK.writeData(index + 1, 4, MOTOR_RIGHT.getLowPassRPM())
-                    WORKBOOK.writeData(index + 1, 5, MOTOR_RIGHT.getKalmanFilterRPM())
+                    WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getLowPassRPM())
+                    WORKBOOK.writeData(index + 1, 2, LEFT_MOTOR.getKalmanFilterRPM())
+                    WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getLowPassRPM())
+                    WORKBOOK.writeData(index + 1, 5, RIGHT_MOTOR.getKalmanFilterRPM())
 
         else:
             while True:
@@ -435,8 +465,8 @@ def loop():
                     motor_driver_node.resetNeedPublish()
                     publish_timer = time.time()
 
-                MOTOR_LEFT.calculateRPM(TICK_1)
-                MOTOR_RIGHT.calculateRPM(TICK_2)
+                LEFT_MOTOR.calculateRPM(TICK_1)
+                RIGHT_MOTOR.calculateRPM(TICK_2)
                 rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:
