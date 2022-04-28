@@ -128,7 +128,7 @@ def checkAngularLimitVelocity(input):
     return input
 
 
-def driveMotors():
+def controlMotors():
     global key, target_linear_velocity, target_angular_velocity
     key = getKey()
 
@@ -194,7 +194,7 @@ class Publisher(Node):
 
     def timer_callback(self):
         self.publisher_.publish(twist)
-        driveMotors()
+        controlMotors()
         updateMessage()
         displayInstruction()
         self.get_logger().info(
