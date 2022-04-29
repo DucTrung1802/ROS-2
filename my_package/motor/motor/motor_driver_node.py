@@ -16,6 +16,7 @@ from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 from motor.MotorDriver import MotorDriver
 from motor.DataRecoder import DataRecoder
+from motor.PIDController import PIDController
 
 
 # =========== Configurable parameters =============
@@ -57,6 +58,20 @@ RIGHT_MOTOR_P = 10000
 RIGHT_MOTOR_Q = 0
 RIGHT_MOTOR_R = 273
 
+# PID Controller parameters
+LEFT_MOTOR_Kp = 0
+LEFT_MOTOR_Ki = 0
+LEFT_MOTOR_Kd = 0
+LEFT_MOTOR_MIN = 0
+LEFT_MOTOR_MAX = 1023
+
+RIGHT_MOTOR_Kp = 0
+RIGHT_MOTOR_Ki = 0
+RIGHT_MOTOR_Kd = 0
+RIGHT_MOTOR_MIN = 0
+RIGHT_MOTOR_MAX = 1023
+
+
 # Test data
 DATA_RECORDING = False
 DIRECTION_LEFT = 1
@@ -93,6 +108,25 @@ RIGHT_MOTOR_MAX_RPM = RIGHT_MOTOR_MAX_VELOCITY / (RIGHT_MOTOR_DIAMETER * math.pi
 LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
 RIGHT_MOTOR.setupValuesKF(
     X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
+)
+
+# PID instances
+LEFT_MOTOR_PID_CONTROLLER = PIDController(
+    LEFT_MOTOR_Kp,
+    LEFT_MOTOR_Ki,
+    LEFT_MOTOR_Kd,
+    LEFT_MOTOR.getSampleTime(),
+    LEFT_MOTOR_MIN,
+    LEFT_MOTOR_MAX
+)
+
+RIGHT_MOTOR_PID_CONTROLLER = PIDController(
+    RIGHT_MOTOR_Kp,
+    RIGHT_MOTOR_Ki,
+    RIGHT_MOTOR_Kd,
+    RIGHT_MOTOR.getSampleTime(),
+    RIGHT_MOTOR_MIN,
+    RIGHT_MOTOR_MAX
 )
 
 
@@ -259,7 +293,10 @@ def driveMotors(msg):
     print("Right RPM: " + str(linear_velocity_right))
     print("---")
 
-    # Control
+    # PID Controller
+    left_pwm_value = LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, LEFT_MOTOR.getKalmanFilterRPM())
+    right_pwm_value = RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_right, RIGHT_MOTOR.getKalmanFilterRPM())
+
     direction = getDirection(msg.linear.x)
 
     pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
@@ -269,10 +306,10 @@ def driveMotors(msg):
         "motor_data": [
             direction,
             pwm_freq_1,
-            linear_velocity_left * 1023 / MPStoRPM(LEFT_MOTOR_MAX_VELOCITY),
+            left_pwm_value,
             direction,
             pwm_freq_2,
-            linear_velocity_right * 1023 / MPStoRPM(RIGHT_MOTOR_MAX_VELOCITY),
+            right_pwm_value,
         ]
     }
 
