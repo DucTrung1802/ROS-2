@@ -16,6 +16,7 @@ from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 from motor.MotorDriver import MotorDriver
 from motor.DataRecoder import DataRecoder
+from motor.PIDController import PIDController
 
 
 # =========== Configurable parameters =============
@@ -57,6 +58,20 @@ RIGHT_MOTOR_P = 10000
 RIGHT_MOTOR_Q = 0
 RIGHT_MOTOR_R = 273
 
+# PID Controller parameters
+LEFT_MOTOR_Kp = 0.051
+LEFT_MOTOR_Ki = 1.25
+LEFT_MOTOR_Kd = 0
+LEFT_MOTOR_MIN = 0
+LEFT_MOTOR_MAX = 1023
+
+RIGHT_MOTOR_Kp = 0.064
+RIGHT_MOTOR_Ki = 1.57
+RIGHT_MOTOR_Kd = 0.0002
+RIGHT_MOTOR_MIN = 0
+RIGHT_MOTOR_MAX = 1023
+
+
 # Test data
 DATA_RECORDING = False
 DIRECTION_LEFT = 1
@@ -93,6 +108,25 @@ RIGHT_MOTOR_MAX_RPM = RIGHT_MOTOR_MAX_VELOCITY / (RIGHT_MOTOR_DIAMETER * math.pi
 LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
 RIGHT_MOTOR.setupValuesKF(
     X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
+)
+
+# PID instances
+LEFT_MOTOR_PID_CONTROLLER = PIDController(
+    LEFT_MOTOR_Kp,
+    LEFT_MOTOR_Ki,
+    LEFT_MOTOR_Kd,
+    LEFT_MOTOR.getSampleTime(),
+    LEFT_MOTOR_MIN,
+    LEFT_MOTOR_MAX,
+)
+
+RIGHT_MOTOR_PID_CONTROLLER = PIDController(
+    RIGHT_MOTOR_Kp,
+    RIGHT_MOTOR_Ki,
+    RIGHT_MOTOR_Kd,
+    RIGHT_MOTOR.getSampleTime(),
+    RIGHT_MOTOR_MIN,
+    RIGHT_MOTOR_MAX,
 )
 
 
@@ -255,15 +289,46 @@ def driveMotors(msg):
     linear_velocity_left = saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
     linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
 
-    print("Left RPM: " + str(linear_velocity_left))
-    print("Right RPM: " + str(linear_velocity_right))
-    print("---")
+    # print("Left RPM: " + str(linear_velocity_left))
+    # print("Right RPM: " + str(linear_velocity_right))
+    # print("---")
 
-    # Control
+    # PID Controller
+    left_pwm_value = LEFT_MOTOR_PID_CONTROLLER.evaluate(
+        linear_velocity_left, LEFT_MOTOR.getKalmanFilterRPM()
+    )
+    right_pwm_value = RIGHT_MOTOR_PID_CONTROLLER.evaluate(
+        linear_velocity_right, RIGHT_MOTOR.getKalmanFilterRPM()
+    )
+
+    print(
+        "Left PWM: "
+        + str(left_pwm_value)
+        + "; Left RPM: "
+        + str(LEFT_MOTOR.getKalmanFilterRPM())
+    )
+    print(
+        "Right PWM: "
+        + str(right_pwm_value)
+        + "; Right RPM: "
+        + str(RIGHT_MOTOR.getKalmanFilterRPM())
+    )
+
     direction = getDirection(msg.linear.x)
 
     pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
     pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
+
+    # data = {
+    #     "motor_data": [
+    #         direction,
+    #         pwm_freq_1,
+    #         left_pwm_value,
+    #         direction,
+    #         pwm_freq_2,
+    #         right_pwm_value,
+    #     ]
+    # }
 
     data = {
         "motor_data": [
