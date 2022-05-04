@@ -355,11 +355,12 @@ def readSerialData():
 def updateStorePosFromSerial():
     global STORE_TICK_1, STORE_TICK_2
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
-    readSerialData()
-    # print("left tick: " + str(dictionaryData["left_tick"]))
-    # print("right tick: " + str(dictionaryData["right_tick"]))
-    STORE_TICK_1 = dictionaryData["left_tick"]
-    STORE_TICK_2 = dictionaryData["right_tick"]
+    try:
+        readSerialData()
+        STORE_TICK_1 = dictionaryData["left_tick"]
+        STORE_TICK_2 = dictionaryData["right_tick"]
+    except:
+        return
 
 
 #
