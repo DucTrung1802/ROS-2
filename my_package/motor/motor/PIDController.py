@@ -4,12 +4,12 @@ class PIDController:
         self.__initializeCoefficient(Kp, Ki, Kd, T, min, max)
 
     def __checkConditions(self, Kp, Ki, Kd, T, min, max):
-        if Kp <= 0:
-            raise Exception("Kp must be positive!")
-        if Ki <= 0:
-            raise Exception("Ki must be positive!")
-        if Kd <= 0:
-            raise Exception("Kd must be positive!")
+        if Kp < 0:
+            raise Exception("Kp must not be negative!")
+        if Ki < 0:
+            raise Exception("Ki must not be negative!")
+        if Kd < 0:
+            raise Exception("Kd must not be negative!")
         if T <= 0:
             raise Exception("T must be positive!")
         if min > max:
