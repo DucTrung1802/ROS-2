@@ -66,5 +66,7 @@ class PIDController:
         self.__ek_2 = self.__ek_1
         self.__ek_1 = self.__ek
         self.__state += 1
+
+    def getOutputValue(self):
         return self.__saturate(self.__uk)
 
