@@ -357,7 +357,7 @@ def updateStorePosFromSerial():
     global STORE_TICK_1, STORE_TICK_2, time_of_receive, error_of_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
     print(
-        "Error in communication: " + str(error_of_receive) + "/" + str(time_of_receive)
+        "Error in serial communication: " + str(error_of_receive) + "/" + str(time_of_receive)
     )
     try:
         readSerialData()
@@ -490,6 +490,7 @@ def loop():
         MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
+        print("Captured Ctrl + C - Terminated process!")
 
     finally:
         MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
