@@ -356,6 +356,9 @@ def readSerialData():
 def updateStorePosFromSerial():
     global STORE_TICK_1, STORE_TICK_2, time_of_receive, error_of_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
+    print(
+        "Error in communication: " + str(error_of_receive) + "/" + str(time_of_receive)
+    )
     try:
         readSerialData()
         STORE_TICK_1 = dictionaryData["left_tick"]
@@ -363,12 +366,6 @@ def updateStorePosFromSerial():
         time_of_receive += 1
     except:
         error_of_receive += 1
-        print(
-            "Error in communication: "
-            + str(error_of_receive)
-            + "/"
-            + str(time_of_receive)
-        )
         return
 
 
