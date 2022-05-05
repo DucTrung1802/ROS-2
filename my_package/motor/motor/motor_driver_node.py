@@ -67,9 +67,8 @@ TEST_PWM = 510
 # DataRecorder parameters
 DATA_AMOUNT = 120
 
-# =================================================
 
-# Non-configure parameters
+# =========== Non-configurable parameters =============
 # Motor instances
 LEFT_MOTOR = MotorDriver(
     diameter=LEFT_MOTOR_DIAMETER,
@@ -113,6 +112,8 @@ foundMCU = False
 foundLidar = False
 serialData = ""
 dictionaryData = {}
+time_of_receive = 0
+error_of_receive = 0
 
 # JSON parameters
 KEY = "pwm_pulse"
@@ -255,9 +256,9 @@ def driveMotors(msg):
     linear_velocity_left = saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
     linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
 
-    print("Left RPM: " + str(linear_velocity_left))
-    print("Right RPM: " + str(linear_velocity_right))
-    print("---")
+    # print("Left RPM: " + str(linear_velocity_left))
+    # print("Right RPM: " + str(linear_velocity_right))
+    # print("---")
 
     # Control
     direction = getDirection(msg.linear.x)
@@ -353,13 +354,21 @@ def readSerialData():
 
 
 def updateStorePosFromSerial():
-    global STORE_TICK_1, STORE_TICK_2
+    global STORE_TICK_1, STORE_TICK_2, time_of_receive, error_of_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
     try:
         readSerialData()
         STORE_TICK_1 = dictionaryData["left_tick"]
         STORE_TICK_2 = dictionaryData["right_tick"]
+        time_of_receive += 1
     except:
+        error_of_receive += 1
+        print(
+            "Error in communication: "
+            + str(error_of_receive)
+            + "/"
+            + str(time_of_receive)
+        )
         return
 
 
