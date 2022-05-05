@@ -147,7 +147,8 @@ foundMCU = False
 foundLidar = False
 serialData = ""
 dictionaryData = {}
-
+time_of_receive = 0
+error_of_receive = 0
 
 # JSON parameters
 KEY = "pwm_pulse"
@@ -320,27 +321,27 @@ def driveMotors(msg):
     pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
     pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-    # data = {
-    #     "motor_data": [
-    #         direction,
-    #         pwm_freq_1,
-    #         left_pwm_value,
-    #         direction,
-    #         pwm_freq_2,
-    #         right_pwm_value,
-    #     ]
-    # }
-
     data = {
         "motor_data": [
             direction,
             pwm_freq_1,
-            linear_velocity_left * 1023 / MPStoRPM(LEFT_MOTOR_MAX_VELOCITY),
+            left_pwm_value,
             direction,
             pwm_freq_2,
-            linear_velocity_right * 1023 / MPStoRPM(RIGHT_MOTOR_MAX_VELOCITY),
+            right_pwm_value,
         ]
     }
+
+    # data = {
+    #     "motor_data": [
+    #         direction,
+    #         pwm_freq_1,
+    #         linear_velocity_left * 1023 / MPStoRPM(LEFT_MOTOR_MAX_VELOCITY),
+    #         direction,
+    #         pwm_freq_2,
+    #         linear_velocity_right * 1023 / MPStoRPM(RIGHT_MOTOR_MAX_VELOCITY),
+    #     ]
+    # }
 
     data = json.dumps(data)
     MCUSerialObject.write(formSerialData(data))
@@ -421,9 +422,9 @@ def readSerialData():
 def updateStorePosFromSerial():
     global STORE_TICK_1, STORE_TICK_2, time_of_receive, error_of_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
-    print(
-        "Error in serial communication: " + str(error_of_receive) + "/" + str(time_of_receive)
-    )
+    # print(
+    #     "Error in serial communication: " + str(error_of_receive) + "/" + str(time_of_receive)
+    # )
     try:
         readSerialData()
         STORE_TICK_1 = dictionaryData["left_tick"]
