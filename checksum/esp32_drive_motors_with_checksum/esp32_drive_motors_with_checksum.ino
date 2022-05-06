@@ -42,8 +42,6 @@ String JSON_DOC_SEND_STRING;
 const unsigned int SENDING_FREQUENCY = 2000; // Hz
 double PERIOD; // milliseconds
 volatile unsigned long long timerPivot = 0; // milliseconds
-String left_tick[15] = "left_tick";
-String right_tick[15] = "right_tick";
 
 // Receiving
 volatile char serialChar;
@@ -79,13 +77,13 @@ bool deserializeJSON() {
 }
 
 void decodeJSON() {
-  wheel_direction[0] = JSON_DOC_RECEIVE[int(KEY)][0];
-  pwm_frequency[0] = JSON_DOC_RECEIVE[int(KEY)][1];
-  pwm_pulse[0] = JSON_DOC_RECEIVE[int(KEY)][2];
+  wheel_direction[0] = JSON_DOC_RECEIVE["motor_data"][0];
+  pwm_frequency[0] = JSON_DOC_RECEIVE["motor_data"][1];
+  pwm_pulse[0] = JSON_DOC_RECEIVE["motor_data"][2];
 
-  wheel_direction[1] = JSON_DOC_RECEIVE[int(KEY)][3];
-  pwm_frequency[1] = JSON_DOC_RECEIVE[int(KEY)][4];
-  pwm_pulse[1] = JSON_DOC_RECEIVE[int(KEY)][5];
+  wheel_direction[1] = JSON_DOC_RECEIVE["motor_data"][3];
+  pwm_frequency[1] = JSON_DOC_RECEIVE["motor_data"][4];
+  pwm_pulse[1] = JSON_DOC_RECEIVE["motor_data"][5];
 }
 
 void driveLeftWheel() {
@@ -184,19 +182,28 @@ void initializeMotor()
   digitalWrite(STBY, HIGH);
 }
 
-void addKeyChecksum() {
+void calculateChecksum() {
+  char buf[200];
   serializeJson(JSON_DOC_SEND, JSON_DOC_SEND_STRING);
-  Serial.println(JSON_DOC_SEND_STRING);
-//  hash = MD5::make_hash(JSON_DOC_SEND);
-//  md5str = MD5::make_digest(hash, 16);
+  JSON_DOC_SEND_STRING.toCharArray(buf, 200);
+  hash = MD5::make_hash(buf);
+  md5str = MD5::make_digest(hash, 16);
+}
+
+void freeChecksum() {
+  free(hash);
+  free(md5str);
 }
 
 void readEncoderTicks() {
   noInterrupts();
-  JSON_DOC_SEND[int(left_tick)] = POS_1;
-  JSON_DOC_SEND[int(right_tick)] = POS_2;
+  JSON_DOC_SEND["left_tick"] = POS_1;
+  JSON_DOC_SEND["right_tick"] = POS_2;
   // Checksum
   interrupts();
+  calculateChecksum();
+  JSON_DOC_SEND["checksum"] = md5str;
+  freeChecksum();
 }
 
 void calculateSendingPeriod() {
@@ -253,7 +260,6 @@ void loop()
   readEncoderTicks();
   if (micros() - timerPivot >= PERIOD) {
     serializeJson(JSON_DOC_SEND, Serial);
-    addKeyChecksum();
     Serial.println();
     //  serializeJsonPretty(JSON_DOC_SEND, Serial);
     timerPivot = micros();
