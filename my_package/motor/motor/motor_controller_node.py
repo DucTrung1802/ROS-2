@@ -7,6 +7,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from pathlib import Path
+import math
 
 # OS parameters
 CLEAR = lambda: os.system("clear")
@@ -21,6 +22,11 @@ BUTTON_DELAY = 0.001
 
 # Controling parameters
 STEP = 3
+
+# Motor parameters
+LEFT_MOTOR_DIAMETER = 0.09
+RIGHT_MOTOR_DIAMETER = 0.09
+
 
 # Velocity: m/s
 LINEAR_SPEED_MAX = 0.6  # m/s
@@ -40,6 +46,15 @@ target_linear_velocity = 0.0
 target_angular_velocity = 0.0
 control_linear_velocity = 0.0
 control_angular_velocity = 0.0
+
+
+def MPStoRPM(mps):
+    return mps / (LEFT_MOTOR_DIAMETER * math.pi) * 60
+
+
+def RPMtoMPS(rpm):
+    return rpm * (LEFT_MOTOR_DIAMETER * math.pi) / 60
+
 
 DASHBOARD = """
 Manually Control ServingBot!
@@ -199,6 +214,13 @@ class Publisher(Node):
         displayInstruction()
         self.get_logger().info(
             "twist.linear.x = " + str(round(twist.linear.x, 2)) + " m/s"
+        )
+        self.get_logger().info(
+            "twist.angular.z = " + str(round(twist.angular.z, 2)) + " rad/s"
+        )
+        self.get_logger().info("-----")
+        self.get_logger().info(
+            "twist.linear.x = " + str(round(MPStoRPM(twist.linear.x), 2)) + " RPM"
         )
         self.get_logger().info(
             "twist.angular.z = " + str(round(twist.angular.z, 2)) + " rad/s"
