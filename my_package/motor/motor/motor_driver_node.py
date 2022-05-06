@@ -32,19 +32,19 @@ PUBLISH_FREQUENCY = 1000
 NODE_NAME = "motor_driver"
 
 # Motor parameters
-LEFT_MOTOR_MAX_VELOCITY = 0.6 # m/s
-RIGHT_MOTOR_MAX_VELOCITY = 0.6 # m/s
+LEFT_MOTOR_MAX_VELOCITY = 0.6  # m/s
+RIGHT_MOTOR_MAX_VELOCITY = 0.6  # m/s
 
 LEFT_MOTOR_DIAMETER = 0.09  # m
-LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480 # ticks
-LEFT_MOTOR_PWM_FREQUENCY = 1000 # Hz
-LEFT_MOTOR_SAMPLE_TIME = 0.005 # s
+LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
+LEFT_MOTOR_PWM_FREQUENCY = 1000  # Hz
+LEFT_MOTOR_SAMPLE_TIME = 0.005  # s
 left_wheel_RPM_for_1_rad_per_sec_of_robot = 100
 
 RIGHT_MOTOR_DIAMETER = 0.09  # m
-RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480 # ticks
-RIGHT_MOTOR_PWM_FREQUENCY = 1000 # Hz
-RIGHT_MOTOR_SAMPLE_TIME = 0.005 # s
+RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
+RIGHT_MOTOR_PWM_FREQUENCY = 1000  # Hz
+RIGHT_MOTOR_SAMPLE_TIME = 0.005  # s
 right_wheel_RPM_for_1_rad_per_sec_of_robot = 100
 
 # Kalman Filter parameters
@@ -313,21 +313,24 @@ def driveMotors():
         linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
     )
 
-    left_pwm_value = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
-    right_pwm_value = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue()
+    # left_pwm_value = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
+    # right_pwm_value = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue()
+
+    # left_pwm_value = saturate(linear_velocity * 1023 / 0.6, 0, LEFT_MOTOR_MAX_VELOCITY)
+    # right_pwm_value = saturate(linear_velocity * 1023 / 0.6, 0, RIGHT_MOTOR_MAX_VELOCITY)
 
     print("---")
     print(
         "Left PWM: "
-        + str(left_pwm_value)
+        + str(linear_velocity_left)
         + "; Left RPM: "
-        + str(LEFT_MOTOR.getKalmanFilterRPM())
+        + str(LEFT_MOTOR.getLowPassRPM())
     )
     print(
         "Right PWM: "
-        + str(right_pwm_value)
+        + str(linear_velocity_right)
         + "; Right RPM: "
-        + str(RIGHT_MOTOR.getKalmanFilterRPM())
+        + str(RIGHT_MOTOR.getLowPassRPM())
     )
     print("---")
 
@@ -335,10 +338,10 @@ def driveMotors():
         "motor_data": [
             direction,
             pwm_freq_1,
-            left_pwm_value,
+            linear_velocity_left,
             direction,
             pwm_freq_2,
-            right_pwm_value,
+            linear_velocity_right,
         ]
     }
 
@@ -465,6 +468,7 @@ def varyPWM(PWM):
             PWM,
         ]
     }
+
     MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
 
 
