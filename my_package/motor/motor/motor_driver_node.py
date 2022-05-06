@@ -133,9 +133,12 @@ RIGHT_MOTOR_PID_CONTROLLER = PIDController(
 # Node parameters
 receiving_timer = time.time()
 publish_timer = time.time()
+linear_velocity = 0
 previous_linear_velocity = 0
 current_state_is_straight = True
 previous_current_state_is_straight = True
+linear_velocity_left = 0
+linear_velocity_right = 0
 RECEIVING_PERIOD = 1
 """ The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided\
     callback function will be called. For no delay, set it equal ZERO. """
@@ -212,7 +215,7 @@ class MotorDriverNode(Node):
             # self.get_logger().info('Publishing: "%s"' % msg.data)
 
     def subscriberCallback(self, msg):
-        driveMotors(msg)
+        setupSetpoint(msg)
 
 
 def MPStoRPM(mps):
@@ -256,9 +259,9 @@ def differientialDriveRight(angular_velocity):
     return right_wheel_RPM_for_1_rad_per_sec_of_robot * angular_velocity
 
 
-def driveMotors(msg):
+def setupSetpoint(msg):
     global previous_linear_velocity, current_state_is_straight, previous_current_state_is_straight
-
+    global linear_velocity, linear_velocity_left, linear_velocity_right
     # Evaluate to have RPM value
 
     linear_velocity = MPStoRPM(msg.linear.x)  # RPM
@@ -291,35 +294,39 @@ def driveMotors(msg):
     linear_velocity_left = saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
     linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
 
+
+def driveMotors():
+    """PID Controller"""
+    global linear_velocity, linear_velocity_left, linear_velocity_right
+
     # print("Left RPM: " + str(linear_velocity_left))
     # print("Right RPM: " + str(linear_velocity_right))
     # print("---")
 
-    # PID Controller
+    # print(
+    #     "Left PWM: "
+    #     + str(left_pwm_value)
+    #     + "; Left RPM: "
+    #     + str(LEFT_MOTOR.getKalmanFilterRPM())
+    # )
+    # print(
+    #     "Right PWM: "
+    #     + str(right_pwm_value)
+    #     + "; Right RPM: "
+    #     + str(RIGHT_MOTOR.getKalmanFilterRPM())
+    # )
+
+    direction = getDirection(linear_velocity)
+
+    pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
+    pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
+
     left_pwm_value = LEFT_MOTOR_PID_CONTROLLER.evaluate(
         linear_velocity_left, LEFT_MOTOR.getKalmanFilterRPM()
     )
     right_pwm_value = RIGHT_MOTOR_PID_CONTROLLER.evaluate(
         linear_velocity_right, RIGHT_MOTOR.getKalmanFilterRPM()
     )
-
-    print(
-        "Left PWM: "
-        + str(left_pwm_value)
-        + "; Left RPM: "
-        + str(LEFT_MOTOR.getKalmanFilterRPM())
-    )
-    print(
-        "Right PWM: "
-        + str(right_pwm_value)
-        + "; Right RPM: "
-        + str(RIGHT_MOTOR.getKalmanFilterRPM())
-    )
-
-    direction = getDirection(msg.linear.x)
-
-    pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
-    pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
     data = {
         "motor_data": [
@@ -331,17 +338,6 @@ def driveMotors(msg):
             right_pwm_value,
         ]
     }
-
-    # data = {
-    #     "motor_data": [
-    #         direction,
-    #         pwm_freq_1,
-    #         linear_velocity_left * 1023 / MPStoRPM(LEFT_MOTOR_MAX_VELOCITY),
-    #         direction,
-    #         pwm_freq_2,
-    #         linear_velocity_right * 1023 / MPStoRPM(RIGHT_MOTOR_MAX_VELOCITY),
-    #     ]
-    # }
 
     data = json.dumps(data)
     MCUSerialObject.write(formSerialData(data))
@@ -549,6 +545,7 @@ def loop():
 
                 LEFT_MOTOR.calculateRPM(TICK_1)
                 RIGHT_MOTOR.calculateRPM(TICK_2)
+                driveMotors()
                 rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:
