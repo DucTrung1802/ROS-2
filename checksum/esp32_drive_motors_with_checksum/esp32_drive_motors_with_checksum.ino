@@ -4,6 +4,7 @@
 *********/
 
 #include <ArduinoJson.h>
+#include <MD5.h>
 
 // Config pin parameters
 // Motor 1
@@ -37,9 +38,12 @@ const uint8_t CHANNEL_PWMB = 2;
 const int BAUD_RATE = 115200;
 // Sending
 StaticJsonDocument<200> JSON_DOC_SEND;
+String JSON_DOC_SEND_STRING;
 const unsigned int SENDING_FREQUENCY = 2000; // Hz
 double PERIOD; // milliseconds
 volatile unsigned long long timerPivot = 0; // milliseconds
+String left_tick[15] = "left_tick";
+String right_tick[15] = "right_tick";
 
 // Receiving
 volatile char serialChar;
@@ -54,8 +58,11 @@ volatile int wheel_direction[2] = {0, 0};
 volatile int pwm_frequency[2] = {0, 0};
 volatile int pwm_pulse[2] = {0, 0};
 
+// Checksum parameters
+char* md5str;
+unsigned char* hash;
 
-// Config encoders' parameters
+// Non-config encoders' parameters
 volatile int POS_1 = 0;
 volatile int POS_2 = 0;
 
@@ -72,13 +79,13 @@ bool deserializeJSON() {
 }
 
 void decodeJSON() {
-  wheel_direction[0] = JSON_DOC_RECEIVE[size_t(KEY)][0];
-  pwm_frequency[0] = JSON_DOC_RECEIVE[size_t(KEY)][1];
-  pwm_pulse[0] = JSON_DOC_RECEIVE[size_t(KEY)][2];
+  wheel_direction[0] = JSON_DOC_RECEIVE[int(KEY)][0];
+  pwm_frequency[0] = JSON_DOC_RECEIVE[int(KEY)][1];
+  pwm_pulse[0] = JSON_DOC_RECEIVE[int(KEY)][2];
 
-  wheel_direction[1] = JSON_DOC_RECEIVE[size_t(KEY)][3];
-  pwm_frequency[1] = JSON_DOC_RECEIVE[size_t(KEY)][4];
-  pwm_pulse[1] = JSON_DOC_RECEIVE[size_t(KEY)][5];
+  wheel_direction[1] = JSON_DOC_RECEIVE[int(KEY)][3];
+  pwm_frequency[1] = JSON_DOC_RECEIVE[int(KEY)][4];
+  pwm_pulse[1] = JSON_DOC_RECEIVE[int(KEY)][5];
 }
 
 void driveLeftWheel() {
@@ -133,6 +140,7 @@ void drive_motors() {
 void serial_receive() {
   serialChar = Serial.read();
   if (serialChar == '\n' || serialChar == '#') {
+    // Checksum here
     drive_motors();
     serialLine = "";
   } else {
@@ -176,10 +184,18 @@ void initializeMotor()
   digitalWrite(STBY, HIGH);
 }
 
+void addKeyChecksum() {
+  serializeJson(JSON_DOC_SEND, JSON_DOC_SEND_STRING);
+  Serial.println(JSON_DOC_SEND_STRING);
+//  hash = MD5::make_hash(JSON_DOC_SEND);
+//  md5str = MD5::make_digest(hash, 16);
+}
+
 void readEncoderTicks() {
   noInterrupts();
-  JSON_DOC_SEND["left_tick"] = POS_1;
-  JSON_DOC_SEND["right_tick"] = POS_2;
+  JSON_DOC_SEND[int(left_tick)] = POS_1;
+  JSON_DOC_SEND[int(right_tick)] = POS_2;
+  // Checksum
   interrupts();
 }
 
@@ -237,6 +253,7 @@ void loop()
   readEncoderTicks();
   if (micros() - timerPivot >= PERIOD) {
     serializeJson(JSON_DOC_SEND, Serial);
+    addKeyChecksum();
     Serial.println();
     //  serializeJsonPretty(JSON_DOC_SEND, Serial);
     timerPivot = micros();
