@@ -1,3 +1,5 @@
+import time
+
 class PIDController:
     def __init__(self, Kp, Ki, Kd, T, min, max):
         self.__checkConditions(Kp, Ki, Kd, T, min, max)
@@ -10,7 +12,7 @@ class PIDController:
             raise Exception("Ki must not be negative!")
         if Kd < 0:
             raise Exception("Kd must not be negative!")
-        if T <= 0:
+        if T <= 0: # T is sample time
             raise Exception("T must be positive!")
         if min > max:
             raise Exception("Minimum value must smaller or equal to maximum value!")
@@ -32,6 +34,9 @@ class PIDController:
         self.__min = min
         self.__max = max
 
+        self.__timer = 0
+        self.__sample_time = T
+
     def __saturate(self, value):
         if value > self.__max:
             return self.__max
@@ -42,30 +47,33 @@ class PIDController:
 
 
     def evaluate(self, setpoint, current_measure_value):
-        self.__ek = setpoint - current_measure_value
+        if time.time() - self.__timer >= self.__sample_time:
+            self.__ek = setpoint - current_measure_value
 
-        if self.__state == 0:
-            self.__uk = self.__alpha * self.__ek / self.__delta
+            if self.__state == 0:
+                self.__uk = self.__alpha * self.__ek / self.__delta
 
-        elif self.__state == 1:
-            self.__uk = (
-                self.__alpha * self.__ek
-                + self.__beta * self.__ek_1
-                + self.__delta * self.__uk_1
-            ) / self.__delta
+            elif self.__state == 1:
+                self.__uk = (
+                    self.__alpha * self.__ek
+                    + self.__beta * self.__ek_1
+                    + self.__delta * self.__uk_1
+                ) / self.__delta
 
-        elif self.__state >= 2:
-            self.__uk = (
-                self.__alpha * self.__ek
-                + self.__beta * self.__ek_1
-                + self.__gamma * self.__ek_2
-                + self.__delta * self.__uk_1
-            ) / self.__delta
+            elif self.__state >= 2:
+                self.__uk = (
+                    self.__alpha * self.__ek
+                    + self.__beta * self.__ek_1
+                    + self.__gamma * self.__ek_2
+                    + self.__delta * self.__uk_1
+                ) / self.__delta
 
-        self.__uk_1 = self.__uk
-        self.__ek_2 = self.__ek_1
-        self.__ek_1 = self.__ek
-        self.__state += 1
+            self.__uk_1 = self.__uk
+            self.__ek_2 = self.__ek_1
+            self.__ek_1 = self.__ek
+            self.__state += 1
+
+            self.__timer = time.time()
 
     def getOutputValue(self):
         return self.__saturate(self.__uk)
