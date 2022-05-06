@@ -303,30 +303,33 @@ def driveMotors():
     # print("Right RPM: " + str(linear_velocity_right))
     # print("---")
 
-    # print(
-    #     "Left PWM: "
-    #     + str(left_pwm_value)
-    #     + "; Left RPM: "
-    #     + str(LEFT_MOTOR.getKalmanFilterRPM())
-    # )
-    # print(
-    #     "Right PWM: "
-    #     + str(right_pwm_value)
-    #     + "; Right RPM: "
-    #     + str(RIGHT_MOTOR.getKalmanFilterRPM())
-    # )
-
     direction = getDirection(linear_velocity)
 
     pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
     pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-    left_pwm_value = LEFT_MOTOR_PID_CONTROLLER.evaluate(
-        linear_velocity_left, LEFT_MOTOR.getKalmanFilterRPM()
+    LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, LEFT_MOTOR.getLowPassRPM())
+    RIGHT_MOTOR_PID_CONTROLLER.evaluate(
+        linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
     )
-    right_pwm_value = RIGHT_MOTOR_PID_CONTROLLER.evaluate(
-        linear_velocity_right, RIGHT_MOTOR.getKalmanFilterRPM()
+
+    left_pwm_value = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
+    right_pwm_value = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue()
+
+    print("---")
+    print(
+        "Left PWM: "
+        + str(left_pwm_value)
+        + "; Left RPM: "
+        + str(LEFT_MOTOR.getKalmanFilterRPM())
     )
+    print(
+        "Right PWM: "
+        + str(right_pwm_value)
+        + "; Right RPM: "
+        + str(RIGHT_MOTOR.getKalmanFilterRPM())
+    )
+    print("---")
 
     data = {
         "motor_data": [
