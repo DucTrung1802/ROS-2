@@ -133,6 +133,7 @@ RIGHT_MOTOR_PID_CONTROLLER = PIDController(
 # Node parameters
 receiving_timer = time.time()
 publish_timer = time.time()
+drive_timer = time.time()
 linear_velocity = 0
 previous_linear_velocity = 0
 current_state_is_straight = True
@@ -294,59 +295,56 @@ def setupSetpoint(msg):
     linear_velocity_left = saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
     linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
 
+    # Testing
+    linear_velocity_left = linear_velocity_left * 1023 / LEFT_MOTOR_MAX_RPM
+    linear_velocity_right = linear_velocity_right * 1023 / RIGHT_MOTOR_MAX_RPM
+
 
 def driveMotors():
-    """PID Controller"""
     global linear_velocity, linear_velocity_left, linear_velocity_right
+    global drive_timer
 
-    # print("Left RPM: " + str(linear_velocity_left))
-    # print("Right RPM: " + str(linear_velocity_right))
-    # print("---")
+    if time.time() - drive_timer >= LEFT_MOTOR.getSampleTime():
+        direction = getDirection(linear_velocity)
 
-    direction = getDirection(linear_velocity)
+        pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
+        pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-    pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
-    pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
+        # LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, LEFT_MOTOR.getLowPassRPM())
+        # RIGHT_MOTOR_PID_CONTROLLER.evaluate(
+        #     linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
+        # )
 
-    LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, LEFT_MOTOR.getLowPassRPM())
-    RIGHT_MOTOR_PID_CONTROLLER.evaluate(
-        linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
-    )
+        print("---")
+        print(
+            "Left PWM: "
+            + str(linear_velocity_left)
+            + "; Left RPM: "
+            + str(LEFT_MOTOR.getLowPassRPM())
+        )
+        print(
+            "Right PWM: "
+            + str(linear_velocity_right)
+            + "; Right RPM: "
+            + str(RIGHT_MOTOR.getLowPassRPM())
+        )
+        print("---")
 
-    # left_pwm_value = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
-    # right_pwm_value = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue()
+        data = {
+            "motor_data": [
+                direction,
+                pwm_freq_1,
+                linear_velocity_left,
+                direction,
+                pwm_freq_2,
+                linear_velocity_right,
+            ]
+        }
 
-    # left_pwm_value = saturate(linear_velocity * 1023 / 0.6, 0, LEFT_MOTOR_MAX_VELOCITY)
-    # right_pwm_value = saturate(linear_velocity * 1023 / 0.6, 0, RIGHT_MOTOR_MAX_VELOCITY)
+        data = json.dumps(data)
+        MCUSerialObject.write(formSerialData(data))
 
-    print("---")
-    print(
-        "Left PWM: "
-        + str(linear_velocity_left)
-        + "; Left RPM: "
-        + str(LEFT_MOTOR.getLowPassRPM())
-    )
-    print(
-        "Right PWM: "
-        + str(linear_velocity_right)
-        + "; Right RPM: "
-        + str(RIGHT_MOTOR.getLowPassRPM())
-    )
-    print("---")
-
-    data = {
-        "motor_data": [
-            direction,
-            pwm_freq_1,
-            linear_velocity_left,
-            direction,
-            pwm_freq_2,
-            linear_velocity_right,
-        ]
-    }
-
-    data = json.dumps(data)
-    MCUSerialObject.write(formSerialData(data))
+        drive_timer = time.time()
 
 
 def getMCUSerial():
