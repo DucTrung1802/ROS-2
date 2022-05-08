@@ -118,15 +118,18 @@ void drive_motors() {
   //  PWM: 0 - 1023
   if (deserializeJSON()) {
     decodeJSON();
-    digitalWrite(STBY, LOW);
+
     driveLeftWheel();
     driveRightWheel();
-    digitalWrite(STBY, HIGH);
+
 
     ledcSetup(CHANNEL_PWMA, pwm_frequency[0], RESOLUTION_PWM_1);
     ledcSetup(CHANNEL_PWMB, pwm_frequency[1], RESOLUTION_PWM_2);
+
+    digitalWrite(STBY, LOW);
     ledcWrite(CHANNEL_PWMA, pwm_pulse[0]);
     ledcWrite(CHANNEL_PWMB, pwm_pulse[1]);
+    digitalWrite(STBY, HIGH);
   }
 }
 
