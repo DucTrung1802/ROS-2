@@ -296,8 +296,8 @@ def setupSetpoint(msg):
     linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
 
     # Testing
-    linear_velocity_left = linear_velocity_left * 1023 / LEFT_MOTOR_MAX_RPM
-    linear_velocity_right = linear_velocity_right * 1023 / RIGHT_MOTOR_MAX_RPM
+    # linear_velocity_left = linear_velocity_left * 1023 / LEFT_MOTOR_MAX_RPM
+    # linear_velocity_right = linear_velocity_right * 1023 / RIGHT_MOTOR_MAX_RPM
 
 
 def driveMotors():
@@ -310,10 +310,13 @@ def driveMotors():
         pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
         pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-        # LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, LEFT_MOTOR.getLowPassRPM())
-        # RIGHT_MOTOR_PID_CONTROLLER.evaluate(
-        #     linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
-        # )
+        LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, LEFT_MOTOR.getLowPassRPM())
+        RIGHT_MOTOR_PID_CONTROLLER.evaluate(
+            linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
+        )
+
+        linear_velocity_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
+        linear_velocity_right = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
 
         print("---")
         print(
