@@ -310,24 +310,26 @@ def driveMotors():
         pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
         pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-        LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, LEFT_MOTOR.getLowPassRPM())
+        LEFT_MOTOR_PID_CONTROLLER.evaluate(
+            linear_velocity_left, LEFT_MOTOR.getLowPassRPM()
+        )
         RIGHT_MOTOR_PID_CONTROLLER.evaluate(
             linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
         )
 
-        linear_velocity_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
-        linear_velocity_right = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
+        pwm_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
+        pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue()
 
         print("---")
         print(
             "Left PWM: "
-            + str(linear_velocity_left)
+            + str(pwm_left)
             + "; Left RPM: "
             + str(LEFT_MOTOR.getLowPassRPM())
         )
         print(
             "Right PWM: "
-            + str(linear_velocity_right)
+            + str(pwm_right)
             + "; Right RPM: "
             + str(RIGHT_MOTOR.getLowPassRPM())
         )
@@ -337,10 +339,10 @@ def driveMotors():
             "motor_data": [
                 direction,
                 pwm_freq_1,
-                linear_velocity_left,
+                pwm_left,
                 direction,
                 pwm_freq_2,
-                linear_velocity_right,
+                pwm_right,
             ]
         }
 

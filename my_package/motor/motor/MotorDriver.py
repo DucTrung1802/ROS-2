@@ -94,8 +94,8 @@ class MotorDriver(object):
             self.__lowPassFilter()
 
             # Kalman Filter
-            self.__KF.filter(self.__lowPassFilteredRPM)
-            self.__KalmanFilteredRPM = self.__KF.getCurrentStateEstimate()
+            # self.__KF.filter(self.__lowPassFilteredRPM)
+            # self.__KalmanFilteredRPM = self.__KF.getCurrentStateEstimate()
 
             self.__previous_tick = current_tick
 
