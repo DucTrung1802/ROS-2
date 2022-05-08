@@ -16,6 +16,7 @@ from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 from motor.MotorDriver import MotorDriver
 from motor.DataRecoder import DataRecoder
+from motor.PIDController import PIDController
 
 
 # =========== Configurable parameters =============
@@ -31,19 +32,19 @@ PUBLISH_FREQUENCY = 1000
 NODE_NAME = "motor_driver"
 
 # Motor parameters
-LEFT_MOTOR_MAX_VELOCITY = 0.6
-RIGHT_MOTOR_MAX_VELOCITY = 0.6
+LEFT_MOTOR_MAX_VELOCITY = 0.6  # m/s
+RIGHT_MOTOR_MAX_VELOCITY = 0.6  # m/s
 
 LEFT_MOTOR_DIAMETER = 0.09  # m
-LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480
-LEFT_MOTOR_PWM_FREQUENCY = 1000
-LEFT_MOTOR_SAMPLE_TIME = 0.05
+LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
+LEFT_MOTOR_PWM_FREQUENCY = 1000  # Hz
+LEFT_MOTOR_SAMPLE_TIME = 0.005  # s
 left_wheel_RPM_for_1_rad_per_sec_of_robot = 100
 
 RIGHT_MOTOR_DIAMETER = 0.09  # m
-RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480
-RIGHT_MOTOR_PWM_FREQUENCY = 1000
-RIGHT_MOTOR_SAMPLE_TIME = 0.05
+RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
+RIGHT_MOTOR_PWM_FREQUENCY = 1000  # Hz
+RIGHT_MOTOR_SAMPLE_TIME = 0.005  # s
 right_wheel_RPM_for_1_rad_per_sec_of_robot = 100
 
 # Kalman Filter parameters
@@ -56,6 +57,20 @@ RIGHT_MOTOR_X = 0
 RIGHT_MOTOR_P = 10000
 RIGHT_MOTOR_Q = 0
 RIGHT_MOTOR_R = 273
+
+# PID Controller parameters
+LEFT_MOTOR_Kp = 0.051
+LEFT_MOTOR_Ki = 1.25
+LEFT_MOTOR_Kd = 0
+LEFT_MOTOR_MIN = 0
+LEFT_MOTOR_MAX = 1023
+
+RIGHT_MOTOR_Kp = 0.064
+RIGHT_MOTOR_Ki = 1.57
+RIGHT_MOTOR_Kd = 0.0002
+RIGHT_MOTOR_MIN = 0
+RIGHT_MOTOR_MAX = 1023
+
 
 # Test data
 DATA_RECORDING = False
@@ -95,13 +110,36 @@ RIGHT_MOTOR.setupValuesKF(
     X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
 )
 
+# PID instances
+LEFT_MOTOR_PID_CONTROLLER = PIDController(
+    LEFT_MOTOR_Kp,
+    LEFT_MOTOR_Ki,
+    LEFT_MOTOR_Kd,
+    LEFT_MOTOR.getSampleTime(),
+    LEFT_MOTOR_MIN,
+    LEFT_MOTOR_MAX,
+)
+
+RIGHT_MOTOR_PID_CONTROLLER = PIDController(
+    RIGHT_MOTOR_Kp,
+    RIGHT_MOTOR_Ki,
+    RIGHT_MOTOR_Kd,
+    RIGHT_MOTOR.getSampleTime(),
+    RIGHT_MOTOR_MIN,
+    RIGHT_MOTOR_MAX,
+)
+
 
 # Node parameters
 receiving_timer = time.time()
 publish_timer = time.time()
+drive_timer = time.time()
+linear_velocity = 0
 previous_linear_velocity = 0
 current_state_is_straight = True
 previous_current_state_is_straight = True
+linear_velocity_left = 0
+linear_velocity_right = 0
 RECEIVING_PERIOD = 1
 """ The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided\
     callback function will be called. For no delay, set it equal ZERO. """
@@ -113,6 +151,8 @@ foundMCU = False
 foundLidar = False
 serialData = ""
 dictionaryData = {}
+time_of_receive = 0
+error_of_receive = 0
 
 # JSON parameters
 KEY = "pwm_pulse"
@@ -176,7 +216,7 @@ class MotorDriverNode(Node):
             # self.get_logger().info('Publishing: "%s"' % msg.data)
 
     def subscriberCallback(self, msg):
-        driveMotors(msg)
+        setupSetpoint(msg)
 
 
 def MPStoRPM(mps):
@@ -220,9 +260,9 @@ def differientialDriveRight(angular_velocity):
     return right_wheel_RPM_for_1_rad_per_sec_of_robot * angular_velocity
 
 
-def driveMotors(msg):
+def setupSetpoint(msg):
     global previous_linear_velocity, current_state_is_straight, previous_current_state_is_straight
-
+    global linear_velocity, linear_velocity_left, linear_velocity_right
     # Evaluate to have RPM value
 
     linear_velocity = MPStoRPM(msg.linear.x)  # RPM
@@ -255,29 +295,56 @@ def driveMotors(msg):
     linear_velocity_left = saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
     linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
 
-    print("Left RPM: " + str(linear_velocity_left))
-    print("Right RPM: " + str(linear_velocity_right))
-    print("---")
+    # Testing
+    linear_velocity_left = linear_velocity_left * 1023 / LEFT_MOTOR_MAX_RPM
+    linear_velocity_right = linear_velocity_right * 1023 / RIGHT_MOTOR_MAX_RPM
 
-    # Control
-    direction = getDirection(msg.linear.x)
 
-    pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
-    pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
+def driveMotors():
+    global linear_velocity, linear_velocity_left, linear_velocity_right
+    global drive_timer
 
-    data = {
-        "motor_data": [
-            direction,
-            pwm_freq_1,
-            linear_velocity_left * 1023 / MPStoRPM(LEFT_MOTOR_MAX_VELOCITY),
-            direction,
-            pwm_freq_2,
-            linear_velocity_right * 1023 / MPStoRPM(RIGHT_MOTOR_MAX_VELOCITY),
-        ]
-    }
+    if time.time() - drive_timer >= LEFT_MOTOR.getSampleTime():
+        direction = getDirection(linear_velocity)
 
-    data = json.dumps(data)
-    MCUSerialObject.write(formSerialData(data))
+        pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
+        pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
+
+        # LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, LEFT_MOTOR.getLowPassRPM())
+        # RIGHT_MOTOR_PID_CONTROLLER.evaluate(
+        #     linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
+        # )
+
+        print("---")
+        print(
+            "Left PWM: "
+            + str(linear_velocity_left)
+            + "; Left RPM: "
+            + str(LEFT_MOTOR.getLowPassRPM())
+        )
+        print(
+            "Right PWM: "
+            + str(linear_velocity_right)
+            + "; Right RPM: "
+            + str(RIGHT_MOTOR.getLowPassRPM())
+        )
+        print("---")
+
+        data = {
+            "motor_data": [
+                direction,
+                pwm_freq_1,
+                linear_velocity_left,
+                direction,
+                pwm_freq_2,
+                linear_velocity_right,
+            ]
+        }
+
+        data = json.dumps(data)
+        MCUSerialObject.write(formSerialData(data))
+
+        drive_timer = time.time()
 
 
 def getMCUSerial():
@@ -353,13 +420,19 @@ def readSerialData():
 
 
 def updateStorePosFromSerial():
-    global STORE_TICK_1, STORE_TICK_2
+    global STORE_TICK_1, STORE_TICK_2, time_of_receive, error_of_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
-    readSerialData()
-    # print("left tick: " + str(dictionaryData["left_tick"]))
-    # print("right tick: " + str(dictionaryData["right_tick"]))
-    STORE_TICK_1 = dictionaryData["left_tick"]
-    STORE_TICK_2 = dictionaryData["right_tick"]
+    # print(
+    #     "Error in serial communication: " + str(error_of_receive) + "/" + str(time_of_receive)
+    # )
+    try:
+        readSerialData()
+        STORE_TICK_1 = dictionaryData["left_tick"]
+        STORE_TICK_2 = dictionaryData["right_tick"]
+        time_of_receive += 1
+    except:
+        error_of_receive += 1
+        return
 
 
 #
@@ -393,6 +466,7 @@ def varyPWM(PWM):
             PWM,
         ]
     }
+
     MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
 
 
@@ -476,6 +550,7 @@ def loop():
 
                 LEFT_MOTOR.calculateRPM(TICK_1)
                 RIGHT_MOTOR.calculateRPM(TICK_2)
+                driveMotors()
                 rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:

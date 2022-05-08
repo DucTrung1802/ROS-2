@@ -4,12 +4,13 @@
 *********/
 
 #include <ArduinoJson.h>
+#include <MD5.h>
 
 // Config pin parameters
 // Motor 1
-const uint8_t AIN1 = 27;
+const uint8_t AIN1 = 25;
 const uint8_t AIN2 = 26;
-const uint8_t PWMA = 25;
+const uint8_t PWMA = 27;
 const uint8_t ENC1_A = 22;
 const uint8_t ENC1_B = 23;
 
@@ -20,7 +21,7 @@ const uint8_t PWMB = 5;
 const uint8_t ENC2_A = 17;
 const uint8_t ENC2_B = 16;
 
-const uint8_t STBY = 21;
+const uint8_t STBY = 13;
 
 
 // Config pwm parameters
@@ -37,6 +38,7 @@ const uint8_t CHANNEL_PWMB = 2;
 const int BAUD_RATE = 115200;
 // Sending
 StaticJsonDocument<200> JSON_DOC_SEND;
+String JSON_DOC_SEND_STRING;
 const unsigned int SENDING_FREQUENCY = 2000; // Hz
 double PERIOD; // milliseconds
 volatile unsigned long long timerPivot = 0; // milliseconds
@@ -54,8 +56,11 @@ volatile int wheel_direction[2] = {0, 0};
 volatile int pwm_frequency[2] = {0, 0};
 volatile int pwm_pulse[2] = {0, 0};
 
+// Checksum parameters
+char* md5str;
+unsigned char* hash;
 
-// Config encoders' parameters
+// Non-config encoders' parameters
 volatile int POS_1 = 0;
 volatile int POS_2 = 0;
 
@@ -133,6 +138,7 @@ void drive_motors() {
 void serial_receive() {
   serialChar = Serial.read();
   if (serialChar == '\n' || serialChar == '#') {
+    // Checksum here
     drive_motors();
     serialLine = "";
   } else {
@@ -176,11 +182,28 @@ void initializeMotor()
   digitalWrite(STBY, HIGH);
 }
 
+void calculateChecksum() {
+  char buf[200];
+  serializeJson(JSON_DOC_SEND, JSON_DOC_SEND_STRING);
+  JSON_DOC_SEND_STRING.toCharArray(buf, 200);
+  hash = MD5::make_hash(buf);
+  md5str = MD5::make_digest(hash, 16);
+}
+
+void freeChecksum() {
+  free(hash);
+  free(md5str);
+}
+
 void readEncoderTicks() {
   noInterrupts();
   JSON_DOC_SEND["left_tick"] = POS_1;
   JSON_DOC_SEND["right_tick"] = POS_2;
+  // Checksum
   interrupts();
+  calculateChecksum();
+  JSON_DOC_SEND["checksum"] = md5str;
+  freeChecksum();
 }
 
 void calculateSendingPeriod() {
