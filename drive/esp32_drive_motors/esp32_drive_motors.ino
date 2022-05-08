@@ -7,9 +7,9 @@
 
 // Config pin parameters
 // Motor 1
-const uint8_t AIN1 = 25;
+const uint8_t AIN1 = 27;
 const uint8_t AIN2 = 26;
-const uint8_t PWMA = 27;
+const uint8_t PWMA = 25;
 const uint8_t ENC1_A = 22;
 const uint8_t ENC1_B = 23;
 
@@ -20,7 +20,7 @@ const uint8_t PWMB = 5;
 const uint8_t ENC2_A = 17;
 const uint8_t ENC2_B = 16;
 
-const uint8_t STBY = 13;
+const uint8_t STBY = 21;
 
 
 // Config pwm parameters
