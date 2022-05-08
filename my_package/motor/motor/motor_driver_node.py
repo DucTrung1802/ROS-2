@@ -73,7 +73,7 @@ RIGHT_MOTOR_MAX = 1023
 
 
 # Test data
-DATA_RECORDING = False
+DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
@@ -492,8 +492,6 @@ def loop():
     try:
         if DATA_RECORDING:
             index = 0
-            old_pwm_value = 0
-            pwm_value = 714
 
             while index <= DATA_AMOUNT:
 
@@ -512,6 +510,7 @@ def loop():
 
                 LEFT_MOTOR.calculateRPM(TICK_1)
                 RIGHT_MOTOR.calculateRPM(TICK_2)
+                driveMotors()
                 rclpy.spin_once(motor_driver_node)
 
                 if index != LEFT_MOTOR.getDataCount():
@@ -526,18 +525,10 @@ def loop():
                     # else:
                     #     pwm_value = 510
 
-                    if pwm_value != old_pwm_value:
-                        LEFT_MOTOR.setupValuesKF(X=0, P=10000, Q=0, R=273)
-                        RIGHT_MOTOR.setupValuesKF(X=0, P=10000, Q=0, R=273)
-                        old_pwm_value = pwm_value
-                        print("change")
-
-                    varyPWM(TEST_PWM)
-
                     WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getLowPassRPM())
-                    WORKBOOK.writeData(index + 1, 2, LEFT_MOTOR.getKalmanFilterRPM())
-                    WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getLowPassRPM())
-                    WORKBOOK.writeData(index + 1, 5, RIGHT_MOTOR.getKalmanFilterRPM())
+                    # WORKBOOK.writeData(index + 1, 2, LEFT_MOTOR.getKalmanFilterRPM())
+                    WORKBOOK.writeData(index + 1, 3, RIGHT_MOTOR.getLowPassRPM())
+                    # WORKBOOK.writeData(index + 1, 5, RIGHT_MOTOR.getKalmanFilterRPM())
 
         else:
             while True:
