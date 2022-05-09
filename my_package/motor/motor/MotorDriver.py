@@ -120,6 +120,9 @@ class MotorDriver(object):
     def changeCoefficientKalmanFilter(self):
         pass
 
+    def getTicks(self):
+        return self.__previous_tick
+
     def getLowPassRPM(self):
         return self.__lowPassFilteredRPM
 

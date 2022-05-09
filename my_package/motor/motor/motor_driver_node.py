@@ -77,10 +77,10 @@ DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 510
+TEST_PWM = 700
 
 # DataRecorder parameters
-DATA_AMOUNT = 120
+DATA_AMOUNT = 500
 
 # =================================================
 
@@ -492,10 +492,10 @@ def loop():
     try:
         if DATA_RECORDING:
             index = 0
+            varyPWM(TEST_PWM)
+            timer = time.time()
 
             while index <= DATA_AMOUNT:
-
-                # varyPWM(1023)
 
                 if time.time() - receiving_timer >= RECEIVING_PERIOD:
                     updateStorePosFromSerial()
@@ -510,7 +510,7 @@ def loop():
 
                 LEFT_MOTOR.calculateRPM(TICK_1)
                 RIGHT_MOTOR.calculateRPM(TICK_2)
-                driveMotors()
+                # driveMotors()
                 rclpy.spin_once(motor_driver_node)
 
                 if index != LEFT_MOTOR.getDataCount():
@@ -525,10 +525,18 @@ def loop():
                     # else:
                     #     pwm_value = 510
 
+
                     WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getLowPassRPM())
                     # WORKBOOK.writeData(index + 1, 2, LEFT_MOTOR.getKalmanFilterRPM())
-                    WORKBOOK.writeData(index + 1, 3, RIGHT_MOTOR.getLowPassRPM())
+                    WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getLowPassRPM())
                     # WORKBOOK.writeData(index + 1, 5, RIGHT_MOTOR.getKalmanFilterRPM())
+
+
+                # print("Left tick: " + str(LEFT_MOTOR.getTicks()))
+                # print("Right tick: " + str(RIGHT_MOTOR.getTicks()))
+
+                # if (time.time() - timer >= 4):
+                #     break
 
         else:
             while True:
