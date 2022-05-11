@@ -270,7 +270,7 @@ void loop()
   
   if (micros() - timerPivot >= PERIOD) {
     serializeJson(JSON_DOC_SEND, Serial);
-    // Serial.println();
+    Serial.println();
     // Serial.println(v1Filt);
     // Serial.println(POS_2);
     //  serializeJsonPretty(JSON_DOC_SEND, Serial);
