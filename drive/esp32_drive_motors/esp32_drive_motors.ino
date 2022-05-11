@@ -122,7 +122,6 @@ void drive_motors() {
     driveLeftWheel();
     driveRightWheel();
 
-
     ledcSetup(CHANNEL_PWMA, pwm_frequency[0], RESOLUTION_PWM_1);
     ledcSetup(CHANNEL_PWMB, pwm_frequency[1], RESOLUTION_PWM_2);
 
@@ -194,6 +193,11 @@ void calculateSendingPeriod() {
   }
 }
 
+void calculateSpeed() {
+  long currT = micros();
+  
+}
+
 void setup()
 {
   Serial.begin(BAUD_RATE);
@@ -239,8 +243,10 @@ void loop()
 
   readEncoderTicks();
   if (micros() - timerPivot >= PERIOD) {
-    serializeJson(JSON_DOC_SEND, Serial);
-    Serial.println();
+    // serializeJson(JSON_DOC_SEND, Serial);
+    // Serial.println();
+    Serial.println(POS_1);
+    // Serial.println(POS_2);
     //  serializeJsonPretty(JSON_DOC_SEND, Serial);
     timerPivot = micros();
   }
