@@ -54,10 +54,18 @@ volatile int wheel_direction[2] = {0, 0};
 volatile int pwm_frequency[2] = {0, 0};
 volatile int pwm_pulse[2] = {0, 0};
 
-
 // Config encoders' parameters
 volatile int POS_1 = 0;
 volatile int POS_2 = 0;
+
+// calculate speed
+long previous_T = 0;
+int PREV_POS_1 = 0;
+int PREV_POS_2 = 0;
+float v1Filt = 0;
+float v1Prev = 0;
+float v2Filt = 0;
+float v2Prev = 0;
 
 bool deserializeJSON() {
   DeserializationError error = deserializeJson(JSON_DOC_RECEIVE, serialLine);
@@ -195,7 +203,22 @@ void calculateSendingPeriod() {
 
 void calculateSpeed() {
   long currT = micros();
-  
+  float deltaT = ((float) (currT - previous_T)) / 1.0e6;
+  float velocity_1 = (POS_1 - PREV_POS_1) / deltaT;
+  float velocity_2 = (POS_2 - PREV_POS_2) / deltaT;
+  PREV_POS_1 = POS_1;
+  PREV_POS_2 = POS_2;
+  previous_T = currT;
+
+  float v1 = velocity_1 / 480.0 * 60.0;
+  float v2 = velocity_2 / 480.0 * 60.0;
+
+  // Low-pass filter (25 Hz cutoff)
+  v1Filt = 0.854*v1Filt + 0.0728*v1 + 0.0728*v1Prev;
+  v1Prev = v1;
+  v2Filt = 0.854*v2Filt + 0.0728*v2 + 0.0728*v2Prev;
+  v2Prev = v2;
+
 }
 
 void setup()
@@ -242,10 +265,13 @@ void loop()
   }
 
   readEncoderTicks();
+
+  // calculateSpeed();
+  
   if (micros() - timerPivot >= PERIOD) {
-    // serializeJson(JSON_DOC_SEND, Serial);
+    serializeJson(JSON_DOC_SEND, Serial);
     // Serial.println();
-    Serial.println(POS_1);
+    // Serial.println(v1Filt);
     // Serial.println(POS_2);
     //  serializeJsonPretty(JSON_DOC_SEND, Serial);
     timerPivot = micros();
