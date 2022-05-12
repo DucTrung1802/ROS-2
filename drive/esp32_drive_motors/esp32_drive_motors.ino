@@ -71,6 +71,12 @@ float v2Prev = 0;
 long read_timer_1 = 0;
 long read_timer_2 = 0;
 
+// Core
+int core_interrupt_1 = 0;
+int core_interrupt_2 = 0;
+
+TaskHandle_t Task1;
+
 bool deserializeJSON() {
   DeserializationError error = deserializeJson(JSON_DOC_RECEIVE, serialLine);
 
@@ -169,6 +175,7 @@ void IRAM_ATTR readEncoder_1()
   }
   long end = micros();
   read_timer_1 = end - start;
+  core_interrupt_1 = xPortGetCoreID();
 }
 
 void IRAM_ATTR readEncoder_2()
@@ -185,6 +192,7 @@ void IRAM_ATTR readEncoder_2()
   }
   long end = micros();
   read_timer_2 = end - start;
+  core_interrupt_2 = xPortGetCoreID();
 }
 
 void initializeMotor()
@@ -270,10 +278,12 @@ void setup()
 
   ledcWrite(CHANNEL_PWMA, 1023);
   ledcWrite(CHANNEL_PWMB, 1023);
+  Serial.println(xPortGetCoreID());
 }
 
 void loop()
 {
+
   while (Serial.available()) {
     serial_receive();
   }
@@ -290,8 +300,12 @@ void loop()
   // calculateSpeed();
   
   if (micros() - timerPivot >= PERIOD) {
-    serializeJson(JSON_DOC_SEND, Serial);
-    Serial.println();
+    Serial.print("Core interrupt 1: ");
+    Serial.println(core_interrupt_1);
+    Serial.print("Core interrupt 2: ");
+    Serial.println(core_interrupt_2);
+    // serializeJson(JSON_DOC_SEND, Serial);
+    // Serial.println();
     // Serial.print("Interrupt 1 time: ");
     // Serial.println(read_timer_1);
     // Serial.print("Interrupt 2 time: ");
