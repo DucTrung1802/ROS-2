@@ -67,6 +67,10 @@ float v1Prev = 0;
 float v2Filt = 0;
 float v2Prev = 0;
 
+// Timer 
+long read_timer_1 = 0;
+long read_timer_2 = 0;
+
 bool deserializeJSON() {
   DeserializationError error = deserializeJson(JSON_DOC_RECEIVE, serialLine);
 
@@ -151,8 +155,9 @@ void serial_receive() {
 }
 
 
-void ICACHE_RAM_ATTR readEncoder_1()
+void IRAM_ATTR readEncoder_1()
 {
+  long start = micros();
   int enc1_b = digitalRead(ENC1_B);
   if (enc1_b > 0)
   {
@@ -162,19 +167,24 @@ void ICACHE_RAM_ATTR readEncoder_1()
   {
     POS_1--;
   }
+  long end = micros();
+  read_timer_1 = end - start;
 }
 
-void ICACHE_RAM_ATTR readEncoder_2()
+void IRAM_ATTR readEncoder_2()
 {
+  long start = micros();
   int enc2_b = digitalRead(ENC2_B);
   if (enc2_b > 0)
   {
-    POS_2--;
+    POS_2++;
   }
   else
   {
-    POS_2++;
+    POS_2--;
   }
+  long end = micros();
+  read_timer_2 = end - start;
 }
 
 void initializeMotor()
@@ -187,10 +197,14 @@ void initializeMotor()
 }
 
 void readEncoderTicks() {
+  // long start_timer = micros();
   noInterrupts();
   JSON_DOC_SEND["left_tick"] = POS_1;
   JSON_DOC_SEND["right_tick"] = POS_2;
   interrupts();
+  // long end_timer = micros();
+  // read_timer = end_timer - start_timer;
+
 }
 
 void calculateSendingPeriod() {
@@ -254,8 +268,8 @@ void setup()
 
   initializeMotor();
 
-  ledcWrite(CHANNEL_PWMA, 0);
-  ledcWrite(CHANNEL_PWMB, 0);
+  ledcWrite(CHANNEL_PWMA, 1023);
+  ledcWrite(CHANNEL_PWMB, 1023);
 }
 
 void loop()
@@ -264,13 +278,24 @@ void loop()
     serial_receive();
   }
 
-  readEncoderTicks();
+  if (millis() < 10000){
+    readEncoderTicks();
+  }
+
+  if (millis() >= 10000) {
+    ledcWrite(CHANNEL_PWMA, 0);
+    ledcWrite(CHANNEL_PWMB, 0);
+  }
 
   // calculateSpeed();
   
   if (micros() - timerPivot >= PERIOD) {
     serializeJson(JSON_DOC_SEND, Serial);
     Serial.println();
+    // Serial.print("Interrupt 1 time: ");
+    // Serial.println(read_timer_1);
+    // Serial.print("Interrupt 2 time: ");
+    // Serial.println(read_timer_2);
     // Serial.println(v1Filt);
     // Serial.println(POS_2);
     //  serializeJsonPretty(JSON_DOC_SEND, Serial);
