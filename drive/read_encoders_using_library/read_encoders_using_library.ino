@@ -40,7 +40,7 @@ const uint8_t CHANNEL_PWMB = 2;
 const int BAUD_RATE = 115200;
 // Sending
 StaticJsonDocument<200> JSON_DOC_SEND;
-const unsigned int SENDING_FREQUENCY = 2000; // Hz
+const unsigned int SENDING_FREQUENCY = 5000; // Hz
 double PERIOD; // milliseconds
 volatile unsigned long long timerPivot = 0; // milliseconds
 
@@ -247,8 +247,8 @@ void setup(){
 
   initializeMotor();
 
-  ledcWrite(CHANNEL_PWMA, 0);
-  ledcWrite(CHANNEL_PWMB, 0);
+  ledcWrite(CHANNEL_PWMA, 1023);
+  ledcWrite(CHANNEL_PWMB, 1023);
 
 	// set starting count value after attaching
 	// encoder.setCount(37);
