@@ -365,9 +365,12 @@ def getMCUSerial():
                 raise Exception("MCU is disconnected!")
             else:
                 # print("MCU in serial: " + device.split()[3])
+                # print(device)
                 foundMCU = True
-                MCUSerial = device.split()[3]
-                MCUSerial = MCUSerial[:-1]
+                index = device.find("ttyUSB")
+                # print(index)
+                MCUSerial = device[index:index+7]
+                # print(MCUSerial)
                 break
 
         # elif (device.find(LIDAR_USB_NAME) > 0 and not foundLidar):
@@ -505,14 +508,15 @@ def loop():
                     updateStorePosFromSerial()
                     receiving_timer = time.time()
 
+                updatePosFromStorePos()
+
                 if time.time() - publish_timer >= PUBLISH_PERIOD:
-                    updatePosFromStorePos()
                     motor_driver_node.setNeedPublish()
                     rclpy.spin_once(motor_driver_node)
                     motor_driver_node.resetNeedPublish()
 
-                    print("Left tick: " + str(LEFT_MOTOR.getTicks()))
-                    print("Right tick: " + str(RIGHT_MOTOR.getTicks()))
+                    # print("Left tick: " + str(LEFT_MOTOR.getTicks()))
+                    # print("Right tick: " + str(RIGHT_MOTOR.getTicks()))
 
                     publish_timer = time.time()
 
@@ -522,7 +526,7 @@ def loop():
                 rclpy.spin_once(motor_driver_node)
 
                 if index != LEFT_MOTOR.getDataCount():
-                    print(str(index) + "/" + str(DATA_AMOUNT))
+                    # print(str(index) + "/" + str(DATA_AMOUNT))
                     index += 1
 
                     # Vary PWM
@@ -534,9 +538,9 @@ def loop():
                     #     pwm_value = 510
 
 
-                    # WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getLowPassRPM())
+                    WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getTicks())
                     # WORKBOOK.writeData(index + 1, 2, LEFT_MOTOR.getKalmanFilterRPM())
-                    # WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getLowPassRPM())
+                    WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getTicks())
                     # WORKBOOK.writeData(index + 1, 5, RIGHT_MOTOR.getKalmanFilterRPM())
    
 
