@@ -6,6 +6,8 @@
 #include <ESP32Encoder.h>
 #include <ArduinoJson.h>
 
+const int RUNNING_TIME = 10000; // ms
+
 // Config pin parameters
 // Motor 1
 const uint8_t AIN1 = 27;
@@ -64,8 +66,12 @@ float v1Prev = 0;
 float v2Filt = 0;
 float v2Prev = 0;
 
+// Encoder instances
 ESP32Encoder encoder_1;
 ESP32Encoder encoder_2;
+
+// Timer
+long read_timer = 0;
 
 bool deserializeJSON() {
   DeserializationError error = deserializeJson(JSON_DOC_RECEIVE, serialLine);
@@ -154,15 +160,17 @@ void initializeMotor()
 {
   digitalWrite(AIN1, HIGH);
   digitalWrite(AIN2, LOW);
-  digitalWrite(BIN1, HIGH);
-  digitalWrite(BIN2, LOW);
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, HIGH);
   digitalWrite(STBY, HIGH);
 }
 
 void readEncoderTicks() {
+  long start = micros();
   JSON_DOC_SEND["left_tick"] = (int32_t)encoder_1.getCount();
   JSON_DOC_SEND["right_tick"] = (int32_t)encoder_2.getCount();
-
+  long end = micros();
+  read_timer = end - start;
 }
 
 void calculateSendingPeriod() {
@@ -213,6 +221,7 @@ void setup(){
   pinMode(ENC1_A, INPUT);
   pinMode(ENC1_B, INPUT);
 	encoder_1.attachSingleEdge(ENC1_A, ENC1_B);
+  encoder_1.setFilter(1023);
   encoder_1.clearCount();
   // void attachHalfQuad(int aPintNumber, int bPinNumber);
 	// void attachFullQuad(int aPintNumber, int bPinNumber);
@@ -223,7 +232,8 @@ void setup(){
   pinMode(PWMB, OUTPUT);
   pinMode(ENC2_A, INPUT);
   pinMode(ENC2_B, INPUT);
-	encoder_2.attachSingleEdge(ENC2_A, ENC2_B);
+	encoder_2.attachSingleEdge(ENC2_B, ENC2_A);
+  encoder_2.setFilter(1023);
   encoder_2.clearCount();
 
   pinMode(STBY, OUTPUT);
@@ -237,8 +247,8 @@ void setup(){
 
   initializeMotor();
 
-  ledcWrite(CHANNEL_PWMA, 1023);
-  ledcWrite(CHANNEL_PWMB, 1023);
+  ledcWrite(CHANNEL_PWMA, 0);
+  ledcWrite(CHANNEL_PWMB, 0);
 
 	// set starting count value after attaching
 	// encoder.setCount(37);
@@ -256,14 +266,16 @@ void loop()
     serial_receive();
   }
 
-  if (millis() < 10000){
-    readEncoderTicks();
-  }
+  readEncoderTicks();
 
-  if (millis() >= 10000) {
-    ledcWrite(CHANNEL_PWMA, 0);
-    ledcWrite(CHANNEL_PWMB, 0);
-  }
+  // if (millis() < RUNNING_TIME){
+  //   readEncoderTicks();
+  // }
+
+  // if (millis() >= RUNNING_TIME) {
+  //   ledcWrite(CHANNEL_PWMA, 0);
+  //   ledcWrite(CHANNEL_PWMB, 0);
+  // }
 
   // calculateSpeed();
   
@@ -271,6 +283,8 @@ void loop()
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
     serializeJson(JSON_DOC_SEND, Serial);
     Serial.println();
+    // Serial.print("Read time: ");
+    // Serial.println(read_timer);
     // Serial.print("Interrupt 1 time: ");
     // Serial.println(read_timer_1);
     // Serial.print("Interrupt 2 time: ");
