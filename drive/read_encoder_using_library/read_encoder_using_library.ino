@@ -160,13 +160,8 @@ void initializeMotor()
 }
 
 void readEncoderTicks() {
-  // long start_timer = micros();
-  noInterrupts();
   JSON_DOC_SEND["left_tick"] = (int32_t)encoder_1.getCount();
-  JSON_DOC_SEND["right_tick"] = (int32_t)encoder_1.getCount();
-  interrupts();
-  // long end_timer = micros();
-  // read_timer = end_timer - start_timer;
+  JSON_DOC_SEND["right_tick"] = (int32_t)encoder_2.getCount();
 
 }
 
@@ -179,6 +174,8 @@ void calculateSendingPeriod() {
 }
 
 void calculateSpeed() {
+  int32_t POS_1 = (int32_t)JSON_DOC_SEND["left_tick"];
+  int32_t POS_2 = (int32_t)JSON_DOC_SEND["right_tick"];
   long currT = micros();
   float deltaT = ((float) (currT - previous_T)) / 1.0e6;
   float velocity_1 = (POS_1 - PREV_POS_1) / deltaT;
@@ -250,25 +247,6 @@ void setup(){
 	// encoder.clearCount();
 	// encoder2.clearCount();
 	// Serial.println("Encoder Start = " + String((int32_t)encoder.getCount()));
-}
-
-void loop(){
-	// Loop and read the count
-	delay(100);
-
-	// // every 5 seconds toggle encoder 2
-	// if (millis() - encoder2lastToggled >= 5000) {
-	// 	if(encoder2Paused) {
-	// 		Serial.println("Resuming Encoder 2");
-	// 		encoder2.resumeCount();
-	// 	} else {
-	// 		Serial.println("Paused Encoder 2");
-	// 		encoder2.pauseCount();
-	// 	}
-
-	// 	encoder2Paused = !encoder2Paused;
-	// 	encoder2lastToggled = millis();
-	// }
 }
 
 void loop()
