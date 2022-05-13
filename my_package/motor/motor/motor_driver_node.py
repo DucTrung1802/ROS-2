@@ -73,14 +73,14 @@ RIGHT_MOTOR_MAX = 1023
 
 
 # Test data
-DATA_RECORDING = False
+DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 510
+TEST_PWM = 700
 
 # DataRecorder parameters
-DATA_AMOUNT = 120
+DATA_AMOUNT = 500
 
 # =================================================
 
@@ -296,8 +296,8 @@ def setupSetpoint(msg):
     linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
 
     # Testing
-    linear_velocity_left = linear_velocity_left * 1023 / LEFT_MOTOR_MAX_RPM
-    linear_velocity_right = linear_velocity_right * 1023 / RIGHT_MOTOR_MAX_RPM
+    # linear_velocity_left = linear_velocity_left * 1023 / LEFT_MOTOR_MAX_RPM
+    # linear_velocity_right = linear_velocity_right * 1023 / RIGHT_MOTOR_MAX_RPM
 
 
 def driveMotors():
@@ -310,21 +310,26 @@ def driveMotors():
         pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
         pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-        # LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, LEFT_MOTOR.getLowPassRPM())
-        # RIGHT_MOTOR_PID_CONTROLLER.evaluate(
-        #     linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
-        # )
+        LEFT_MOTOR_PID_CONTROLLER.evaluate(
+            linear_velocity_left, LEFT_MOTOR.getLowPassRPM()
+        )
+        RIGHT_MOTOR_PID_CONTROLLER.evaluate(
+            linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
+        )
+
+        pwm_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
+        pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue()
 
         print("---")
         print(
             "Left PWM: "
-            + str(linear_velocity_left)
+            + str(pwm_left)
             + "; Left RPM: "
             + str(LEFT_MOTOR.getLowPassRPM())
         )
         print(
             "Right PWM: "
-            + str(linear_velocity_right)
+            + str(pwm_right)
             + "; Right RPM: "
             + str(RIGHT_MOTOR.getLowPassRPM())
         )
@@ -334,10 +339,10 @@ def driveMotors():
             "motor_data": [
                 direction,
                 pwm_freq_1,
-                linear_velocity_left,
+                pwm_left,
                 direction,
                 pwm_freq_2,
-                linear_velocity_right,
+                pwm_right,
             ]
         }
 
@@ -487,12 +492,10 @@ def loop():
     try:
         if DATA_RECORDING:
             index = 0
-            old_pwm_value = 0
-            pwm_value = 714
+            varyPWM(TEST_PWM)
+            timer = time.time()
 
             while index <= DATA_AMOUNT:
-
-                # varyPWM(1023)
 
                 if time.time() - receiving_timer >= RECEIVING_PERIOD:
                     updateStorePosFromSerial()
@@ -507,6 +510,7 @@ def loop():
 
                 LEFT_MOTOR.calculateRPM(TICK_1)
                 RIGHT_MOTOR.calculateRPM(TICK_2)
+                # driveMotors()
                 rclpy.spin_once(motor_driver_node)
 
                 if index != LEFT_MOTOR.getDataCount():
@@ -521,18 +525,18 @@ def loop():
                     # else:
                     #     pwm_value = 510
 
-                    if pwm_value != old_pwm_value:
-                        LEFT_MOTOR.setupValuesKF(X=0, P=10000, Q=0, R=273)
-                        RIGHT_MOTOR.setupValuesKF(X=0, P=10000, Q=0, R=273)
-                        old_pwm_value = pwm_value
-                        print("change")
-
-                    varyPWM(TEST_PWM)
 
                     WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getLowPassRPM())
-                    WORKBOOK.writeData(index + 1, 2, LEFT_MOTOR.getKalmanFilterRPM())
+                    # WORKBOOK.writeData(index + 1, 2, LEFT_MOTOR.getKalmanFilterRPM())
                     WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getLowPassRPM())
-                    WORKBOOK.writeData(index + 1, 5, RIGHT_MOTOR.getKalmanFilterRPM())
+                    # WORKBOOK.writeData(index + 1, 5, RIGHT_MOTOR.getKalmanFilterRPM())
+
+
+                # print("Left tick: " + str(LEFT_MOTOR.getTicks()))
+                # print("Right tick: " + str(RIGHT_MOTOR.getTicks()))
+
+                # if (time.time() - timer >= 4):
+                #     break
 
         else:
             while True:

@@ -3,7 +3,10 @@
   Complete project details at https://randomnerdtutorials.com
 *********/
 
+#include <ESP32Encoder.h>
 #include <ArduinoJson.h>
+
+const int RUNNING_TIME = 10000; // ms
 
 // Config pin parameters
 // Motor 1
@@ -54,10 +57,6 @@ volatile int wheel_direction[2] = {0, 0};
 volatile int pwm_frequency[2] = {0, 0};
 volatile int pwm_pulse[2] = {0, 0};
 
-// Config encoders' parameters
-volatile int POS_1 = 0;
-volatile int POS_2 = 0;
-
 // calculate speed
 long previous_T = 0;
 int PREV_POS_1 = 0;
@@ -67,15 +66,12 @@ float v1Prev = 0;
 float v2Filt = 0;
 float v2Prev = 0;
 
-// Timer 
-long read_timer_1 = 0;
-long read_timer_2 = 0;
+// Encoder instances
+ESP32Encoder encoder_1;
+ESP32Encoder encoder_2;
 
-// Core
-int core_interrupt_1 = 0;
-int core_interrupt_2 = 0;
-
-TaskHandle_t Task1;
+// Timer
+long read_timer = 0;
 
 bool deserializeJSON() {
   DeserializationError error = deserializeJson(JSON_DOC_RECEIVE, serialLine);
@@ -160,59 +156,21 @@ void serial_receive() {
   }
 }
 
-
-void IRAM_ATTR readEncoder_1()
-{
-  long start = micros();
-  int enc1_b = digitalRead(ENC1_B);
-  if (enc1_b > 0)
-  {
-    POS_1++;
-  }
-  else
-  {
-    POS_1--;
-  }
-  long end = micros();
-  read_timer_1 = end - start;
-  core_interrupt_1 = xPortGetCoreID();
-}
-
-void IRAM_ATTR readEncoder_2()
-{
-  long start = micros();
-  int enc2_b = digitalRead(ENC2_B);
-  if (enc2_b > 0)
-  {
-    POS_2++;
-  }
-  else
-  {
-    POS_2--;
-  }
-  long end = micros();
-  read_timer_2 = end - start;
-  core_interrupt_2 = xPortGetCoreID();
-}
-
 void initializeMotor()
 {
   digitalWrite(AIN1, HIGH);
   digitalWrite(AIN2, LOW);
-  digitalWrite(BIN1, HIGH);
-  digitalWrite(BIN2, LOW);
+  digitalWrite(BIN1, LOW);
+  digitalWrite(BIN2, HIGH);
   digitalWrite(STBY, HIGH);
 }
 
 void readEncoderTicks() {
-  // long start_timer = micros();
-  noInterrupts();
-  JSON_DOC_SEND["left_tick"] = POS_1;
-  JSON_DOC_SEND["right_tick"] = POS_2;
-  interrupts();
-  // long end_timer = micros();
-  // read_timer = end_timer - start_timer;
-
+  long start = micros();
+  JSON_DOC_SEND["left_tick"] = (int32_t)encoder_1.getCount();
+  JSON_DOC_SEND["right_tick"] = (int32_t)encoder_2.getCount();
+  long end = micros();
+  read_timer = end - start;
 }
 
 void calculateSendingPeriod() {
@@ -224,6 +182,8 @@ void calculateSendingPeriod() {
 }
 
 void calculateSpeed() {
+  int32_t POS_1 = (int32_t)JSON_DOC_SEND["left_tick"];
+  int32_t POS_2 = (int32_t)JSON_DOC_SEND["right_tick"];
   long currT = micros();
   float deltaT = ((float) (currT - previous_T)) / 1.0e6;
   float velocity_1 = (POS_1 - PREV_POS_1) / deltaT;
@@ -240,30 +200,41 @@ void calculateSpeed() {
   v1Prev = v1;
   v2Filt = 0.854*v2Filt + 0.0728*v2 + 0.0728*v2Prev;
   v2Prev = v2;
-
 }
 
-void setup()
-{
+
+void setup(){
   Serial.begin(BAUD_RATE);
 
-  // Double check Sending Frequency
-  calculateSendingPeriod();
+	// Enable the weak pull down resistors
+	//ESP32Encoder::useInternalWeakPullResistors=DOWN;
+	// Enable the weak pull up resistors
+	ESP32Encoder::useInternalWeakPullResistors=UP;
 
+  // Double check Sending Frequency
+  calculateSendingPeriod();  
+  
   // Setup pinmode
   pinMode(AIN1, OUTPUT);
   pinMode(AIN2, OUTPUT);
   pinMode(PWMA, OUTPUT);
   pinMode(ENC1_A, INPUT);
   pinMode(ENC1_B, INPUT);
-  attachInterrupt(digitalPinToInterrupt(ENC1_A), readEncoder_1, RISING);
+	encoder_1.attachSingleEdge(ENC1_A, ENC1_B);
+  encoder_1.setFilter(1023);
+  encoder_1.clearCount();
+  // void attachHalfQuad(int aPintNumber, int bPinNumber);
+	// void attachFullQuad(int aPintNumber, int bPinNumber);
+	// void attachSingleEdge(int aPintNumber, int bPinNumber);
 
   pinMode(BIN1, OUTPUT);
   pinMode(BIN2, OUTPUT);
   pinMode(PWMB, OUTPUT);
   pinMode(ENC2_A, INPUT);
   pinMode(ENC2_B, INPUT);
-  attachInterrupt(digitalPinToInterrupt(ENC2_A), readEncoder_2, RISING);
+	encoder_2.attachSingleEdge(ENC2_B, ENC2_A);
+  encoder_2.setFilter(1023);
+  encoder_2.clearCount();
 
   pinMode(STBY, OUTPUT);
 
@@ -276,9 +247,16 @@ void setup()
 
   initializeMotor();
 
-  ledcWrite(CHANNEL_PWMA, 1023);
-  ledcWrite(CHANNEL_PWMB, 1023);
-  Serial.println(xPortGetCoreID());
+  ledcWrite(CHANNEL_PWMA, 0);
+  ledcWrite(CHANNEL_PWMB, 0);
+
+	// set starting count value after attaching
+	// encoder.setCount(37);
+
+	// clear the encoder's raw count and set the tracked count to zero
+	// encoder.clearCount();
+	// encoder2.clearCount();
+	// Serial.println("Encoder Start = " + String((int32_t)encoder.getCount()));
 }
 
 void loop()
@@ -288,24 +266,25 @@ void loop()
     serial_receive();
   }
 
-  if (millis() < 10000){
-    readEncoderTicks();
-  }
+  readEncoderTicks();
 
-  if (millis() >= 10000) {
-    ledcWrite(CHANNEL_PWMA, 0);
-    ledcWrite(CHANNEL_PWMB, 0);
-  }
+  // if (millis() < RUNNING_TIME){
+  //   readEncoderTicks();
+  // }
+
+  // if (millis() >= RUNNING_TIME) {
+  //   ledcWrite(CHANNEL_PWMA, 0);
+  //   ledcWrite(CHANNEL_PWMB, 0);
+  // }
 
   // calculateSpeed();
   
   if (micros() - timerPivot >= PERIOD) {
-    Serial.print("Core interrupt 1: ");
-    Serial.println(core_interrupt_1);
-    Serial.print("Core interrupt 2: ");
-    Serial.println(core_interrupt_2);
-    // serializeJson(JSON_DOC_SEND, Serial);
-    // Serial.println();
+    // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
+    serializeJson(JSON_DOC_SEND, Serial);
+    Serial.println();
+    // Serial.print("Read time: ");
+    // Serial.println(read_timer);
     // Serial.print("Interrupt 1 time: ");
     // Serial.println(read_timer_1);
     // Serial.print("Interrupt 2 time: ");
@@ -316,3 +295,4 @@ void loop()
     timerPivot = micros();
   }
 }
+
