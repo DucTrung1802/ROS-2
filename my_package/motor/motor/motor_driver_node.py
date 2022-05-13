@@ -25,10 +25,10 @@ SKIP_SERIAL_LINES = 12
 LIDAR_USB_NAME = "FTDI USB Serial Device"
 MCU_USB_NAME = "cp210x"
 BAUD_RATE = 115200
-RECEIVING_FREQUENCY = 2000
+RECEIVING_FREQUENCY = 5000
 
 # Node parameters
-PUBLISH_FREQUENCY = 1000
+PUBLISH_FREQUENCY = 500
 NODE_NAME = "motor_driver"
 
 # Motor parameters
@@ -77,10 +77,10 @@ DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 700
+TEST_PWM = 1023
 
 # DataRecorder parameters
-DATA_AMOUNT = 500
+DATA_AMOUNT = 50000
 
 # =================================================
 
@@ -497,6 +497,9 @@ def loop():
 
             while index <= DATA_AMOUNT:
 
+                if (time.time() - timer >= 10):
+                    break
+
                 if time.time() - receiving_timer >= RECEIVING_PERIOD:
                     updateStorePosFromSerial()
                     receiving_timer = time.time()
@@ -506,6 +509,10 @@ def loop():
                     motor_driver_node.setNeedPublish()
                     rclpy.spin_once(motor_driver_node)
                     motor_driver_node.resetNeedPublish()
+
+                    print("Left tick: " + str(LEFT_MOTOR.getTicks()))
+                    print("Right tick: " + str(RIGHT_MOTOR.getTicks()))
+
                     publish_timer = time.time()
 
                 LEFT_MOTOR.calculateRPM(TICK_1)
@@ -526,17 +533,11 @@ def loop():
                     #     pwm_value = 510
 
 
-                    WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getLowPassRPM())
+                    # WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getLowPassRPM())
                     # WORKBOOK.writeData(index + 1, 2, LEFT_MOTOR.getKalmanFilterRPM())
-                    WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getLowPassRPM())
+                    # WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getLowPassRPM())
                     # WORKBOOK.writeData(index + 1, 5, RIGHT_MOTOR.getKalmanFilterRPM())
-
-
-                # print("Left tick: " + str(LEFT_MOTOR.getTicks()))
-                # print("Right tick: " + str(RIGHT_MOTOR.getTicks()))
-
-                # if (time.time() - timer >= 4):
-                #     break
+   
 
         else:
             while True:
