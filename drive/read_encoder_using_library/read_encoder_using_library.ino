@@ -1,62 +1,9 @@
-#include <ESP32Encoder.h>
-
-ESP32Encoder encoder;
-ESP32Encoder encoder2;
-
-// timer and flag for example, not needed for encoders
-unsigned long encoder2lastToggled;
-bool encoder2Paused = false;
-
-void setup(){
-	
-	Serial.begin(115200);
-	// Enable the weak pull down resistors
-
-	//ESP32Encoder::useInternalWeakPullResistors=DOWN;
-	// Enable the weak pull up resistors
-	ESP32Encoder::useInternalWeakPullResistors=UP;
-
-	// use pin 19 and 18 for the first encoder
-	encoder.attachSingleEdge(22, 23);
-	// use pin 17 and 16 for the second encoder
-	encoder2.attachSingleEdge(17, 16);
-		
-	// set starting count value after attaching
-	// encoder.setCount(37);
-
-	// clear the encoder's raw count and set the tracked count to zero
-	encoder.clearCount();
-	encoder2.clearCount();
-	Serial.println("Encoder Start = " + String((int32_t)encoder.getCount()));
-	// set the lastToggle
-	encoder2lastToggled = millis();
-}
-
-void loop(){
-	// Loop and read the count
-	Serial.println("Encoder count = " + String((int32_t)encoder.getCount()) + " " + String((int32_t)encoder2.getCount()));
-	delay(100);
-
-	// // every 5 seconds toggle encoder 2
-	// if (millis() - encoder2lastToggled >= 5000) {
-	// 	if(encoder2Paused) {
-	// 		Serial.println("Resuming Encoder 2");
-	// 		encoder2.resumeCount();
-	// 	} else {
-	// 		Serial.println("Paused Encoder 2");
-	// 		encoder2.pauseCount();
-	// 	}
-
-	// 	encoder2Paused = !encoder2Paused;
-	// 	encoder2lastToggled = millis();
-	// }
-}
-
 /*********
   Rui Santos - Serial communication between ESP32 and Raspberry Pi 4
   Complete project details at https://randomnerdtutorials.com
 *********/
 
+#include <ESP32Encoder.h>
 #include <ArduinoJson.h>
 
 // Config pin parameters
@@ -108,10 +55,6 @@ volatile int wheel_direction[2] = {0, 0};
 volatile int pwm_frequency[2] = {0, 0};
 volatile int pwm_pulse[2] = {0, 0};
 
-// Config encoders' parameters
-volatile int POS_1 = 0;
-volatile int POS_2 = 0;
-
 // calculate speed
 long previous_T = 0;
 int PREV_POS_1 = 0;
@@ -121,15 +64,8 @@ float v1Prev = 0;
 float v2Filt = 0;
 float v2Prev = 0;
 
-// Timer 
-long read_timer_1 = 0;
-long read_timer_2 = 0;
-
-// Core
-int core_interrupt_1 = 0;
-int core_interrupt_2 = 0;
-
-TaskHandle_t Task1;
+ESP32Encoder encoder_1;
+ESP32Encoder encoder_2;
 
 bool deserializeJSON() {
   DeserializationError error = deserializeJson(JSON_DOC_RECEIVE, serialLine);
@@ -214,41 +150,6 @@ void serial_receive() {
   }
 }
 
-
-void IRAM_ATTR readEncoder_1()
-{
-  long start = micros();
-  int enc1_b = digitalRead(ENC1_B);
-  if (enc1_b > 0)
-  {
-    POS_1++;
-  }
-  else
-  {
-    POS_1--;
-  }
-  long end = micros();
-  read_timer_1 = end - start;
-  core_interrupt_1 = xPortGetCoreID();
-}
-
-void IRAM_ATTR readEncoder_2()
-{
-  long start = micros();
-  int enc2_b = digitalRead(ENC2_B);
-  if (enc2_b > 0)
-  {
-    POS_2++;
-  }
-  else
-  {
-    POS_2--;
-  }
-  long end = micros();
-  read_timer_2 = end - start;
-  core_interrupt_2 = xPortGetCoreID();
-}
-
 void initializeMotor()
 {
   digitalWrite(AIN1, HIGH);
@@ -261,8 +162,8 @@ void initializeMotor()
 void readEncoderTicks() {
   // long start_timer = micros();
   noInterrupts();
-  JSON_DOC_SEND["left_tick"] = POS_1;
-  JSON_DOC_SEND["right_tick"] = POS_2;
+  JSON_DOC_SEND["left_tick"] = (int32_t)encoder_1.getCount();
+  JSON_DOC_SEND["right_tick"] = (int32_t)encoder_1.getCount();
   interrupts();
   // long end_timer = micros();
   // read_timer = end_timer - start_timer;
@@ -294,30 +195,39 @@ void calculateSpeed() {
   v1Prev = v1;
   v2Filt = 0.854*v2Filt + 0.0728*v2 + 0.0728*v2Prev;
   v2Prev = v2;
-
 }
 
-void setup()
-{
+
+void setup(){
   Serial.begin(BAUD_RATE);
 
-  // Double check Sending Frequency
-  calculateSendingPeriod();
+	// Enable the weak pull down resistors
+	//ESP32Encoder::useInternalWeakPullResistors=DOWN;
+	// Enable the weak pull up resistors
+	ESP32Encoder::useInternalWeakPullResistors=UP;
 
+  // Double check Sending Frequency
+  calculateSendingPeriod();  
+  
   // Setup pinmode
   pinMode(AIN1, OUTPUT);
   pinMode(AIN2, OUTPUT);
   pinMode(PWMA, OUTPUT);
   pinMode(ENC1_A, INPUT);
   pinMode(ENC1_B, INPUT);
-  attachInterrupt(digitalPinToInterrupt(ENC1_A), readEncoder_1, RISING);
+	encoder_1.attachSingleEdge(ENC1_A, ENC1_B);
+  encoder_1.clearCount();
+  // void attachHalfQuad(int aPintNumber, int bPinNumber);
+	// void attachFullQuad(int aPintNumber, int bPinNumber);
+	// void attachSingleEdge(int aPintNumber, int bPinNumber);
 
   pinMode(BIN1, OUTPUT);
   pinMode(BIN2, OUTPUT);
   pinMode(PWMB, OUTPUT);
   pinMode(ENC2_A, INPUT);
   pinMode(ENC2_B, INPUT);
-  attachInterrupt(digitalPinToInterrupt(ENC2_A), readEncoder_2, RISING);
+	encoder_2.attachSingleEdge(ENC2_A, ENC2_B);
+  encoder_2.clearCount();
 
   pinMode(STBY, OUTPUT);
 
@@ -332,7 +242,33 @@ void setup()
 
   ledcWrite(CHANNEL_PWMA, 1023);
   ledcWrite(CHANNEL_PWMB, 1023);
-  Serial.println(xPortGetCoreID());
+
+	// set starting count value after attaching
+	// encoder.setCount(37);
+
+	// clear the encoder's raw count and set the tracked count to zero
+	// encoder.clearCount();
+	// encoder2.clearCount();
+	// Serial.println("Encoder Start = " + String((int32_t)encoder.getCount()));
+}
+
+void loop(){
+	// Loop and read the count
+	delay(100);
+
+	// // every 5 seconds toggle encoder 2
+	// if (millis() - encoder2lastToggled >= 5000) {
+	// 	if(encoder2Paused) {
+	// 		Serial.println("Resuming Encoder 2");
+	// 		encoder2.resumeCount();
+	// 	} else {
+	// 		Serial.println("Paused Encoder 2");
+	// 		encoder2.pauseCount();
+	// 	}
+
+	// 	encoder2Paused = !encoder2Paused;
+	// 	encoder2lastToggled = millis();
+	// }
 }
 
 void loop()
@@ -354,10 +290,7 @@ void loop()
   // calculateSpeed();
   
   if (micros() - timerPivot >= PERIOD) {
-    // Serial.print("Core interrupt 1: ");
-    // Serial.println(core_interrupt_1);
-    // Serial.print("Core interrupt 2: ");
-    // Serial.println(core_interrupt_2);
+    // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
     serializeJson(JSON_DOC_SEND, Serial);
     Serial.println();
     // Serial.print("Interrupt 1 time: ");
