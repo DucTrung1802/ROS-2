@@ -25,7 +25,7 @@ SKIP_SERIAL_LINES = 12
 LIDAR_USB_NAME = "FTDI USB Serial Device"
 MCU_USB_NAME = "cp210x"
 BAUD_RATE = 115200
-RECEIVING_FREQUENCY = 5000
+RECEIVING_FREQUENCY = 2000
 
 # Node parameters
 PUBLISH_FREQUENCY = 500
@@ -364,9 +364,10 @@ def getMCUSerial():
             if device.find("disconnected") > 0:
                 raise Exception("MCU is disconnected!")
             else:
-                # print("MCU in serial: " + device.split()[-1])
+                # print("MCU in serial: " + device.split()[3])
                 foundMCU = True
-                MCUSerial = device.split()[-1]
+                MCUSerial = device.split()[3]
+                MCUSerial = MCUSerial[:-1]
                 break
 
         # elif (device.find(LIDAR_USB_NAME) > 0 and not foundLidar):
