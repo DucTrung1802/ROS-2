@@ -247,8 +247,8 @@ void setup(){
 
   initializeMotor();
 
-  ledcWrite(CHANNEL_PWMA, 1023);
-  ledcWrite(CHANNEL_PWMB, 1023);
+  ledcWrite(CHANNEL_PWMA, 0);
+  ledcWrite(CHANNEL_PWMB, 0);
 
 	// set starting count value after attaching
 	// encoder.setCount(37);
