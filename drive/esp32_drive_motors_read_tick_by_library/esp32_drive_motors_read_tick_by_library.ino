@@ -57,6 +57,13 @@ class RPMCalculator {
     }
 };
 
+struct MotorData {
+  long left_RPM;
+  long right_RPM;
+  String checksum;
+};
+
+
 const int RUNNING_TIME = 10000; // ms
 
 // Config pin parameters
@@ -90,9 +97,6 @@ const uint8_t CHANNEL_PWMB = 2;
 // Config serial parameters
 const int BAUD_RATE = 115200;
 // Sending
-StaticJsonDocument<200> JSON_DOC_SEND;
-StaticJsonDocument<200> JSON_DOC_CHECK;
-String JSON_DOC_SEND_STRING;
 const unsigned int SENDING_FREQUENCY = 2000; // Hz
 double PERIOD; // milliseconds
 volatile unsigned long long timerPivot = 0; // milliseconds
@@ -118,9 +122,8 @@ ESP32Encoder encoder_2;
 RPMCalculator rpm_calculator_1;
 RPMCalculator rpm_calculator_2;
 
-// Checksum parameters
-char* md5str;
-unsigned char* hash;
+// Struct
+MotorData motor_data;
 
 // Timer
 long read_timer = 0;
@@ -218,32 +221,29 @@ void initializeMotor()
   digitalWrite(STBY, HIGH);
 }
 
-void calculateChecksum() {
-  char buf[200];
-  JSON_DOC_CHECK = JSON_DOC_SEND;
-  JSON_DOC_CHECK.remove("checksum");
-  serializeJson(JSON_DOC_CHECK, buf, 200);
-  //  Serial.println(buf);
-  hash = MD5::make_hash(buf);
-  md5str = MD5::make_digest(hash, 16);
-  //  JSON_DOC_SEND["checksum"] = NULL;
-}
-
-void freeChecksum() {
-  free(hash);
-  free(md5str);
-}
-
 void readRPM() {
   long start = micros();
-  String md5_str = "";
-  JSON_DOC_SEND["left_RPM"] = rpm_calculator_1.getRPM();
-  JSON_DOC_SEND["right_RPM"] = rpm_calculator_2.getRPM();
-  calculateChecksum();
-  //  Serial.println(md5str);
-  //    JSON_DOC_SEND["checksum"] = String(md5str);
-  JSON_DOC_SEND["checksum"] = md5str;
-  freeChecksum();
+
+  char* md5str;
+  unsigned char* hash;
+
+  motor_data.left_RPM = rpm_calculator_1.getRPM();
+  motor_data.right_RPM = rpm_calculator_2.getRPM();
+
+  // calculate checksum
+  char buf[200];
+  StaticJsonDocument<200> JSON_DOC_CHECK;
+  JSON_DOC_CHECK["left_RPM"] = motor_data.left_RPM;
+  JSON_DOC_CHECK["right_RPM"] = motor_data.right_RPM;
+  serializeJson(JSON_DOC_CHECK, buf, 200);
+  // Serial.println(buf);
+  hash = MD5::make_hash(buf);
+  md5str = MD5::make_digest(hash, 16);
+  motor_data.checksum = String(md5str);
+
+  free(hash);
+  free(md5str);
+  
   long end = micros();
   read_timer = end - start;
 }
@@ -336,8 +336,8 @@ void loop()
   if (micros() - timerPivot >= PERIOD) {
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
     readRPM();
-    serializeJson(JSON_DOC_SEND, Serial);
-    Serial.println();
+    // serializeJson(JSON_DOC_SEND, Serial);
+    // Serial.println();
 
     timerPivot = micros();
   }
