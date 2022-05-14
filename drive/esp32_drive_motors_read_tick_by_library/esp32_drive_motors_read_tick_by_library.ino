@@ -58,7 +58,7 @@ volatile int pwm_frequency[2] = {0, 0};
 volatile int pwm_pulse[2] = {0, 0};
 
 // calculate speed
-long previous_T = 0;
+long long previous_T = 0;
 int PREV_POS_1 = 0;
 int PREV_POS_2 = 0;
 float v1Filt = 0;
@@ -72,6 +72,31 @@ ESP32Encoder encoder_2;
 
 // Timer
 long read_timer = 0;
+
+class RPMCalculator {
+  private:
+    float _sample_time = 0.005;
+    unsigned int _encoder_tick_per_round = 480;
+    float _RPM_Filter_coefficient = 0.854;
+    float _RPM_coefficient = 0.0728;
+    float _previous_RPM_coefficient = 0.0728;
+    int32_t _previous_tick = 0;
+  public:
+    void setupRPMCalculator(unsigned int encoder_tick_per_round, float sample_time) {
+      this->_encoder_tick_per_round = encoder_tick_per_round;
+      this->_sample_time = sample_time;
+    }
+
+    void setupLowPassFilter(float RPM_Filter_coefficient, float RPM_coefficient, float previous_RPM_coefficient) {
+      this->_RPM_Filter_coefficient = RPM_Filter_coefficient;
+      this->_RPM_coefficient = RPM_coefficient;
+      this->_previous_RPM_coefficient = previous_RPM_coefficient;
+    }
+
+    void calculate(long current_tick) {
+
+    }
+};
 
 bool deserializeJSON() {
   DeserializationError error = deserializeJson(JSON_DOC_RECEIVE, serialLine);
@@ -167,8 +192,8 @@ void initializeMotor()
 
 void readEncoderTicks() {
   long start = micros();
-  JSON_DOC_SEND["left_tick"] = (int32_t)encoder_1.getCount();
-  JSON_DOC_SEND["right_tick"] = (int32_t)encoder_2.getCount();
+  JSON_DOC_SEND["left_tick"] = v1Filt;
+  JSON_DOC_SEND["right_tick"] = v2Filt;
   long end = micros();
   read_timer = end - start;
 }
@@ -182,57 +207,61 @@ void calculateSendingPeriod() {
 }
 
 void calculateSpeed() {
-  int32_t POS_1 = (int32_t)JSON_DOC_SEND["left_tick"];
-  int32_t POS_2 = (int32_t)JSON_DOC_SEND["right_tick"];
+  int32_t POS_1 = (int32_t)encoder_1.getCount();
+  int32_t POS_2 = (int32_t)encoder_2.getCount();
   long currT = micros();
-  float deltaT = ((float) (currT - previous_T)) / 1.0e6;
-  float velocity_1 = (POS_1 - PREV_POS_1) / deltaT;
-  float velocity_2 = (POS_2 - PREV_POS_2) / deltaT;
-  PREV_POS_1 = POS_1;
-  PREV_POS_2 = POS_2;
-  previous_T = currT;
+  if (((float) (currT - previous_T)) / 1.0e6 >= 0.005) {
+    float deltaT = ((float) (currT - previous_T)) / 1.0e6;
+    float velocity_1 = (POS_1 - PREV_POS_1) / deltaT;
+    float velocity_2 = (POS_2 - PREV_POS_2) / deltaT;
+    PREV_POS_1 = POS_1;
+    PREV_POS_2 = POS_2;
 
-  float v1 = velocity_1 / 480.0 * 60.0;
-  float v2 = velocity_2 / 480.0 * 60.0;
 
-  // Low-pass filter (25 Hz cutoff)
-  v1Filt = 0.854*v1Filt + 0.0728*v1 + 0.0728*v1Prev;
-  v1Prev = v1;
-  v2Filt = 0.854*v2Filt + 0.0728*v2 + 0.0728*v2Prev;
-  v2Prev = v2;
+    float v1 = velocity_1 / 480.0 * 60.0;
+    float v2 = velocity_2 / 480.0 * 60.0;
+
+    // Low-pass filter (25 Hz cutoff)
+    v1Filt = 0.854 * v1Filt + 0.0728 * v1 + 0.0728 * v1Prev;
+    v1Prev = v1;
+    v2Filt = 0.854 * v2Filt + 0.0728 * v2 + 0.0728 * v2Prev;
+    v2Prev = v2;
+
+    previous_T = currT;
+  }
 }
 
 
-void setup(){
+void setup() {
   Serial.begin(BAUD_RATE);
 
-	// Enable the weak pull down resistors
-	//ESP32Encoder::useInternalWeakPullResistors=DOWN;
-	// Enable the weak pull up resistors
-	ESP32Encoder::useInternalWeakPullResistors=UP;
+  // Enable the weak pull down resistors
+  //ESP32Encoder::useInternalWeakPullResistors=DOWN;
+  // Enable the weak pull up resistors
+  ESP32Encoder::useInternalWeakPullResistors = UP;
 
   // Double check Sending Frequency
-  calculateSendingPeriod();  
-  
+  calculateSendingPeriod();
+
   // Setup pinmode
   pinMode(AIN1, OUTPUT);
   pinMode(AIN2, OUTPUT);
   pinMode(PWMA, OUTPUT);
   pinMode(ENC1_A, INPUT);
   pinMode(ENC1_B, INPUT);
-	encoder_1.attachSingleEdge(ENC1_A, ENC1_B);
+  encoder_1.attachSingleEdge(ENC1_A, ENC1_B);
   encoder_1.setFilter(1023);
   encoder_1.clearCount();
   // void attachHalfQuad(int aPintNumber, int bPinNumber);
-	// void attachFullQuad(int aPintNumber, int bPinNumber);
-	// void attachSingleEdge(int aPintNumber, int bPinNumber);
+  // void attachFullQuad(int aPintNumber, int bPinNumber);
+  // void attachSingleEdge(int aPintNumber, int bPinNumber);
 
   pinMode(BIN1, OUTPUT);
   pinMode(BIN2, OUTPUT);
   pinMode(PWMB, OUTPUT);
   pinMode(ENC2_A, INPUT);
   pinMode(ENC2_B, INPUT);
-	encoder_2.attachSingleEdge(ENC2_B, ENC2_A);
+  encoder_2.attachSingleEdge(ENC2_B, ENC2_A);
   encoder_2.setFilter(1023);
   encoder_2.clearCount();
 
@@ -250,13 +279,13 @@ void setup(){
   ledcWrite(CHANNEL_PWMA, 0);
   ledcWrite(CHANNEL_PWMB, 0);
 
-	// set starting count value after attaching
-	// encoder.setCount(37);
+  // set starting count value after attaching
+  // encoder.setCount(37);
 
-	// clear the encoder's raw count and set the tracked count to zero
-	// encoder.clearCount();
-	// encoder2.clearCount();
-	// Serial.println("Encoder Start = " + String((int32_t)encoder.getCount()));
+  // clear the encoder's raw count and set the tracked count to zero
+  // encoder.clearCount();
+  // encoder2.clearCount();
+  // Serial.println("Encoder Start = " + String((int32_t)encoder.getCount()));
 }
 
 void loop()
@@ -266,6 +295,7 @@ void loop()
     serial_receive();
   }
 
+  calculateSpeed();
   readEncoderTicks();
 
   // if (millis() < RUNNING_TIME){
@@ -277,8 +307,7 @@ void loop()
   //   ledcWrite(CHANNEL_PWMB, 0);
   // }
 
-  // calculateSpeed();
-  
+
   if (micros() - timerPivot >= PERIOD) {
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
     serializeJson(JSON_DOC_SEND, Serial);
@@ -295,4 +324,3 @@ void loop()
     timerPivot = micros();
   }
 }
-
