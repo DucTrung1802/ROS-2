@@ -58,8 +58,8 @@ class RPMCalculator {
 };
 
 struct MotorData {
-  long left_RPM;
-  long right_RPM;
+  float left_RPM;
+  float right_RPM;
   String checksum;
 };
 
@@ -256,6 +256,17 @@ void calculateSendingPeriod() {
   }
 }
 
+void sendJSON() {
+  StaticJsonDocument<200> JSON_DOC_SEND;
+
+  JSON_DOC_SEND["left_RPM"] = motor_data.left_RPM;
+  JSON_DOC_SEND["right_RPM"] = motor_data.right_RPM;
+  JSON_DOC_SEND["checksum"] = motor_data.checksum;
+
+  serializeJson(JSON_DOC_SEND, Serial);
+  Serial.println();
+}
+
 void setup() {
   Serial.begin(BAUD_RATE);
 
@@ -336,8 +347,7 @@ void loop()
   if (micros() - timerPivot >= PERIOD) {
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
     readRPM();
-    // serializeJson(JSON_DOC_SEND, Serial);
-    // Serial.println();
+    sendJSON();
 
     timerPivot = micros();
   }
