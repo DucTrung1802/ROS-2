@@ -6,6 +6,55 @@
 #include <ESP32Encoder.h>
 #include <ArduinoJson.h>
 
+class RPMCalculator {
+  private:
+    float _sample_time = 0.005;
+    float _encoder_tick_per_round = 480;
+
+    float _RPM_Filter;
+    float _previous_RPM;
+
+    float _RPM_Filter_coefficient = 0.854;
+    float _RPM_coefficient = 0.0728;
+    float _previous_RPM_coefficient = 0.0728;
+
+    int32_t _previous_tick;
+    long _previous_T;
+  public:
+    void setupSampleTime(float sample_time) {
+      this->_sample_time = sample_time;
+    }
+
+    void setupEncoderTickPerRound(unsigned int encoder_tick_per_round) {
+      this->_encoder_tick_per_round = encoder_tick_per_round;
+    }
+
+    void setupLowPassFilter(float RPM_Filter_coefficient, float RPM_coefficient, float previous_RPM_coefficient) {
+      this->_RPM_Filter_coefficient = RPM_Filter_coefficient;
+      this->_RPM_coefficient = RPM_coefficient;
+      this->_previous_RPM_coefficient = previous_RPM_coefficient;
+    }
+
+    void calculate(uint32_t current_tick) {
+      long curr_T = micros();
+      if (((float) (curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
+        float delta_T = ((float) (curr_T - this->_previous_T)) / 1.0e6;
+        float encoder_per_sec = (current_tick - this->_previous_tick) / delta_T;
+        float RPM = encoder_per_sec / this->_encoder_tick_per_round * 60.0;
+
+        // Low-pass filter (over 25Hz cut off)
+        this->_RPM_Filter = this->_RPM_Filter_coefficient * this->_RPM_Filter + RPM * this->_RPM_coefficient + this->_previous_RPM * this->_previous_RPM_coefficient;
+
+        this->_previous_tick = curr_T;
+        this->_previous_T = curr_T;
+      }
+    }
+
+    float getRPM() {
+      return this->_RPM_Filter;
+    }
+};
+
 const int RUNNING_TIME = 10000; // ms
 
 // Config pin parameters
@@ -57,46 +106,18 @@ volatile int wheel_direction[2] = {0, 0};
 volatile int pwm_frequency[2] = {0, 0};
 volatile int pwm_pulse[2] = {0, 0};
 
-// calculate speed
-long long previous_T = 0;
-int PREV_POS_1 = 0;
-int PREV_POS_2 = 0;
-float v1Filt = 0;
-float v1Prev = 0;
-float v2Filt = 0;
-float v2Prev = 0;
 
 // Encoder instances
 ESP32Encoder encoder_1;
 ESP32Encoder encoder_2;
 
+// RPMCalculator instances
+RPMCalculator rpm_calculator_1;
+RPMCalculator rpm_calculator_2;
+
 // Timer
 long read_timer = 0;
 
-class RPMCalculator {
-  private:
-    float _sample_time = 0.005;
-    unsigned int _encoder_tick_per_round = 480;
-    float _RPM_Filter_coefficient = 0.854;
-    float _RPM_coefficient = 0.0728;
-    float _previous_RPM_coefficient = 0.0728;
-    int32_t _previous_tick = 0;
-  public:
-    void setupRPMCalculator(unsigned int encoder_tick_per_round, float sample_time) {
-      this->_encoder_tick_per_round = encoder_tick_per_round;
-      this->_sample_time = sample_time;
-    }
-
-    void setupLowPassFilter(float RPM_Filter_coefficient, float RPM_coefficient, float previous_RPM_coefficient) {
-      this->_RPM_Filter_coefficient = RPM_Filter_coefficient;
-      this->_RPM_coefficient = RPM_coefficient;
-      this->_previous_RPM_coefficient = previous_RPM_coefficient;
-    }
-
-    void calculate(long current_tick) {
-
-    }
-};
 
 bool deserializeJSON() {
   DeserializationError error = deserializeJson(JSON_DOC_RECEIVE, serialLine);
@@ -190,10 +211,10 @@ void initializeMotor()
   digitalWrite(STBY, HIGH);
 }
 
-void readEncoderTicks() {
+void readRPM() {
   long start = micros();
-  JSON_DOC_SEND["left_tick"] = v1Filt;
-  JSON_DOC_SEND["right_tick"] = v2Filt;
+  JSON_DOC_SEND["left_tick"] = rpm_calculator_1.getRPM();
+  JSON_DOC_SEND["right_tick"] = rpm_calculator_2.getRPM();
   long end = micros();
   read_timer = end - start;
 }
@@ -205,32 +226,6 @@ void calculateSendingPeriod() {
     PERIOD = 1e6;
   }
 }
-
-void calculateSpeed() {
-  int32_t POS_1 = (int32_t)encoder_1.getCount();
-  int32_t POS_2 = (int32_t)encoder_2.getCount();
-  long currT = micros();
-  if (((float) (currT - previous_T)) / 1.0e6 >= 0.005) {
-    float deltaT = ((float) (currT - previous_T)) / 1.0e6;
-    float velocity_1 = (POS_1 - PREV_POS_1) / deltaT;
-    float velocity_2 = (POS_2 - PREV_POS_2) / deltaT;
-    PREV_POS_1 = POS_1;
-    PREV_POS_2 = POS_2;
-
-
-    float v1 = velocity_1 / 480.0 * 60.0;
-    float v2 = velocity_2 / 480.0 * 60.0;
-
-    // Low-pass filter (25 Hz cutoff)
-    v1Filt = 0.854 * v1Filt + 0.0728 * v1 + 0.0728 * v1Prev;
-    v1Prev = v1;
-    v2Filt = 0.854 * v2Filt + 0.0728 * v2 + 0.0728 * v2Prev;
-    v2Prev = v2;
-
-    previous_T = currT;
-  }
-}
-
 
 void setup() {
   Serial.begin(BAUD_RATE);
@@ -295,11 +290,12 @@ void loop()
     serial_receive();
   }
 
-  calculateSpeed();
-  readEncoderTicks();
+  rpm_calculator_1.calculate((int32_t)encoder_1.getCount());
+  rpm_calculator_2.calculate((int32_t)encoder_2.getCount());
+  readRPM();
 
   // if (millis() < RUNNING_TIME){
-  //   readEncoderTicks();
+  //   readRPM();
   // }
 
   // if (millis() >= RUNNING_TIME) {
