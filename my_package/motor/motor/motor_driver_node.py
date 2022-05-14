@@ -64,8 +64,8 @@ LEFT_MOTOR_Kd = 0
 LEFT_MOTOR_MIN = 0
 LEFT_MOTOR_MAX = 12
 
-RIGHT_MOTOR_Kp = 0.075
-RIGHT_MOTOR_Ki = 0.43
+RIGHT_MOTOR_Kp = 0.06
+RIGHT_MOTOR_Ki = 0.46
 RIGHT_MOTOR_Kd = 0
 RIGHT_MOTOR_MIN = 0
 RIGHT_MOTOR_MAX = 12
@@ -482,10 +482,10 @@ def loop():
                 if time.time() - save_data_timer >= LEFT_MOTOR_SAMPLE_TIME:
                     WORKBOOK.writeData(index + 1, 1, linear_velocity_left)
                     WORKBOOK.writeData(index + 1, 2, RPM_LEFT)
-                    WORKBOOK.writeData(index + 1, 3, pwm_left)
+                    WORKBOOK.writeData(index + 1, 3, pwm_left / 1023.0 * 12.0)
                     WORKBOOK.writeData(index + 1, 5, linear_velocity_right)
                     WORKBOOK.writeData(index + 1, 6, RPM_RIGHT)
-                    WORKBOOK.writeData(index + 1, 7, pwm_right)
+                    WORKBOOK.writeData(index + 1, 7, pwm_right / 1023.0 * 12.0)
                     WORKBOOK.writeData(index + 1, 8, CHECKSUM)
                     index += 1
                     save_data_timer = time.time()
