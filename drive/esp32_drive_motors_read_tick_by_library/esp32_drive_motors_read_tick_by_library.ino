@@ -11,15 +11,15 @@ class RPMCalculator {
     float _sample_time = 0.005;
     float _encoder_tick_per_round = 480;
 
-    float _RPM_Filter;
-    float _previous_RPM;
+    float _RPM_Filter = 0;
+    float _previous_RPM = 0;
 
     float _RPM_Filter_coefficient = 0.854;
     float _RPM_coefficient = 0.0728;
     float _previous_RPM_coefficient = 0.0728;
 
-    int32_t _previous_tick;
-    long _previous_T;
+    uint32_t _previous_tick = 0;
+    long _previous_T = 0;
   public:
     void setupSampleTime(float sample_time) {
       this->_sample_time = sample_time;
@@ -45,7 +45,8 @@ class RPMCalculator {
         // Low-pass filter (over 25Hz cut off)
         this->_RPM_Filter = this->_RPM_Filter_coefficient * this->_RPM_Filter + RPM * this->_RPM_coefficient + this->_previous_RPM * this->_previous_RPM_coefficient;
 
-        this->_previous_tick = curr_T;
+        this->_previous_RPM = this->_RPM_Filter;
+        this->_previous_tick = current_tick;
         this->_previous_T = curr_T;
       }
     }
@@ -213,8 +214,8 @@ void initializeMotor()
 
 void readRPM() {
   long start = micros();
-  JSON_DOC_SEND["left_tick"] = rpm_calculator_1.getRPM();
-  JSON_DOC_SEND["right_tick"] = rpm_calculator_2.getRPM();
+  JSON_DOC_SEND["left_RPM"] = rpm_calculator_1.getRPM();
+  JSON_DOC_SEND["right_RPM"] = rpm_calculator_2.getRPM();
   long end = micros();
   read_timer = end - start;
 }
