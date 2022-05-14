@@ -369,7 +369,7 @@ def getMCUSerial():
                 foundMCU = True
                 index = device.find("ttyUSB")
                 # print(index)
-                MCUSerial = device[index:index+7]
+                MCUSerial = device[index : index + 7]
                 # print(MCUSerial)
                 break
 
@@ -496,13 +496,34 @@ def loop():
     try:
         if DATA_RECORDING:
             index = 0
-            varyPWM(TEST_PWM)
             timer = time.time()
+            varyPWM(500)
 
             while index <= DATA_AMOUNT:
 
-                if (time.time() - timer >= 10):
+                if index != LEFT_MOTOR.getDataCount():
+                    # print(str(index) + "/" + str(DATA_AMOUNT))
+                    index += 1
+
+                    # Vary PWM
+                    # if 0 < index <= DATA_AMOUNT / 3:
+                    #     pwm_value = 1023
+                    # elif DATA_AMOUNT / 3 < index <= DATA_AMOUNT * 2 / 3:
+                    #     pwm_value = 714
+                    # else:
+                    #     pwm_value = 510
+
+                    # WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getLowPassRPM())
+                    # WORKBOOK.writeData(index + 1, 2, LEFT_MOTOR.getKalmanFilterRPM())
+                    # WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getLowPassRPM())
+                    # WORKBOOK.writeData(index + 1, 5, RIGHT_MOTOR.getKalmanFilterRPM())
+
+                if time.time() - timer >= 5:
                     break
+
+                if time.time() - timer >= LEFT_MOTOR_SAMPLE_TIME:
+                    WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getLowPassRPM())
+                    WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getLowPassRPM())
 
                 if time.time() - receiving_timer >= RECEIVING_PERIOD:
                     updateStorePosFromSerial()
@@ -525,25 +546,6 @@ def loop():
                 # driveMotors()
                 rclpy.spin_once(motor_driver_node)
 
-                if index != LEFT_MOTOR.getDataCount():
-                    # print(str(index) + "/" + str(DATA_AMOUNT))
-                    index += 1
-
-                    # Vary PWM
-                    # if 0 < index <= DATA_AMOUNT / 3:
-                    #     pwm_value = 1023
-                    # elif DATA_AMOUNT / 3 < index <= DATA_AMOUNT * 2 / 3:
-                    #     pwm_value = 714
-                    # else:
-                    #     pwm_value = 510
-
-
-                    WORKBOOK.writeData(index + 1, 1, LEFT_MOTOR.getTicks())
-                    # WORKBOOK.writeData(index + 1, 2, LEFT_MOTOR.getKalmanFilterRPM())
-                    WORKBOOK.writeData(index + 1, 4, RIGHT_MOTOR.getTicks())
-                    # WORKBOOK.writeData(index + 1, 5, RIGHT_MOTOR.getKalmanFilterRPM())
-   
-
         else:
             while True:
                 # manuallyWrite()
@@ -553,9 +555,9 @@ def loop():
 
                 if time.time() - publish_timer >= PUBLISH_PERIOD:
                     updatePosFromStorePos()
-                    motor_driver_node.setNeedPublish()
-                    rclpy.spin_once(motor_driver_node)
-                    motor_driver_node.resetNeedPublish()
+                #     motor_driver_node.setNeedPublish()
+                #     rclpy.spin_once(motor_driver_node)
+                #     motor_driver_node.resetNeedPublish()
                     publish_timer = time.time()
 
                 LEFT_MOTOR.calculateRPM(TICK_1)
