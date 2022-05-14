@@ -83,8 +83,9 @@ class MotorDriver(object):
     # Calculate RPM of Motor
     def calculateRPM(self, current_tick):
         if time.time() - self.__timer >= self.__sample_time:
+            self.__delta_time = time.time() - self.__timer
             self.__encoder_count_per_second = (
-                abs(current_tick - self.__previous_tick) / self.__sample_time
+                abs(current_tick - self.__previous_tick) / self.__delta_time
             )
             self.__RPM = (
                 self.__encoder_count_per_second
@@ -122,6 +123,12 @@ class MotorDriver(object):
 
     def getTicks(self):
         return self.__previous_tick
+
+    def getDiffTick(self):
+        return self.__encoder_count_per_second * self.__sample_time
+
+    def getRawRPM(self):
+        return self.__RPM
 
     def getLowPassRPM(self):
         return self.__lowPassFilteredRPM

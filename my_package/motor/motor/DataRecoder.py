@@ -24,12 +24,13 @@ class DataRecoder(object):
 
     def __initializeWorkBook(self):
         self.__work_book = Workbook()
-        for i in range(1, 6):
+        for i in range(1, 7):
             self.__work_book.active.column_dimensions[get_column_letter(i)].width = 30
         self.writeData(1, 1, "MOTOR 1 NO KF")
         self.writeData(1, 2, "MOTOR 1 WITH KF")
         self.writeData(1, 4, "MOTOR 2 NO KF")
         self.writeData(1, 5, "MOTOR 2 WITH KF")
+        self.writeData(1, 6, "Checksum")
 
     def saveWorkBook(self):
         # self.__folder_name = os.path.dirname(os.path.realpath(__file__))

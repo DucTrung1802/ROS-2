@@ -30,7 +30,7 @@ RIGHT_MOTOR_DIAMETER = 0.09
 
 # Velocity: m/s
 LINEAR_SPEED_MAX = 0.6  # m/s
-LINEAR_SPEED_MIN = -LINEAR_SPEED_MAX
+LINEAR_SPEED_MIN = 0.0  # m/s
 LINEAR_SPEED_STEP = LINEAR_SPEED_MAX / STEP
 
 # Degree: positive-clockwise; negative-counterclockwise
@@ -65,7 +65,7 @@ MAX ANGULAR VELOCITY : {} rad/s
 Moving around:
         w    
     a   s   d
-        x    
+        x   
 
 w/x : increase/decrease linear speed by {} m/s
 a/d : increase/decrease angular speed by {} rad/s
