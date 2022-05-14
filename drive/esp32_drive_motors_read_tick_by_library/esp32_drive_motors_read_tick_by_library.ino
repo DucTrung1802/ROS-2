@@ -91,6 +91,7 @@ const uint8_t CHANNEL_PWMB = 2;
 const int BAUD_RATE = 115200;
 // Sending
 StaticJsonDocument<200> JSON_DOC_SEND;
+StaticJsonDocument<200> JSON_DOC_CHECK;
 String JSON_DOC_SEND_STRING;
 const unsigned int SENDING_FREQUENCY = 2000; // Hz
 double PERIOD; // milliseconds
@@ -219,11 +220,13 @@ void initializeMotor()
 
 void calculateChecksum() {
   char buf[200];
-  JSON_DOC_SEND.remove("checksum");
-  serializeJson(JSON_DOC_SEND, buf, 200);
-  Serial.println(buf);
+  JSON_DOC_CHECK = JSON_DOC_SEND;
+  JSON_DOC_CHECK.remove("checksum");
+  serializeJson(JSON_DOC_CHECK, buf, 200);
+  //  Serial.println(buf);
   hash = MD5::make_hash(buf);
   md5str = MD5::make_digest(hash, 16);
+  //  JSON_DOC_SEND["checksum"] = NULL;
 }
 
 void freeChecksum() {
@@ -233,10 +236,11 @@ void freeChecksum() {
 
 void readRPM() {
   long start = micros();
+  String md5_str = "";
   JSON_DOC_SEND["left_RPM"] = rpm_calculator_1.getRPM();
   JSON_DOC_SEND["right_RPM"] = rpm_calculator_2.getRPM();
   calculateChecksum();
-  Serial.println(md5str);
+  //  Serial.println(md5str);
   //    JSON_DOC_SEND["checksum"] = String(md5str);
   JSON_DOC_SEND["checksum"] = md5str;
   freeChecksum();
@@ -317,7 +321,7 @@ void loop()
 
   rpm_calculator_1.calculate((int32_t)encoder_1.getCount());
   rpm_calculator_2.calculate((int32_t)encoder_2.getCount());
-  readRPM();
+  //  readRPM();
 
   // if (millis() < RUNNING_TIME){
   //   readRPM();
@@ -331,7 +335,8 @@ void loop()
 
   if (micros() - timerPivot >= PERIOD) {
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
-    serializeJson(JSON_DOC_SEND["checksum"], Serial);
+    readRPM();
+    serializeJson(JSON_DOC_SEND, Serial);
     Serial.println();
 
     timerPivot = micros();
