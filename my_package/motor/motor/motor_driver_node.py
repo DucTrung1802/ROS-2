@@ -58,21 +58,21 @@ RIGHT_MOTOR_Q = 0
 RIGHT_MOTOR_R = 273
 
 # PID Controller parameters
-LEFT_MOTOR_Kp = 0.051
-LEFT_MOTOR_Ki = 1.25
+LEFT_MOTOR_Kp = 0.074
+LEFT_MOTOR_Ki = 0.43
 LEFT_MOTOR_Kd = 0
 LEFT_MOTOR_MIN = 0
-LEFT_MOTOR_MAX = 1023
+LEFT_MOTOR_MAX = 12
 
-RIGHT_MOTOR_Kp = 0.064
-RIGHT_MOTOR_Ki = 1.57
-RIGHT_MOTOR_Kd = 0.0002
+RIGHT_MOTOR_Kp = 0.075
+RIGHT_MOTOR_Ki = 0.43
+RIGHT_MOTOR_Kd = 0
 RIGHT_MOTOR_MIN = 0
-RIGHT_MOTOR_MAX = 1023
+RIGHT_MOTOR_MAX = 12
 
 
 # Test data
-DATA_RECORDING = True
+DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
@@ -302,29 +302,22 @@ def driveMotors():
         pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
         pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-        LEFT_MOTOR_PID_CONTROLLER.evaluate(
-            linear_velocity_left, LEFT_MOTOR.getLowPassRPM()
-        )
-        RIGHT_MOTOR_PID_CONTROLLER.evaluate(
-            linear_velocity_right, RIGHT_MOTOR.getLowPassRPM()
-        )
+        LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, RPM_LEFT)
+        RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_right, RPM_RIGHT)
 
-        pwm_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue()
-        pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue()
+        if linear_velocity_left == 0:
+            pwm_left = 0.0
+        elif linear_velocity_left > 0:
+            pwm_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
+
+        if linear_velocity_right == 0:
+            pwm_right = 0.0
+        elif linear_velocity_right > 0:
+            pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
         print("---")
-        print(
-            "Left PWM: "
-            + str(pwm_left)
-            + "; Left RPM: "
-            + str(LEFT_MOTOR.getLowPassRPM())
-        )
-        print(
-            "Right PWM: "
-            + str(pwm_right)
-            + "; Right RPM: "
-            + str(RIGHT_MOTOR.getLowPassRPM())
-        )
+        print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(RPM_LEFT))
+        print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RPM_RIGHT))
         print("---")
 
         data = {
@@ -546,8 +539,8 @@ def loop():
                     # print("Checksum: " + CHECKSUM)
                     publish_timer = time.time()
 
-                # driveMotors()
-                # rclpy.spin_once(motor_driver_node)
+                driveMotors()
+                rclpy.spin_once(motor_driver_node)
 
     except KeyboardInterrupt:
         # JSON
