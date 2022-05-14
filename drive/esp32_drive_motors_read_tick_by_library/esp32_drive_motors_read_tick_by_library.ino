@@ -57,10 +57,20 @@ class RPMCalculator {
     }
 };
 
-struct MotorData {
+struct MotorDataSend {
   float left_RPM;
   float right_RPM;
   String checksum;
+};
+
+struct MotorDataReceive {
+  int left_wheel_direction;
+  int left_pwm_frequency;
+  int left_pwm_pulse;
+
+  int right_wheel_direction;
+  int right_pwm_frequency;
+  int right_pwm_pulse;
 };
 
 
@@ -110,9 +120,6 @@ String serialLine = "";
 // Use arduinojson.org/v6/assistant to compute the capacity.
 StaticJsonDocument<200> JSON_DOC_RECEIVE;
 String KEY[15] = "motor_data";
-volatile int wheel_direction[2] = {0, 0};
-volatile int pwm_frequency[2] = {0, 0};
-volatile int pwm_pulse[2] = {0, 0};
 
 // Encoder instances
 ESP32Encoder encoder_1;
@@ -123,7 +130,8 @@ RPMCalculator rpm_calculator_1;
 RPMCalculator rpm_calculator_2;
 
 // Struct
-MotorData motor_data;
+MotorDataSend motor_data_send;
+MotorDataReceive motor_data_receive;
 
 // Timer
 long read_timer = 0;
@@ -142,40 +150,40 @@ bool deserializeJSON() {
 }
 
 void decodeJSON() {
-  wheel_direction[0] = JSON_DOC_RECEIVE["motor_data"][0];
-  pwm_frequency[0] = JSON_DOC_RECEIVE["motor_data"][1];
-  pwm_pulse[0] = JSON_DOC_RECEIVE["motor_data"][2];
+  motor_data_receive.left_wheel_direction = JSON_DOC_RECEIVE["motor_data"][0];
+  motor_data_receive.left_pwm_frequency = JSON_DOC_RECEIVE["motor_data"][1];
+  motor_data_receive.left_pwm_pulse = JSON_DOC_RECEIVE["motor_data"][2];
 
-  wheel_direction[1] = JSON_DOC_RECEIVE["motor_data"][3];
-  pwm_frequency[1] = JSON_DOC_RECEIVE["motor_data"][4];
-  pwm_pulse[1] = JSON_DOC_RECEIVE["motor_data"][5];
+  motor_data_receive.right_wheel_direction = JSON_DOC_RECEIVE["motor_data"][3];
+  motor_data_receive.right_pwm_frequency = JSON_DOC_RECEIVE["motor_data"][4];
+  motor_data_receive.right_pwm_pulse = JSON_DOC_RECEIVE["motor_data"][5];
 }
 
 void driveLeftWheel() {
-  if (wheel_direction[0] == 1) {
+  if (motor_data_receive.left_wheel_direction == 1) {
     digitalWrite(AIN1, HIGH);
     digitalWrite(AIN2, LOW);
   }
-  else if (wheel_direction[0] == -1) {
+  else if (motor_data_receive.left_wheel_direction == -1) {
     digitalWrite(AIN1, LOW);
     digitalWrite(AIN2, HIGH);
   }
-  else if (wheel_direction[0] == 0) {
+  else if (motor_data_receive.left_wheel_direction == 0) {
     digitalWrite(AIN1, LOW);
     digitalWrite(AIN2, LOW);
   }
 }
 
 void driveRightWheel() {
-  if (wheel_direction[1] == 1) {
+  if (motor_data_receive.right_wheel_direction == 1) {
     digitalWrite(BIN1, LOW);
     digitalWrite(BIN2, HIGH);
   }
-  else if (wheel_direction[1] == -1) {
+  else if (motor_data_receive.right_wheel_direction == -1) {
     digitalWrite(BIN1, HIGH);
     digitalWrite(BIN2, LOW);
   }
-  else if (wheel_direction[1] == 0) {
+  else if (motor_data_receive.right_wheel_direction == 0) {
     digitalWrite(BIN1, LOW);
     digitalWrite(BIN2, LOW);
   }
@@ -192,12 +200,12 @@ void drive_motors() {
     driveLeftWheel();
     driveRightWheel();
 
-    ledcSetup(CHANNEL_PWMA, pwm_frequency[0], RESOLUTION_PWM_1);
-    ledcSetup(CHANNEL_PWMB, pwm_frequency[1], RESOLUTION_PWM_2);
+    ledcSetup(CHANNEL_PWMA, motor_data_receive.left_pwm_frequency, RESOLUTION_PWM_1);
+    ledcSetup(CHANNEL_PWMB, motor_data_receive.right_pwm_frequency, RESOLUTION_PWM_2);
 
     digitalWrite(STBY, LOW);
-    ledcWrite(CHANNEL_PWMA, pwm_pulse[0]);
-    ledcWrite(CHANNEL_PWMB, pwm_pulse[1]);
+    ledcWrite(CHANNEL_PWMA, motor_data_receive.left_pwm_pulse);
+    ledcWrite(CHANNEL_PWMB, motor_data_receive.right_pwm_pulse);
     digitalWrite(STBY, HIGH);
   }
 }
@@ -227,19 +235,19 @@ void readRPM() {
   char* md5str;
   unsigned char* hash;
 
-  motor_data.left_RPM = rpm_calculator_1.getRPM();
-  motor_data.right_RPM = rpm_calculator_2.getRPM();
+  motor_data_send.left_RPM = rpm_calculator_1.getRPM();
+  motor_data_send.right_RPM = rpm_calculator_2.getRPM();
 
   // calculate checksum
   char buf[200];
   StaticJsonDocument<200> JSON_DOC_CHECK;
-  JSON_DOC_CHECK["left_RPM"] = motor_data.left_RPM;
-  JSON_DOC_CHECK["right_RPM"] = motor_data.right_RPM;
+  JSON_DOC_CHECK["left_RPM"] = motor_data_send.left_RPM;
+  JSON_DOC_CHECK["right_RPM"] = motor_data_send.right_RPM;
   serializeJson(JSON_DOC_CHECK, buf, 200);
   // Serial.println(buf);
   hash = MD5::make_hash(buf);
   md5str = MD5::make_digest(hash, 16);
-  motor_data.checksum = String(md5str);
+  motor_data_send.checksum = String(md5str);
 
   free(hash);
   free(md5str);
@@ -259,9 +267,9 @@ void calculateSendingPeriod() {
 void sendJSON() {
   StaticJsonDocument<200> JSON_DOC_SEND;
 
-  JSON_DOC_SEND["left_RPM"] = motor_data.left_RPM;
-  JSON_DOC_SEND["right_RPM"] = motor_data.right_RPM;
-  JSON_DOC_SEND["checksum"] = motor_data.checksum;
+  JSON_DOC_SEND["left_RPM"] = motor_data_send.left_RPM;
+  JSON_DOC_SEND["right_RPM"] = motor_data_send.right_RPM;
+  JSON_DOC_SEND["checksum"] = motor_data_send.checksum;
 
   serializeJson(JSON_DOC_SEND, Serial);
   Serial.println();
