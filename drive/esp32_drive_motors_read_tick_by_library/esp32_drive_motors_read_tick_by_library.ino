@@ -5,6 +5,7 @@
 
 #include <ESP32Encoder.h>
 #include <ArduinoJson.h>
+#include <MD5.h>
 
 class RPMCalculator {
   private:
@@ -90,6 +91,7 @@ const uint8_t CHANNEL_PWMB = 2;
 const int BAUD_RATE = 115200;
 // Sending
 StaticJsonDocument<200> JSON_DOC_SEND;
+String JSON_DOC_SEND_STRING;
 const unsigned int SENDING_FREQUENCY = 2000; // Hz
 double PERIOD; // milliseconds
 volatile unsigned long long timerPivot = 0; // milliseconds
@@ -107,7 +109,6 @@ volatile int wheel_direction[2] = {0, 0};
 volatile int pwm_frequency[2] = {0, 0};
 volatile int pwm_pulse[2] = {0, 0};
 
-
 // Encoder instances
 ESP32Encoder encoder_1;
 ESP32Encoder encoder_2;
@@ -115,6 +116,10 @@ ESP32Encoder encoder_2;
 // RPMCalculator instances
 RPMCalculator rpm_calculator_1;
 RPMCalculator rpm_calculator_2;
+
+// Checksum parameters
+char* md5str;
+unsigned char* hash;
 
 // Timer
 long read_timer = 0;
@@ -212,10 +217,29 @@ void initializeMotor()
   digitalWrite(STBY, HIGH);
 }
 
+void calculateChecksum() {
+  char buf[200];
+  JSON_DOC_SEND.remove("checksum");
+  serializeJson(JSON_DOC_SEND, buf, 200);
+  Serial.println(buf);
+  hash = MD5::make_hash(buf);
+  md5str = MD5::make_digest(hash, 16);
+}
+
+void freeChecksum() {
+  free(hash);
+  free(md5str);
+}
+
 void readRPM() {
   long start = micros();
   JSON_DOC_SEND["left_RPM"] = rpm_calculator_1.getRPM();
   JSON_DOC_SEND["right_RPM"] = rpm_calculator_2.getRPM();
+  calculateChecksum();
+  Serial.println(md5str);
+  //    JSON_DOC_SEND["checksum"] = String(md5str);
+  JSON_DOC_SEND["checksum"] = md5str;
+  freeChecksum();
   long end = micros();
   read_timer = end - start;
 }
@@ -307,17 +331,9 @@ void loop()
 
   if (micros() - timerPivot >= PERIOD) {
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
-    serializeJson(JSON_DOC_SEND, Serial);
+    serializeJson(JSON_DOC_SEND["checksum"], Serial);
     Serial.println();
-    // Serial.print("Read time: ");
-    // Serial.println(read_timer);
-    // Serial.print("Interrupt 1 time: ");
-    // Serial.println(read_timer_1);
-    // Serial.print("Interrupt 2 time: ");
-    // Serial.println(read_timer_2);
-    // Serial.println(v1Filt);
-    // Serial.println(POS_2);
-    //  serializeJsonPretty(JSON_DOC_SEND, Serial);
+
     timerPivot = micros();
   }
 }
