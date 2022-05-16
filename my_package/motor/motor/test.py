@@ -1,5 +1,5 @@
-def calculate(a, b):
-    return a + b
-
-
-print(calculate(5, 7))
+import copy
+dict_A = {"key":"abcd1234"}
+dict_B = copy.deepcopy(dict_A)
+dict_B["hello"] = "A"
+print(dict_A)

@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+# Python libraries
 import subprocess
 import time
 from click import prompt
@@ -8,7 +9,11 @@ import serial
 import re
 import json
 import math
+import copy
+import hashlib
 
+
+# ROS 2 libraries
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
@@ -150,8 +155,8 @@ foundMCU = False
 foundLidar = False
 serialData = ""
 dictionaryData = {}
-time_of_receive = 0
-error_of_receive = 0
+successful_receive = 0
+error_receive = 0
 
 # JSON parameters
 KEY = "pwm_pulse"
@@ -400,24 +405,35 @@ def readSerialData():
         return
 
 
+def checksum():
+    global error_receive
+    dictionaryDataCheck = copy.deepcopy(dictionaryData)
+    dictionaryDataCheck.pop("checksum", None)
+    dictionaryDataCheckString = json.dumps(dictionaryDataCheck)
+    dictionaryDataCheckString.replace(" ", "")
+    checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
+    if checksumString != STORE_CHECKSUM:
+        error_receive += 1
+
+
 def updateStoreRPMFromSerial():
-    global STORE_RPM_LEFT, STORE_RPM_RIGHT, STORE_CHECKSUM, time_of_receive, error_of_receive
+    global STORE_RPM_LEFT, STORE_RPM_RIGHT, STORE_CHECKSUM, successful_receive, error_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
     # print(
-    #     "Error in serial communication: " + str(error_of_receive) + "/" + str(time_of_receive)
+    #     "Error in serial communication: " + str(error_receive) + "/" + str(successful_receive)
     # )
     try:
         readSerialData()
         STORE_RPM_LEFT = dictionaryData["left_RPM"]
         STORE_RPM_RIGHT = dictionaryData["right_RPM"]
         STORE_CHECKSUM = dictionaryData["checksum"]
-        time_of_receive += 1
+        checksum()
+        successful_receive += 1
     except:
-        error_of_receive += 1
+        error_receive += 1
         return
 
 
-#
 def updateRPMFromStorePos():
     global RPM_LEFT, RPM_RIGHT, CHECKSUM
     RPM_LEFT = STORE_RPM_LEFT
@@ -479,17 +495,6 @@ def loop():
                 # if time.time() - timer >= 5:
                 #     break
 
-                if time.time() - save_data_timer >= LEFT_MOTOR_SAMPLE_TIME:
-                    WORKBOOK.writeData(index + 1, 1, linear_velocity_left)
-                    WORKBOOK.writeData(index + 1, 2, RPM_LEFT)
-                    WORKBOOK.writeData(index + 1, 3, pwm_left / 1023.0 * 12.0)
-                    WORKBOOK.writeData(index + 1, 5, linear_velocity_right)
-                    WORKBOOK.writeData(index + 1, 6, RPM_RIGHT)
-                    WORKBOOK.writeData(index + 1, 7, pwm_right / 1023.0 * 12.0)
-                    WORKBOOK.writeData(index + 1, 8, CHECKSUM)
-                    index += 1
-                    save_data_timer = time.time()
-
                 if time.time() - receiving_timer >= RECEIVING_PERIOD:
                     updateStoreRPMFromSerial()
                     receiving_timer = time.time()
@@ -502,10 +507,30 @@ def loop():
 
                     publish_timer = time.time()
 
-                # LEFT_MOTOR.calculateRPM(RPM_LEFT)
-                # RIGHT_MOTOR.calculateRPM(RPM_RIGHT)
                 driveMotors()
                 rclpy.spin_once(motor_driver_node)
+
+                if time.time() - save_data_timer >= LEFT_MOTOR_SAMPLE_TIME:
+                    WORKBOOK.writeData(index + 1, 1, linear_velocity_left)
+                    WORKBOOK.writeData(index + 1, 2, RPM_LEFT)
+                    WORKBOOK.writeData(index + 1, 3, pwm_left / 1023.0 * 12.0)
+                    WORKBOOK.writeData(index + 1, 5, linear_velocity_right)
+                    WORKBOOK.writeData(index + 1, 6, RPM_RIGHT)
+                    WORKBOOK.writeData(index + 1, 7, pwm_right / 1023.0 * 12.0)
+                    WORKBOOK.writeData(index + 1, 8, successful_receive)
+                    WORKBOOK.writeData(index + 1, 9, error_receive)
+                    WORKBOOK.writeData(
+                        index + 1,
+                        10,
+                        round(
+                            successful_receive
+                            / (error_receive + successful_receive)
+                            * 100,
+                            2,
+                        ),
+                    )
+                    index += 1
+                    save_data_timer = time.time()
 
         else:
             while True:
