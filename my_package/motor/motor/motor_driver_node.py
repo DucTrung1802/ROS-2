@@ -84,7 +84,7 @@ TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 1023
 
 # DataRecorder parameters
-DATA_AMOUNT = 2000
+DATA_AMOUNT = 3000
 
 # =================================================
 
@@ -307,10 +307,10 @@ def driveMotors():
         elif linear_velocity_right > 0:
             pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
-        print("---")
-        print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(RPM_LEFT))
-        print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RPM_RIGHT))
-        print("---")
+        # print("---")
+        # print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(RPM_LEFT))
+        # print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RPM_RIGHT))
+        # print("---")
 
         data = {
             "motor_data": [
@@ -410,8 +410,15 @@ def checksum():
     dictionaryDataCheck = copy.deepcopy(dictionaryData)
     dictionaryDataCheck.pop("checksum", None)
     dictionaryDataCheckString = json.dumps(dictionaryDataCheck)
-    dictionaryDataCheckString.replace(" ", "")
+    dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
     checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
+
+    print("Dict: " + dictionaryDataCheckString)
+
+    # print("STORE_CHECKSUM: " + STORE_CHECKSUM)
+    # print("dictionaryDataCheck: " + checksumString)
+    # print("---------")
+
     if checksumString != STORE_CHECKSUM:
         error_receive += 1
 
@@ -484,6 +491,8 @@ def loop():
 
     LEFT_MOTOR.resetDataCount()
     RIGHT_MOTOR.resetDataCount()
+
+    print("Ready!")
 
     try:
         if DATA_RECORDING:

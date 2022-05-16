@@ -36,7 +36,7 @@ class DataRecoder(object):
 
         self.writeData(1, 8, "Successful Receive")
         self.writeData(1, 9, "Error Receive")
-        self.writeData(1, 10, "Rate of Error (%)")
+        self.writeData(1, 10, "Rate of Successful (%)")
 
 
     def saveWorkBook(self):
