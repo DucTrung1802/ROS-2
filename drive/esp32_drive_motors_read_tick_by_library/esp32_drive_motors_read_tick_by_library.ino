@@ -229,9 +229,17 @@ void readRPM() {
   char* md5str;
   unsigned char* hash;
 
+
   motor_data_send.left_RPM = rpm_calculator_1.getRPM();
   motor_data_send.right_RPM = rpm_calculator_2.getRPM();
 
+  if (motor_data_send.left_RPM < 1) {
+    motor_data_send.left_RPM = 0;
+  }
+  if (motor_data_send.right_RPM < 1) {
+    motor_data_send.right_RPM = 0;
+  }
+  
   // calculate checksum
   char buf[200];
   StaticJsonDocument<200> JSON_DOC_CHECK;
@@ -245,7 +253,7 @@ void readRPM() {
 
   free(hash);
   free(md5str);
-  
+
   long end = micros();
   read_timer = end - start;
 }
