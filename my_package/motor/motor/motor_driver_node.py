@@ -155,7 +155,7 @@ foundMCU = False
 foundLidar = False
 serialData = ""
 dictionaryData = {}
-successful_receive = 0
+total_receive = 0
 error_receive = 0
 
 # JSON parameters
@@ -417,10 +417,10 @@ def checksum():
 
 
 def updateStoreRPMFromSerial():
-    global STORE_RPM_LEFT, STORE_RPM_RIGHT, STORE_CHECKSUM, successful_receive, error_receive
+    global STORE_RPM_LEFT, STORE_RPM_RIGHT, STORE_CHECKSUM, total_receive, error_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
     # print(
-    #     "Error in serial communication: " + str(error_receive) + "/" + str(successful_receive)
+    #     "Error in serial communication: " + str(error_receive) + "/" + str(total_receive)
     # )
     try:
         readSerialData()
@@ -428,9 +428,11 @@ def updateStoreRPMFromSerial():
         STORE_RPM_RIGHT = dictionaryData["right_RPM"]
         STORE_CHECKSUM = dictionaryData["checksum"]
         checksum()
-        successful_receive += 1
+
     except:
         error_receive += 1
+    finally:
+        total_receive += 1
         return
 
 
@@ -517,15 +519,13 @@ def loop():
                     WORKBOOK.writeData(index + 1, 5, linear_velocity_right)
                     WORKBOOK.writeData(index + 1, 6, RPM_RIGHT)
                     WORKBOOK.writeData(index + 1, 7, pwm_right / 1023.0 * 12.0)
-                    WORKBOOK.writeData(index + 1, 8, successful_receive)
+                    WORKBOOK.writeData(index + 1, 8, total_receive)
                     WORKBOOK.writeData(index + 1, 9, error_receive)
                     WORKBOOK.writeData(
                         index + 1,
                         10,
                         round(
-                            successful_receive
-                            / (error_receive + successful_receive)
-                            * 100,
+                            (total_receive - error_receive) / total_receive * 100,
                             2,
                         ),
                     )
