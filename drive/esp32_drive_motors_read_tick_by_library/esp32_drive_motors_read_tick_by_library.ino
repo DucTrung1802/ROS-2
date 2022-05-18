@@ -157,6 +157,7 @@ void deserializeJSON() {
     return;
   }
 
+  // Assign data of JSON_DOC_RECEIVE to MotorDataReceive struct
   motor_data_receive.left_wheel_direction = JSON_DOC_RECEIVE["motor_data"][0];
   motor_data_receive.left_pwm_frequency = JSON_DOC_RECEIVE["motor_data"][1];
   motor_data_receive.left_pwm_pulse = JSON_DOC_RECEIVE["motor_data"][2];
@@ -369,10 +370,10 @@ void loop()
   //   ledcWrite(CHANNEL_PWMB, 0);
   // }
 
+  readRPM();
 
   if (micros() - timerPivot >= PERIOD) {
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
-    readRPM();
     sendJSON();
 
     timerPivot = micros();
