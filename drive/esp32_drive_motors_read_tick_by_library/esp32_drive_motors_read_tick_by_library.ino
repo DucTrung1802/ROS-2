@@ -8,6 +8,7 @@
 #include <MD5.h>
 
 class RPMCalculator {
+  // Declare private variable of class
   private:
     float _sample_time = 0.005;
     float _encoder_tick_per_round = 480;
@@ -42,8 +43,8 @@ class RPMCalculator {
       if (((float) (curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
         float delta_T = ((float) (curr_T - this->_previous_T)) / 1.0e6;
         this->_current_tick = current_tick;
-        float encoder_per_sec = (this->_current_tick - this->_previous_tick) / delta_T;
-        float RPM = encoder_per_sec / this->_encoder_tick_per_round * 60.0;
+        float encoder_tick_per_sec = (this->_current_tick - this->_previous_tick) / delta_T;
+        float RPM = encoder_tick_per_sec / this->_encoder_tick_per_round * 60.0;
 
         // Low-pass filter (over 25Hz cut off)
         this->_RPM_Filter = this->_RPM_Filter_coefficient * this->_RPM_Filter + RPM * this->_RPM_coefficient + this->_previous_RPM * this->_previous_RPM_coefficient;
@@ -350,8 +351,7 @@ void setup() {
   // Serial.println("Encoder Start = " + String((int32_t)encoder.getCount()));
 }
 
-void loop()
-{
+void loop() {
 
   while (Serial.available()) {
     serial_receive();
