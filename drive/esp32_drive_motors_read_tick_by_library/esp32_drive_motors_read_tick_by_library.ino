@@ -126,7 +126,7 @@ String serialLine = "";
 // Inside the brackets, 200 is the capacity of the memory pool in bytes.
 // Don't forget to change this value to match your JSON document.
 // Use arduinojson.org/v6/assistant to compute the capacity.
-StaticJsonDocument<200> JSON_DOC_RECEIVE;
+bool is_received = false;
 String KEY[15] = "motor_data";
 
 // Encoder instances
@@ -145,19 +145,18 @@ MotorDataReceive motor_data_receive;
 long read_timer = 0;
 
 
-bool deserializeJSON() {
+void deserializeJSON() {
+  StaticJsonDocument<200> JSON_DOC_RECEIVE;
   DeserializationError error = deserializeJson(JSON_DOC_RECEIVE, serialLine);
 
   // Test if parsing succeeds.
   if (error) {
     //    Serial.print(F("deserializeJson() failed: "));
     //    Serial.println(error.f_str());
-    return false;
+    is_received = false;
+    return;
   }
-  return true;
-}
 
-void decodeJSON() {
   motor_data_receive.left_wheel_direction = JSON_DOC_RECEIVE["motor_data"][0];
   motor_data_receive.left_pwm_frequency = JSON_DOC_RECEIVE["motor_data"][1];
   motor_data_receive.left_pwm_pulse = JSON_DOC_RECEIVE["motor_data"][2];
@@ -165,6 +164,8 @@ void decodeJSON() {
   motor_data_receive.right_wheel_direction = JSON_DOC_RECEIVE["motor_data"][3];
   motor_data_receive.right_pwm_frequency = JSON_DOC_RECEIVE["motor_data"][4];
   motor_data_receive.right_pwm_pulse = JSON_DOC_RECEIVE["motor_data"][5];
+
+  is_received = true;
 }
 
 void driveLeftWheel() {
@@ -196,9 +197,9 @@ void drive_motors() {
   //  DIRECTION_RIGHT / DIRECTION_LEFT: 1 is forward, 0 is stop, -1 is backward
   //  PWM_FREQUENCY_LEFT / PWM_FREQUENCY_RIGHT: 1000 - 100000 Hz
   //  PWM: 0 - 1023
-  if (deserializeJSON()) {
-    decodeJSON();
+  deserializeJSON();
 
+  if (is_received) {
     driveLeftWheel();
     driveRightWheel();
 
@@ -282,13 +283,13 @@ void calculateSendingPeriod() {
 void sendJSON() {
   StaticJsonDocument<200> JSON_DOC_SEND;
 
-  JSON_DOC_SEND["left_tick"] = motor_data_send.left_tick;
-  JSON_DOC_SEND["right_tick"] = motor_data_send.right_tick;
-  JSON_DOC_SEND["left_RPM"] = motor_data_send.left_RPM;
-  JSON_DOC_SEND["right_RPM"] = motor_data_send.right_RPM;
-  JSON_DOC_SEND["checksum"] = motor_data_send.checksum;
+    JSON_DOC_SEND["left_tick"] = motor_data_send.left_tick;
+    JSON_DOC_SEND["right_tick"] = motor_data_send.right_tick;
+    JSON_DOC_SEND["left_RPM"] = motor_data_send.left_RPM;
+    JSON_DOC_SEND["right_RPM"] = motor_data_send.right_RPM;
+    JSON_DOC_SEND["checksum"] = motor_data_send.checksum;
 
-  serializeJson(JSON_DOC_SEND, Serial);
+    serializeJson(JSON_DOC_SEND, Serial);
   Serial.println();
 }
 
