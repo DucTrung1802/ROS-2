@@ -19,6 +19,7 @@ class RPMCalculator {
     float _RPM_coefficient = 0.0728;
     float _previous_RPM_coefficient = 0.0728;
 
+    uint32_t _current_tick = 0;
     uint32_t _previous_tick = 0;
     long _previous_T = 0;
   public:
@@ -40,7 +41,8 @@ class RPMCalculator {
       long curr_T = micros();
       if (((float) (curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
         float delta_T = ((float) (curr_T - this->_previous_T)) / 1.0e6;
-        float encoder_per_sec = (current_tick - this->_previous_tick) / delta_T;
+        this->_current_tick = current_tick;
+        float encoder_per_sec = (this->_current_tick - this->_previous_tick) / delta_T;
         float RPM = encoder_per_sec / this->_encoder_tick_per_round * 60.0;
 
         // Low-pass filter (over 25Hz cut off)
@@ -55,9 +57,15 @@ class RPMCalculator {
     float getRPM() {
       return this->_RPM_Filter;
     }
+
+    float getTick() {
+      return this->_current_tick;
+    }
 };
 
 struct MotorDataSend {
+  uint32_t left_tick;
+  uint32_t right_tick;
   float left_RPM;
   float right_RPM;
   String checksum;
@@ -231,7 +239,10 @@ void readRPM() {
 
 
   motor_data_send.left_RPM = rpm_calculator_1.getRPM();
+  motor_data_send.left_tick = rpm_calculator_1.getTick();
+  
   motor_data_send.right_RPM = rpm_calculator_2.getRPM();
+  motor_data_send.right_tick = rpm_calculator_2.getTick();
 
   if (motor_data_send.left_RPM < 1) {
     motor_data_send.left_RPM = 0;
@@ -243,6 +254,8 @@ void readRPM() {
   // calculate checksum
   char buf[200];
   StaticJsonDocument<200> JSON_DOC_CHECK;
+  JSON_DOC_CHECK["left_tick"] = motor_data_send.left_tick;
+  JSON_DOC_CHECK["right_tick"] = motor_data_send.right_tick;
   JSON_DOC_CHECK["left_RPM"] = motor_data_send.left_RPM;
   JSON_DOC_CHECK["right_RPM"] = motor_data_send.right_RPM;
   serializeJson(JSON_DOC_CHECK, buf, 200);
@@ -269,6 +282,8 @@ void calculateSendingPeriod() {
 void sendJSON() {
   StaticJsonDocument<200> JSON_DOC_SEND;
 
+  JSON_DOC_SEND["left_tick"] = motor_data_send.left_tick;
+  JSON_DOC_SEND["right_tick"] = motor_data_send.right_tick;
   JSON_DOC_SEND["left_RPM"] = motor_data_send.left_RPM;
   JSON_DOC_SEND["right_RPM"] = motor_data_send.right_RPM;
   JSON_DOC_SEND["checksum"] = motor_data_send.checksum;
