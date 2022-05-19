@@ -20,8 +20,8 @@ class RPMCalculator {
     float _RPM_coefficient = 0.0728;
     float _previous_RPM_coefficient = 0.0728;
 
-    uint32_t _current_tick = 0;
-    uint32_t _previous_tick = 0;
+    int32_t _current_tick = 0;
+    int32_t _previous_tick = 0;
     long _previous_T = 0;
   public:
     void setupSampleTime(float sample_time) {
@@ -38,12 +38,12 @@ class RPMCalculator {
       this->_previous_RPM_coefficient = previous_RPM_coefficient;
     }
 
-    void calculate(uint32_t current_tick) {
+    void calculate(int32_t current_tick) {
       long curr_T = micros();
       if (((float) (curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
         float delta_T = ((float) (curr_T - this->_previous_T)) / 1.0e6;
         this->_current_tick = current_tick;
-        float encoder_tick_per_sec = (this->_current_tick - this->_previous_tick) / delta_T;
+        float encoder_tick_per_sec = abs(this->_current_tick - this->_previous_tick) / delta_T;
         float RPM = encoder_tick_per_sec / this->_encoder_tick_per_round * 60.0;
 
         // Low-pass filter (over 25Hz cut off)
@@ -65,8 +65,8 @@ class RPMCalculator {
 };
 
 struct MotorDataSend {
-  uint32_t left_tick;
-  uint32_t right_tick;
+  int32_t left_tick;
+  int32_t right_tick;
   float left_RPM;
   float right_RPM;
   String checksum;
@@ -176,16 +176,27 @@ void driveLeftWheel() {
     digitalWrite(AIN2, LOW);
   }
 
+  else if (motor_data_receive.left_wheel_direction == -1) {
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, HIGH);
+  }
+
   else if (motor_data_receive.left_wheel_direction == 0) {
     digitalWrite(AIN1, LOW);
     digitalWrite(AIN2, LOW);
   }
+
 }
 
 void driveRightWheel() {
   if (motor_data_receive.right_wheel_direction == 1) {
     digitalWrite(BIN1, LOW);
     digitalWrite(BIN2, HIGH);
+  }
+
+  else if (motor_data_receive.right_wheel_direction == -1) {
+    digitalWrite(BIN1, HIGH);
+    digitalWrite(BIN2, LOW);
   }
 
   else if (motor_data_receive.right_wheel_direction == 0) {
@@ -359,7 +370,6 @@ void loop() {
 
   rpm_calculator_1.calculate((int32_t)encoder_1.getCount());
   rpm_calculator_2.calculate((int32_t)encoder_2.getCount());
-  //  readRPM();
 
   // if (millis() < RUNNING_TIME){
   //   readRPM();
@@ -376,6 +386,10 @@ void loop() {
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
     sendJSON();
 
+    // Serial.print("left_tick: ");
+    // Serial.println((int32_t)encoder_1.getCount());
+    // Serial.print("right_tick: ");
+    // Serial.println((int32_t)encoder_2.getCount());
     timerPivot = micros();
   }
 }
