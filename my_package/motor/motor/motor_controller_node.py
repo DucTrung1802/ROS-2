@@ -21,7 +21,7 @@ TOPIC = "/cmd_vel"
 BUTTON_DELAY = 0.001
 
 # Controling parameters
-STEP = 1
+STEP = 3
 
 # Motor parameters
 LEFT_MOTOR_DIAMETER = 0.09

@@ -44,13 +44,13 @@ LEFT_MOTOR_DIAMETER = 0.09  # m
 LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
 LEFT_MOTOR_PWM_FREQUENCY = 1000  # Hz
 LEFT_MOTOR_SAMPLE_TIME = 0.005  # s
-left_wheel_RPM_for_1_rad_per_sec_of_robot = 100
+left_wheel_RPM_for_1_rad_per_sec_of_robot = 42.4
 
 RIGHT_MOTOR_DIAMETER = 0.09  # m
 RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
 RIGHT_MOTOR_PWM_FREQUENCY = 1000  # Hz
 RIGHT_MOTOR_SAMPLE_TIME = 0.005  # s
-right_wheel_RPM_for_1_rad_per_sec_of_robot = 100
+right_wheel_RPM_for_1_rad_per_sec_of_robot = 42.4
 
 # Kalman Filter parameters
 LEFT_MOTOR_X = 0
@@ -78,14 +78,14 @@ RIGHT_MOTOR_MAX = 12
 
 
 # Test data
-DATA_RECORDING = True
+DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 1023
 
 # DataRecorder parameters
-DATA_AMOUNT = 3000
+DATA_AMOUNT = 5000
 
 # =================================================
 
@@ -280,8 +280,8 @@ def setupSetpoint(msg):
     angular_velocity = msg.angular.z  # rad/s
 
     # Differential drive
-    linear_velocity_left = abs(linear_velocity)  # RPM
-    linear_velocity_right = abs(linear_velocity)  # RPM
+    linear_velocity_left = linear_velocity  # RPM
+    linear_velocity_right = linear_velocity  # RPM
 
     if angular_velocity >= 0:
         linear_velocity_left -= differientialDriveLeft(abs(msg.angular.z))
@@ -290,8 +290,16 @@ def setupSetpoint(msg):
         linear_velocity_left += differientialDriveLeft(abs(msg.angular.z))
         linear_velocity_right -= differientialDriveRight(abs(msg.angular.z))
 
-    linear_velocity_left = saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
-    linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
+    linear_velocity_left = saturate(
+        linear_velocity_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM
+    )
+
+    linear_velocity_right = saturate(
+        linear_velocity_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
+    )
+
+    # print("linear_velocity_left: " + str(linear_velocity_left))
+    # print("linear_velocity_right: " + str(linear_velocity_right))
 
     # Testing
     # linear_velocity_left = linear_velocity_left * 1023 / LEFT_MOTOR_MAX_RPM
@@ -299,26 +307,37 @@ def setupSetpoint(msg):
 
 
 def driveMotors():
-    global linear_velocity, linear_velocity_left, linear_velocity_right
+    global linear_velocity_left, linear_velocity_right
     global drive_timer, pwm_left, pwm_right
 
     if time.time() - drive_timer >= LEFT_MOTOR.getSampleTime():
-        direction = getDirection(linear_velocity)
+
+        # print("linear_velocity_left: " + str(linear_velocity_left))
+        # print("linear_velocity_right: " + str(linear_velocity_right))
+
+        # linear_velocity_left = 42.4
+        # linear_velocity_right = -42.4
+
+        direction_1 = getDirection(linear_velocity_left)
+        direction_2 = getDirection(linear_velocity_right)
+
+        linear_velocity_left_abs = abs(linear_velocity_left)
+        linear_velocity_right_abs = abs(linear_velocity_right)
 
         pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
         pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-        LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, LEFT_RPM)
-        RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_right, RIGHT_RPM)
+        LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left_abs, LEFT_RPM)
+        RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_right_abs, RIGHT_RPM)
 
-        if linear_velocity_left == 0:
+        if linear_velocity_left_abs == 0:
             pwm_left = 0.0
-        elif linear_velocity_left > 0:
+        elif linear_velocity_left_abs > 0:
             pwm_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
-        if linear_velocity_right == 0:
+        if linear_velocity_right_abs == 0:
             pwm_right = 0.0
-        elif linear_velocity_right > 0:
+        elif linear_velocity_right_abs > 0:
             pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
         # print("---")
@@ -328,16 +347,17 @@ def driveMotors():
 
         data = {
             "motor_data": [
-                direction,
+                direction_1,
                 pwm_freq_1,
                 pwm_left,
-                direction,
+                direction_2,
                 pwm_freq_2,
                 pwm_right,
             ]
         }
 
         data = json.dumps(data)
+        # print(data)
         MCUSerialObject.write(formSerialData(data))
 
         drive_timer = time.time()
@@ -427,7 +447,7 @@ def checksum():
     dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
     checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
 
-    print("Dict: " + dictionaryDataCheckString)
+    # print("Dict: " + dictionaryDataCheckString)
 
     # print("STORE_CHECKSUM: " + STORE_CHECKSUM)
     # print("dictionaryDataCheck: " + checksumString)
@@ -510,12 +530,13 @@ def loop():
     LEFT_MOTOR.resetDataCount()
     RIGHT_MOTOR.resetDataCount()
 
+    timer = time.time()
+
     print("Ready!")
 
     try:
         if DATA_RECORDING:
             index = 1
-            timer = time.time()
             save_data_timer = time.time()
             varyPWM(0)
 
@@ -562,6 +583,10 @@ def loop():
         else:
             while True:
                 # manuallyWrite()
+
+                # if time.time() - timer >= 6.283185:
+                #     break
+
                 if time.time() - receiving_timer >= RECEIVING_PERIOD:
                     updateStoreRPMFromSerial()
                     receiving_timer = time.time()
