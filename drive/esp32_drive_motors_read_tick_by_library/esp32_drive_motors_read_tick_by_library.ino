@@ -8,6 +8,7 @@
 #include <MD5.h>
 
 class RPMCalculator {
+  // Declare private variable of class
   private:
     float _sample_time = 0.005;
     float _encoder_tick_per_round = 480;
@@ -19,7 +20,8 @@ class RPMCalculator {
     float _RPM_coefficient = 0.0728;
     float _previous_RPM_coefficient = 0.0728;
 
-    uint32_t _previous_tick = 0;
+    int32_t _current_tick = 0;
+    int32_t _previous_tick = 0;
     long _previous_T = 0;
   public:
     void setupSampleTime(float sample_time) {
@@ -36,12 +38,13 @@ class RPMCalculator {
       this->_previous_RPM_coefficient = previous_RPM_coefficient;
     }
 
-    void calculate(uint32_t current_tick) {
+    void calculate(int32_t current_tick) {
       long curr_T = micros();
       if (((float) (curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
         float delta_T = ((float) (curr_T - this->_previous_T)) / 1.0e6;
-        float encoder_per_sec = (current_tick - this->_previous_tick) / delta_T;
-        float RPM = encoder_per_sec / this->_encoder_tick_per_round * 60.0;
+        this->_current_tick = current_tick;
+        float encoder_tick_per_sec = abs(this->_current_tick - this->_previous_tick) / delta_T;
+        float RPM = encoder_tick_per_sec / this->_encoder_tick_per_round * 60.0;
 
         // Low-pass filter (over 25Hz cut off)
         this->_RPM_Filter = this->_RPM_Filter_coefficient * this->_RPM_Filter + RPM * this->_RPM_coefficient + this->_previous_RPM * this->_previous_RPM_coefficient;
@@ -55,9 +58,15 @@ class RPMCalculator {
     float getRPM() {
       return this->_RPM_Filter;
     }
+
+    float getTick() {
+      return this->_current_tick;
+    }
 };
 
 struct MotorDataSend {
+  int32_t left_tick;
+  int32_t right_tick;
   float left_RPM;
   float right_RPM;
   String checksum;
@@ -118,7 +127,7 @@ String serialLine = "";
 // Inside the brackets, 200 is the capacity of the memory pool in bytes.
 // Don't forget to change this value to match your JSON document.
 // Use arduinojson.org/v6/assistant to compute the capacity.
-StaticJsonDocument<200> JSON_DOC_RECEIVE;
+bool is_received = false;
 String KEY[15] = "motor_data";
 
 // Encoder instances
@@ -137,19 +146,19 @@ MotorDataReceive motor_data_receive;
 long read_timer = 0;
 
 
-bool deserializeJSON() {
+void deserializeJSON() {
+  StaticJsonDocument<200> JSON_DOC_RECEIVE;
   DeserializationError error = deserializeJson(JSON_DOC_RECEIVE, serialLine);
 
   // Test if parsing succeeds.
   if (error) {
     //    Serial.print(F("deserializeJson() failed: "));
     //    Serial.println(error.f_str());
-    return false;
+    is_received = false;
+    return;
   }
-  return true;
-}
 
-void decodeJSON() {
+  // Assign data of JSON_DOC_RECEIVE to MotorDataReceive struct
   motor_data_receive.left_wheel_direction = JSON_DOC_RECEIVE["motor_data"][0];
   motor_data_receive.left_pwm_frequency = JSON_DOC_RECEIVE["motor_data"][1];
   motor_data_receive.left_pwm_pulse = JSON_DOC_RECEIVE["motor_data"][2];
@@ -157,6 +166,8 @@ void decodeJSON() {
   motor_data_receive.right_wheel_direction = JSON_DOC_RECEIVE["motor_data"][3];
   motor_data_receive.right_pwm_frequency = JSON_DOC_RECEIVE["motor_data"][4];
   motor_data_receive.right_pwm_pulse = JSON_DOC_RECEIVE["motor_data"][5];
+
+  is_received = true;
 }
 
 void driveLeftWheel() {
@@ -165,16 +176,27 @@ void driveLeftWheel() {
     digitalWrite(AIN2, LOW);
   }
 
+  else if (motor_data_receive.left_wheel_direction == -1) {
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, HIGH);
+  }
+
   else if (motor_data_receive.left_wheel_direction == 0) {
     digitalWrite(AIN1, LOW);
     digitalWrite(AIN2, LOW);
   }
+
 }
 
 void driveRightWheel() {
   if (motor_data_receive.right_wheel_direction == 1) {
     digitalWrite(BIN1, LOW);
     digitalWrite(BIN2, HIGH);
+  }
+
+  else if (motor_data_receive.right_wheel_direction == -1) {
+    digitalWrite(BIN1, HIGH);
+    digitalWrite(BIN2, LOW);
   }
 
   else if (motor_data_receive.right_wheel_direction == 0) {
@@ -188,9 +210,9 @@ void drive_motors() {
   //  DIRECTION_RIGHT / DIRECTION_LEFT: 1 is forward, 0 is stop, -1 is backward
   //  PWM_FREQUENCY_LEFT / PWM_FREQUENCY_RIGHT: 1000 - 100000 Hz
   //  PWM: 0 - 1023
-  if (deserializeJSON()) {
-    decodeJSON();
+  deserializeJSON();
 
+  if (is_received) {
     driveLeftWheel();
     driveRightWheel();
 
@@ -231,7 +253,10 @@ void readRPM() {
 
 
   motor_data_send.left_RPM = rpm_calculator_1.getRPM();
+  motor_data_send.left_tick = rpm_calculator_1.getTick();
+  
   motor_data_send.right_RPM = rpm_calculator_2.getRPM();
+  motor_data_send.right_tick = rpm_calculator_2.getTick();
 
   if (motor_data_send.left_RPM < 1) {
     motor_data_send.left_RPM = 0;
@@ -243,6 +268,8 @@ void readRPM() {
   // calculate checksum
   char buf[200];
   StaticJsonDocument<200> JSON_DOC_CHECK;
+  JSON_DOC_CHECK["left_tick"] = motor_data_send.left_tick;
+  JSON_DOC_CHECK["right_tick"] = motor_data_send.right_tick;
   JSON_DOC_CHECK["left_RPM"] = motor_data_send.left_RPM;
   JSON_DOC_CHECK["right_RPM"] = motor_data_send.right_RPM;
   serializeJson(JSON_DOC_CHECK, buf, 200);
@@ -269,11 +296,13 @@ void calculateSendingPeriod() {
 void sendJSON() {
   StaticJsonDocument<200> JSON_DOC_SEND;
 
-  JSON_DOC_SEND["left_RPM"] = motor_data_send.left_RPM;
-  JSON_DOC_SEND["right_RPM"] = motor_data_send.right_RPM;
-  JSON_DOC_SEND["checksum"] = motor_data_send.checksum;
+    JSON_DOC_SEND["left_tick"] = motor_data_send.left_tick;
+    JSON_DOC_SEND["right_tick"] = motor_data_send.right_tick;
+    JSON_DOC_SEND["left_RPM"] = motor_data_send.left_RPM;
+    JSON_DOC_SEND["right_RPM"] = motor_data_send.right_RPM;
+    JSON_DOC_SEND["checksum"] = motor_data_send.checksum;
 
-  serializeJson(JSON_DOC_SEND, Serial);
+    serializeJson(JSON_DOC_SEND, Serial);
   Serial.println();
 }
 
@@ -333,8 +362,7 @@ void setup() {
   // Serial.println("Encoder Start = " + String((int32_t)encoder.getCount()));
 }
 
-void loop()
-{
+void loop() {
 
   while (Serial.available()) {
     serial_receive();
@@ -342,7 +370,6 @@ void loop()
 
   rpm_calculator_1.calculate((int32_t)encoder_1.getCount());
   rpm_calculator_2.calculate((int32_t)encoder_2.getCount());
-  //  readRPM();
 
   // if (millis() < RUNNING_TIME){
   //   readRPM();
@@ -353,12 +380,16 @@ void loop()
   //   ledcWrite(CHANNEL_PWMB, 0);
   // }
 
+  readRPM();
 
   if (micros() - timerPivot >= PERIOD) {
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
-    readRPM();
     sendJSON();
 
+    // Serial.print("left_tick: ");
+    // Serial.println((int32_t)encoder_1.getCount());
+    // Serial.print("right_tick: ");
+    // Serial.println((int32_t)encoder_2.getCount());
     timerPivot = micros();
   }
 }

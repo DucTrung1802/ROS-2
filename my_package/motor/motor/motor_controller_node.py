@@ -30,7 +30,7 @@ RIGHT_MOTOR_DIAMETER = 0.09
 
 # Velocity: m/s
 LINEAR_SPEED_MAX = 0.6  # m/s
-LINEAR_SPEED_MIN = 0.0  # m/s
+LINEAR_SPEED_MIN = -LINEAR_SPEED_MAX  # m/s
 LINEAR_SPEED_STEP = LINEAR_SPEED_MAX / STEP
 
 # Degree: positive-clockwise; negative-counterclockwise

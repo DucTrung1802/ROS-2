@@ -16,6 +16,7 @@ import hashlib
 # ROS 2 libraries
 import rclpy
 from rclpy.node import Node
+from std_msgs.msg import Int32
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 from motor.MotorDriver import MotorDriver
@@ -43,13 +44,13 @@ LEFT_MOTOR_DIAMETER = 0.09  # m
 LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
 LEFT_MOTOR_PWM_FREQUENCY = 1000  # Hz
 LEFT_MOTOR_SAMPLE_TIME = 0.005  # s
-left_wheel_RPM_for_1_rad_per_sec_of_robot = 100
+left_wheel_RPM_for_1_rad_per_sec_of_robot = 42.4
 
 RIGHT_MOTOR_DIAMETER = 0.09  # m
 RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
 RIGHT_MOTOR_PWM_FREQUENCY = 1000  # Hz
 RIGHT_MOTOR_SAMPLE_TIME = 0.005  # s
-right_wheel_RPM_for_1_rad_per_sec_of_robot = 100
+right_wheel_RPM_for_1_rad_per_sec_of_robot = 42.4
 
 # Kalman Filter parameters
 LEFT_MOTOR_X = 0
@@ -77,14 +78,14 @@ RIGHT_MOTOR_MAX = 12
 
 
 # Test data
-DATA_RECORDING = True
+DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 1023
 
 # DataRecorder parameters
-DATA_AMOUNT = 3000
+DATA_AMOUNT = 5000
 
 # =================================================
 
@@ -160,11 +161,15 @@ error_receive = 0
 
 # JSON parameters
 KEY = "pwm_pulse"
+STORE_LEFT_TICK = 0
+STORE_RIGHT_TICK = 0
 STORE_RPM_LEFT = 0
 STORE_RPM_RIGHT = 0
 STORE_CHECKSUM = ""
-RPM_LEFT = 0
-RPM_RIGHT = 0
+LEFT_TICK = 0
+RIGHT_TICK = 0
+LEFT_RPM = 0
+RIGHT_RPM = 0
 CHECKSUM = ""
 
 # Data recorder
@@ -186,6 +191,8 @@ class MotorDriverNode(Node):
     def __init__(self, node_name):
         super().__init__(node_name)
         self.__need_publish = True
+        self.left_tick_pub = self.create_publisher(Int32, "left_tick", 1)
+        self.right_tick_pub = self.create_publisher(Int32, "right_tick", 1)
         self.left_RPM_pub = self.create_publisher(Float32, "left_RPM", 1)
         self.right_RPM_pub = self.create_publisher(Float32, "right_RPM", 1)
         self.timer = self.create_timer(0, self.publisherCallback)
@@ -203,12 +210,19 @@ class MotorDriverNode(Node):
 
     def publisherCallback(self):
         if self.__need_publish:
-            RPM_left = Float32()
-            RPM_right = Float32()
-            RPM_left.data = float(RPM_LEFT)
-            RPM_right.data = float(RPM_RIGHT)
-            self.left_RPM_pub.publish(RPM_left)
-            self.right_RPM_pub.publish(RPM_right)
+            left_RPM = Float32()
+            right_RPM = Float32()
+            left_RPM.data = float(LEFT_RPM)
+            right_RPM.data = float(RIGHT_RPM)
+            self.left_RPM_pub.publish(left_RPM)
+            self.right_RPM_pub.publish(right_RPM)
+
+            left_tick = Int32()
+            right_tick = Int32()
+            left_tick.data = int(LEFT_TICK)
+            right_tick.data = int(RIGHT_TICK)
+            self.left_tick_pub.publish(left_tick)
+            self.right_tick_pub.publish(right_tick)
 
             # self.get_logger().info('Publishing: "%s"' % msg.data)
 
@@ -266,8 +280,8 @@ def setupSetpoint(msg):
     angular_velocity = msg.angular.z  # rad/s
 
     # Differential drive
-    linear_velocity_left = abs(linear_velocity)  # RPM
-    linear_velocity_right = abs(linear_velocity)  # RPM
+    linear_velocity_left = linear_velocity  # RPM
+    linear_velocity_right = linear_velocity  # RPM
 
     if angular_velocity >= 0:
         linear_velocity_left -= differientialDriveLeft(abs(msg.angular.z))
@@ -276,8 +290,16 @@ def setupSetpoint(msg):
         linear_velocity_left += differientialDriveLeft(abs(msg.angular.z))
         linear_velocity_right -= differientialDriveRight(abs(msg.angular.z))
 
-    linear_velocity_left = saturate(linear_velocity_left, 0, LEFT_MOTOR_MAX_RPM)
-    linear_velocity_right = saturate(linear_velocity_right, 0, RIGHT_MOTOR_MAX_RPM)
+    linear_velocity_left = saturate(
+        linear_velocity_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM
+    )
+
+    linear_velocity_right = saturate(
+        linear_velocity_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
+    )
+
+    # print("linear_velocity_left: " + str(linear_velocity_left))
+    # print("linear_velocity_right: " + str(linear_velocity_right))
 
     # Testing
     # linear_velocity_left = linear_velocity_left * 1023 / LEFT_MOTOR_MAX_RPM
@@ -285,45 +307,57 @@ def setupSetpoint(msg):
 
 
 def driveMotors():
-    global linear_velocity, linear_velocity_left, linear_velocity_right
+    global linear_velocity_left, linear_velocity_right
     global drive_timer, pwm_left, pwm_right
 
     if time.time() - drive_timer >= LEFT_MOTOR.getSampleTime():
-        direction = getDirection(linear_velocity)
+
+        # print("linear_velocity_left: " + str(linear_velocity_left))
+        # print("linear_velocity_right: " + str(linear_velocity_right))
+
+        # linear_velocity_left = 42.4
+        # linear_velocity_right = -42.4
+
+        direction_1 = getDirection(linear_velocity_left)
+        direction_2 = getDirection(linear_velocity_right)
+
+        linear_velocity_left_abs = abs(linear_velocity_left)
+        linear_velocity_right_abs = abs(linear_velocity_right)
 
         pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
         pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-        LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left, RPM_LEFT)
-        RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_right, RPM_RIGHT)
+        LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left_abs, LEFT_RPM)
+        RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_right_abs, RIGHT_RPM)
 
-        if linear_velocity_left == 0:
+        if linear_velocity_left_abs == 0:
             pwm_left = 0.0
-        elif linear_velocity_left > 0:
+        elif linear_velocity_left_abs > 0:
             pwm_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
-        if linear_velocity_right == 0:
+        if linear_velocity_right_abs == 0:
             pwm_right = 0.0
-        elif linear_velocity_right > 0:
+        elif linear_velocity_right_abs > 0:
             pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
         # print("---")
-        # print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(RPM_LEFT))
-        # print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RPM_RIGHT))
+        # print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(LEFT_RPM))
+        # print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RIGHT_RPM))
         # print("---")
 
         data = {
             "motor_data": [
-                direction,
+                direction_1,
                 pwm_freq_1,
                 pwm_left,
-                direction,
+                direction_2,
                 pwm_freq_2,
                 pwm_right,
             ]
         }
 
         data = json.dumps(data)
+        # print(data)
         MCUSerialObject.write(formSerialData(data))
 
         drive_timer = time.time()
@@ -413,7 +447,7 @@ def checksum():
     dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
     checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
 
-    print("Dict: " + dictionaryDataCheckString)
+    # print("Dict: " + dictionaryDataCheckString)
 
     # print("STORE_CHECKSUM: " + STORE_CHECKSUM)
     # print("dictionaryDataCheck: " + checksumString)
@@ -424,13 +458,15 @@ def checksum():
 
 
 def updateStoreRPMFromSerial():
-    global STORE_RPM_LEFT, STORE_RPM_RIGHT, STORE_CHECKSUM, total_receive, error_receive
+    global STORE_LEFT_TICK, STORE_RIGHT_TICK, STORE_RPM_LEFT, STORE_RPM_RIGHT, STORE_CHECKSUM, total_receive, error_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
     # print(
     #     "Error in serial communication: " + str(error_receive) + "/" + str(total_receive)
     # )
     try:
         readSerialData()
+        STORE_LEFT_TICK = dictionaryData["left_tick"]
+        STORE_RIGHT_TICK = dictionaryData["right_tick"]
         STORE_RPM_LEFT = dictionaryData["left_RPM"]
         STORE_RPM_RIGHT = dictionaryData["right_RPM"]
         STORE_CHECKSUM = dictionaryData["checksum"]
@@ -444,9 +480,11 @@ def updateStoreRPMFromSerial():
 
 
 def updateRPMFromStorePos():
-    global RPM_LEFT, RPM_RIGHT, CHECKSUM
-    RPM_LEFT = STORE_RPM_LEFT
-    RPM_RIGHT = STORE_RPM_RIGHT
+    global LEFT_TICK, RIGHT_TICK, LEFT_RPM, RIGHT_RPM, CHECKSUM
+    LEFT_TICK = STORE_LEFT_TICK
+    RIGHT_TICK = STORE_RIGHT_TICK
+    LEFT_RPM = STORE_RPM_LEFT
+    RIGHT_RPM = STORE_RPM_RIGHT
     CHECKSUM = STORE_CHECKSUM
 
 
@@ -484,7 +522,7 @@ def setup():
 
 
 def loop():
-    global receiving_timer, publish_timer, RPM_LEFT, RPM_RIGHT
+    global receiving_timer, publish_timer, LEFT_RPM, RIGHT_RPM
     rclpy.init()
 
     motor_driver_node = MotorDriverNode(NODE_NAME)
@@ -492,12 +530,13 @@ def loop():
     LEFT_MOTOR.resetDataCount()
     RIGHT_MOTOR.resetDataCount()
 
+    timer = time.time()
+
     print("Ready!")
 
     try:
         if DATA_RECORDING:
             index = 1
-            timer = time.time()
             save_data_timer = time.time()
             varyPWM(0)
 
@@ -523,10 +562,10 @@ def loop():
 
                 if time.time() - save_data_timer >= LEFT_MOTOR_SAMPLE_TIME:
                     WORKBOOK.writeData(index + 1, 1, linear_velocity_left)
-                    WORKBOOK.writeData(index + 1, 2, RPM_LEFT)
+                    WORKBOOK.writeData(index + 1, 2, LEFT_RPM)
                     WORKBOOK.writeData(index + 1, 3, pwm_left / 1023.0 * 12.0)
                     WORKBOOK.writeData(index + 1, 5, linear_velocity_right)
-                    WORKBOOK.writeData(index + 1, 6, RPM_RIGHT)
+                    WORKBOOK.writeData(index + 1, 6, RIGHT_RPM)
                     WORKBOOK.writeData(index + 1, 7, pwm_right / 1023.0 * 12.0)
                     WORKBOOK.writeData(index + 1, 8, total_receive)
                     WORKBOOK.writeData(index + 1, 9, error_receive)
@@ -544,6 +583,10 @@ def loop():
         else:
             while True:
                 # manuallyWrite()
+
+                # if time.time() - timer >= 6.283185:
+                #     break
+
                 if time.time() - receiving_timer >= RECEIVING_PERIOD:
                     updateStoreRPMFromSerial()
                     receiving_timer = time.time()
@@ -554,8 +597,8 @@ def loop():
                     rclpy.spin_once(motor_driver_node)
                     motor_driver_node.resetNeedPublish()
 
-                    # print("Left RPM: " + str(RPM_LEFT))
-                    # print("Right RPM: " + str(RPM_RIGHT))
+                    # print("Left RPM: " + str(LEFT_RPM))
+                    # print("Right RPM: " + str(RIGHT_RPM))
                     # print("Checksum: " + CHECKSUM)
                     publish_timer = time.time()
 
