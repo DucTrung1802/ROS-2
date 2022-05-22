@@ -112,8 +112,8 @@ KINEMATICS_MODEL_MATRIX = np.matrix(
     [
         [RIGHT_MOTOR_DIAMETER / 4, LEFT_MOTOR_DIAMETER / 4],
         [
-            RIGHT_MOTOR_DIAMETER / (4 * WHEEL_BASE),
-            -LEFT_MOTOR_DIAMETER / (4 * WHEEL_BASE),
+            RIGHT_MOTOR_DIAMETER / (2 * WHEEL_BASE),
+            -LEFT_MOTOR_DIAMETER / (2 * WHEEL_BASE),
         ],
     ]
 )
