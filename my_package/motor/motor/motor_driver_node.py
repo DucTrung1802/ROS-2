@@ -37,8 +37,9 @@ PUBLISH_FREQUENCY = 100
 NODE_NAME = "motor_driver"
 
 # Motor parameters
-LEFT_MOTOR_MAX_VELOCITY = 0.6  # m/s
-RIGHT_MOTOR_MAX_VELOCITY = 0.6  # m/s
+LEFT_MOTOR_MAX_RPM = 190
+RIGHT_MOTOR_MAX_RPM = 190
+
 WHEEL_BASE = 0.44
 
 LEFT_MOTOR_DIAMETER = 0.09  # m
@@ -106,9 +107,6 @@ RIGHT_MOTOR = MotorDriver(
     sample_time=RIGHT_MOTOR_SAMPLE_TIME,
 )
 
-# Motor parameters
-LEFT_MOTOR_MAX_RPM = LEFT_MOTOR_MAX_VELOCITY / (LEFT_MOTOR_DIAMETER * math.pi) * 60.0
-RIGHT_MOTOR_MAX_RPM = RIGHT_MOTOR_MAX_VELOCITY / (RIGHT_MOTOR_DIAMETER * math.pi) * 60.0
 
 KINEMATICS_MODEL_MATRIX = np.matrix(
     [
@@ -305,28 +303,23 @@ def setupSetpoint(msg):
     linear_velocity = msg.linear.x  # RPM
     angular_velocity = msg.angular.z  # rad/s
 
-    # Differential drive
-    linear_RPM_left = MPStoRPM(linear_velocity)  # RPM
-    linear_RPM_right = MPStoRPM(linear_velocity)  # RPM
-
     differiential_drive_matrix = differientialDriveCalculate(
         linear_velocity, angular_velocity
     )
-    differiential_drive_matrix = RAD_PER_SEC_to_RPM(differiential_drive_matrix)
-    print(differiential_drive_matrix)
 
-    if angular_velocity >= 0:
-        linear_RPM_left -= differientialDriveLeft(abs(msg.angular.z))
-        linear_RPM_right += differientialDriveRight(abs(msg.angular.z))
-    elif angular_velocity < 0:
-        linear_RPM_left += differientialDriveLeft(abs(msg.angular.z))
-        linear_RPM_right -= differientialDriveRight(abs(msg.angular.z))
+    differiential_drive_matrix = RAD_PER_SEC_to_RPM(differiential_drive_matrix)
+
+    # Differential drive
+    linear_RPM_right = differiential_drive_matrix.item(0)
+    linear_RPM_left = differiential_drive_matrix.item(1)
 
     linear_RPM_left = saturate(linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
 
     linear_RPM_right = saturate(
         linear_RPM_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
     )
+
+    # print(differiential_drive_matrix)
 
     # print("linear_RPM_left: " + str(linear_RPM_left))
     # print("linear_RPM_right: " + str(linear_RPM_right))
@@ -370,10 +363,10 @@ def driveMotors():
         elif linear_RPM_right_abs > 0:
             pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
-        # print("---")
-        # print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(LEFT_RPM))
-        # print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RIGHT_RPM))
-        # print("---")
+        print("---")
+        print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(LEFT_RPM))
+        print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RIGHT_RPM))
+        print("---")
 
         data = {
             "motor_data": [
@@ -388,7 +381,7 @@ def driveMotors():
 
         data = json.dumps(data)
         # print(data)
-        # MCUSerialObject.write(formSerialData(data))
+        MCUSerialObject.write(formSerialData(data))
 
         drive_timer = time.time()
 
