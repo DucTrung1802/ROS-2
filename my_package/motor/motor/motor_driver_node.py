@@ -254,6 +254,10 @@ def RPMtoMPS(rpm):
     return rpm * (LEFT_MOTOR_DIAMETER * math.pi) / 60
 
 
+def RAD_PER_SEC_to_RPM(matrix):
+    return matrix * (60 / (2 * math.pi))
+
+
 def saturate(index, min, max):
     if index <= min:
         return min
@@ -308,7 +312,7 @@ def setupSetpoint(msg):
     differiential_drive_matrix = differientialDriveCalculate(
         linear_velocity, angular_velocity
     )
-
+    differiential_drive_matrix = RAD_PER_SEC_to_RPM(differiential_drive_matrix)
     print(differiential_drive_matrix)
 
     if angular_velocity >= 0:
