@@ -27,7 +27,7 @@ def checkConditions():
 class IMUPublisher(Node):
     def __init__(self):
         super().__init__(NODE_NAME)
-        self.imu_pub = self.create_publisher(Imu, "imu_mpu6050", 1)
+        self.imu_pub = self.create_publisher(Imu, "/imu/data", 1)
 
         timer_period1 = 0  # seconds
         self.timer1 = self.create_timer(timer_period1, self.timer_callback)
