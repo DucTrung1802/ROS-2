@@ -34,7 +34,7 @@ LINEAR_SPEED_MIN = -LINEAR_SPEED_MAX  # m/s
 LINEAR_SPEED_STEP = LINEAR_SPEED_MAX / STEP
 
 # Degree: positive-clockwise; negative-counterclockwise
-ANGULAR_SPPEED_MAX = 1.0  # rad/s
+ANGULAR_SPPEED_MAX = 0.6  # rad/s
 ANGULAR_SPPEED_MIN = -ANGULAR_SPPEED_MAX  # rad/s
 ANGULAR_SPPEED_STEP = ANGULAR_SPPEED_MAX / STEP  # rad/s
 

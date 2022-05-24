@@ -11,7 +11,7 @@ import json
 import math
 import copy
 import hashlib
-
+import numpy as np
 
 # ROS 2 libraries
 import rclpy
@@ -37,8 +37,10 @@ PUBLISH_FREQUENCY = 100
 NODE_NAME = "motor_driver"
 
 # Motor parameters
-LEFT_MOTOR_MAX_VELOCITY = 0.6  # m/s
-RIGHT_MOTOR_MAX_VELOCITY = 0.6  # m/s
+LEFT_MOTOR_MAX_RPM = 190
+RIGHT_MOTOR_MAX_RPM = 190
+
+WHEEL_BASE = 0.44
 
 LEFT_MOTOR_DIAMETER = 0.09  # m
 LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
@@ -105,9 +107,21 @@ RIGHT_MOTOR = MotorDriver(
     sample_time=RIGHT_MOTOR_SAMPLE_TIME,
 )
 
-# Motor parameters
-LEFT_MOTOR_MAX_RPM = LEFT_MOTOR_MAX_VELOCITY / (LEFT_MOTOR_DIAMETER * math.pi) * 60.0
-RIGHT_MOTOR_MAX_RPM = RIGHT_MOTOR_MAX_VELOCITY / (RIGHT_MOTOR_DIAMETER * math.pi) * 60.0
+
+KINEMATICS_MODEL_MATRIX = np.matrix(
+    [
+        [RIGHT_MOTOR_DIAMETER / 4, LEFT_MOTOR_DIAMETER / 4],
+        [
+            RIGHT_MOTOR_DIAMETER / (2 * WHEEL_BASE),
+            -LEFT_MOTOR_DIAMETER / (2 * WHEEL_BASE),
+        ],
+    ]
+)
+
+try:
+    INVERSE_KINEMATICS_MODEL_MATRIX = KINEMATICS_MODEL_MATRIX.I
+except:
+    raise Exception("Cannot calculate inverse of kinematic model matrix!")
 
 # Kalman Filter instances
 LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
@@ -143,8 +157,8 @@ linear_velocity = 0
 previous_linear_velocity = 0
 current_state_is_straight = True
 previous_current_state_is_straight = True
-linear_velocity_left = 0
-linear_velocity_right = 0
+linear_RPM_left = 0
+linear_RPM_right = 0
 RECEIVING_PERIOD = 1
 """ The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided\
     callback function will be called. For no delay, set it equal ZERO. """
@@ -238,6 +252,10 @@ def RPMtoMPS(rpm):
     return rpm * (LEFT_MOTOR_DIAMETER * math.pi) / 60
 
 
+def RAD_PER_SEC_to_RPM(matrix):
+    return matrix * (60 / (2 * math.pi))
+
+
 def saturate(index, min, max):
     if index <= min:
         return min
@@ -271,79 +289,84 @@ def differientialDriveRight(angular_velocity):
     return right_wheel_RPM_for_1_rad_per_sec_of_robot * angular_velocity
 
 
+def differientialDriveCalculate(linear_velocity, angular_velocity):
+    velocity_matrix = np.matrix([[linear_velocity], [angular_velocity]])
+    RPM_matrix = INVERSE_KINEMATICS_MODEL_MATRIX.dot(velocity_matrix)
+    return RPM_matrix
+
+
 def setupSetpoint(msg):
     global previous_linear_velocity, current_state_is_straight, previous_current_state_is_straight
-    global linear_velocity, linear_velocity_left, linear_velocity_right
+    global linear_velocity, linear_RPM_left, linear_RPM_right
     # Evaluate to have RPM value
 
-    linear_velocity = MPStoRPM(msg.linear.x)  # RPM
+    linear_velocity = msg.linear.x  # RPM
     angular_velocity = msg.angular.z  # rad/s
 
+    differiential_drive_matrix = differientialDriveCalculate(
+        linear_velocity, angular_velocity
+    )
+
+    differiential_drive_matrix = RAD_PER_SEC_to_RPM(differiential_drive_matrix)
+
     # Differential drive
-    linear_velocity_left = linear_velocity  # RPM
-    linear_velocity_right = linear_velocity  # RPM
+    linear_RPM_right = differiential_drive_matrix.item(0)
+    linear_RPM_left = differiential_drive_matrix.item(1)
 
-    if angular_velocity >= 0:
-        linear_velocity_left -= differientialDriveLeft(abs(msg.angular.z))
-        linear_velocity_right += differientialDriveRight(abs(msg.angular.z))
-    elif angular_velocity < 0:
-        linear_velocity_left += differientialDriveLeft(abs(msg.angular.z))
-        linear_velocity_right -= differientialDriveRight(abs(msg.angular.z))
+    linear_RPM_left = saturate(linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
 
-    linear_velocity_left = saturate(
-        linear_velocity_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM
+    linear_RPM_right = saturate(
+        linear_RPM_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
     )
 
-    linear_velocity_right = saturate(
-        linear_velocity_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
-    )
+    # print(differiential_drive_matrix)
 
-    # print("linear_velocity_left: " + str(linear_velocity_left))
-    # print("linear_velocity_right: " + str(linear_velocity_right))
+    # print("linear_RPM_left: " + str(linear_RPM_left))
+    # print("linear_RPM_right: " + str(linear_RPM_right))
 
     # Testing
-    # linear_velocity_left = linear_velocity_left * 1023 / LEFT_MOTOR_MAX_RPM
-    # linear_velocity_right = linear_velocity_right * 1023 / RIGHT_MOTOR_MAX_RPM
+    # linear_RPM_left = linear_RPM_left * 1023 / LEFT_MOTOR_MAX_RPM
+    # linear_RPM_right = linear_RPM_right * 1023 / RIGHT_MOTOR_MAX_RPM
 
 
 def driveMotors():
-    global linear_velocity_left, linear_velocity_right
+    global linear_RPM_left, linear_RPM_right
     global drive_timer, pwm_left, pwm_right
 
     if time.time() - drive_timer >= LEFT_MOTOR.getSampleTime():
 
-        # print("linear_velocity_left: " + str(linear_velocity_left))
-        # print("linear_velocity_right: " + str(linear_velocity_right))
+        # print("linear_RPM_left: " + str(linear_RPM_left))
+        # print("linear_RPM_right: " + str(linear_RPM_right))
 
-        # linear_velocity_left = 42.4
-        # linear_velocity_right = -42.4
+        # linear_RPM_left = 42.4
+        # linear_RPM_right = -42.4
 
-        direction_1 = getDirection(linear_velocity_left)
-        direction_2 = getDirection(linear_velocity_right)
+        direction_1 = getDirection(linear_RPM_left)
+        direction_2 = getDirection(linear_RPM_right)
 
-        linear_velocity_left_abs = abs(linear_velocity_left)
-        linear_velocity_right_abs = abs(linear_velocity_right)
+        linear_RPM_left_abs = abs(linear_RPM_left)
+        linear_RPM_right_abs = abs(linear_RPM_right)
 
         pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
         pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-        LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_left_abs, LEFT_RPM)
-        RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_velocity_right_abs, RIGHT_RPM)
+        LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_RPM_left_abs, LEFT_RPM)
+        RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_RPM_right_abs, RIGHT_RPM)
 
-        if linear_velocity_left_abs == 0:
+        if linear_RPM_left_abs == 0:
             pwm_left = 0.0
-        elif linear_velocity_left_abs > 0:
+        elif linear_RPM_left_abs > 0:
             pwm_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
-        if linear_velocity_right_abs == 0:
+        if linear_RPM_right_abs == 0:
             pwm_right = 0.0
-        elif linear_velocity_right_abs > 0:
+        elif linear_RPM_right_abs > 0:
             pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
-        # print("---")
-        # print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(LEFT_RPM))
-        # print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RIGHT_RPM))
-        # print("---")
+        print("---")
+        print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(LEFT_RPM))
+        print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RIGHT_RPM))
+        print("---")
 
         data = {
             "motor_data": [
@@ -561,10 +584,10 @@ def loop():
                 rclpy.spin_once(motor_driver_node)
 
                 if time.time() - save_data_timer >= LEFT_MOTOR_SAMPLE_TIME:
-                    WORKBOOK.writeData(index + 1, 1, linear_velocity_left)
+                    WORKBOOK.writeData(index + 1, 1, linear_RPM_left)
                     WORKBOOK.writeData(index + 1, 2, LEFT_RPM)
                     WORKBOOK.writeData(index + 1, 3, pwm_left / 1023.0 * 12.0)
-                    WORKBOOK.writeData(index + 1, 5, linear_velocity_right)
+                    WORKBOOK.writeData(index + 1, 5, linear_RPM_right)
                     WORKBOOK.writeData(index + 1, 6, RIGHT_RPM)
                     WORKBOOK.writeData(index + 1, 7, pwm_right / 1023.0 * 12.0)
                     WORKBOOK.writeData(index + 1, 8, total_receive)
@@ -572,10 +595,7 @@ def loop():
                     WORKBOOK.writeData(
                         index + 1,
                         10,
-                        round(
-                            (total_receive - error_receive) / total_receive * 100,
-                            2,
-                        ),
+                        round((total_receive - error_receive) / total_receive * 100, 2),
                     )
                     index += 1
                     save_data_timer = time.time()
