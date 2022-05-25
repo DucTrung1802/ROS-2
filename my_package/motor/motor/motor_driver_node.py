@@ -46,13 +46,11 @@ LEFT_MOTOR_DIAMETER = 0.09  # m
 LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
 LEFT_MOTOR_PWM_FREQUENCY = 1000  # Hz
 LEFT_MOTOR_SAMPLE_TIME = 0.005  # s
-left_wheel_RPM_for_1_rad_per_sec_of_robot = 42.4
 
 RIGHT_MOTOR_DIAMETER = 0.09  # m
 RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
 RIGHT_MOTOR_PWM_FREQUENCY = 1000  # Hz
 RIGHT_MOTOR_SAMPLE_TIME = 0.005  # s
-right_wheel_RPM_for_1_rad_per_sec_of_robot = 42.4
 
 # Kalman Filter parameters
 LEFT_MOTOR_X = 0
@@ -66,28 +64,28 @@ RIGHT_MOTOR_Q = 0
 RIGHT_MOTOR_R = 273
 
 # PID Controller parameters
-LEFT_MOTOR_Kp = 0.074
-LEFT_MOTOR_Ki = 0.43
-LEFT_MOTOR_Kd = 0
+LEFT_MOTOR_Kp = 0.07713
+LEFT_MOTOR_Ki = 0.4553
+LEFT_MOTOR_Kd = 0.00092
 LEFT_MOTOR_MIN = 0
 LEFT_MOTOR_MAX = 12
 
-RIGHT_MOTOR_Kp = 0.06
-RIGHT_MOTOR_Ki = 0.46
-RIGHT_MOTOR_Kd = 0
+RIGHT_MOTOR_Kp = 0.06866
+RIGHT_MOTOR_Ki = 0.4641
+RIGHT_MOTOR_Kd = 0.00012
 RIGHT_MOTOR_MIN = 0
 RIGHT_MOTOR_MAX = 12
 
 
 # Test data
-DATA_RECORDING = False
+DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 1023
 
 # DataRecorder parameters
-DATA_AMOUNT = 5000
+DATA_AMOUNT = 1000
 
 # =================================================
 
@@ -279,15 +277,6 @@ def resetKF():
     RIGHT_MOTOR.setupValuesKF(
         X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
     )
-
-
-def differientialDriveLeft(angular_velocity):
-    return left_wheel_RPM_for_1_rad_per_sec_of_robot * angular_velocity
-
-
-def differientialDriveRight(angular_velocity):
-    return right_wheel_RPM_for_1_rad_per_sec_of_robot * angular_velocity
-
 
 def differientialDriveCalculate(linear_velocity, angular_velocity):
     velocity_matrix = np.matrix([[linear_velocity], [angular_velocity]])
@@ -584,17 +573,18 @@ def loop():
                 rclpy.spin_once(motor_driver_node)
 
                 if time.time() - save_data_timer >= LEFT_MOTOR_SAMPLE_TIME:
-                    WORKBOOK.writeData(index + 1, 1, linear_RPM_left)
-                    WORKBOOK.writeData(index + 1, 2, LEFT_RPM)
-                    WORKBOOK.writeData(index + 1, 3, pwm_left / 1023.0 * 12.0)
-                    WORKBOOK.writeData(index + 1, 5, linear_RPM_right)
-                    WORKBOOK.writeData(index + 1, 6, RIGHT_RPM)
-                    WORKBOOK.writeData(index + 1, 7, pwm_right / 1023.0 * 12.0)
-                    WORKBOOK.writeData(index + 1, 8, total_receive)
-                    WORKBOOK.writeData(index + 1, 9, error_receive)
+                    WORKBOOK.writeData(index + 1, 1, (index - 1) * LEFT_MOTOR_SAMPLE_TIME)
+                    WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
+                    WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
+                    WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
+                    WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
+                    WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
+                    WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
+                    WORKBOOK.writeData(index + 1, 9, total_receive)
+                    WORKBOOK.writeData(index + 1, 10, error_receive)
                     WORKBOOK.writeData(
                         index + 1,
-                        10,
+                        11,
                         round((total_receive - error_receive) / total_receive * 100, 2),
                     )
                     index += 1
