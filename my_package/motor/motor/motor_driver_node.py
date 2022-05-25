@@ -85,7 +85,7 @@ TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 1023
 
 # DataRecorder parameters
-DATA_AMOUNT = 1000
+DATA_AMOUNT = 800
 
 # =================================================
 
@@ -533,6 +533,7 @@ def varyPWM(PWM):
 
 def testPIDResponse(step, time_interval):
     global linear_velocity, linear_RPM_left, linear_RPM_right
+    global timer_test_PID, step_test_PID
     if step <= 0:
         raise Exception("step must be positive number!")
     if time_interval <= 0:
@@ -544,6 +545,7 @@ def testPIDResponse(step, time_interval):
         linear_velocity = step_test_PID
         linear_RPM_left = MPStoRPM(linear_velocity)
         linear_RPM_right = MPStoRPM(linear_velocity)
+        timer_test_PID = time.time()
 
 
 def setup():
@@ -553,6 +555,7 @@ def setup():
 
 def loop():
     global receiving_timer, publish_timer, LEFT_RPM, RIGHT_RPM
+    global timer_test_PID
     rclpy.init()
 
     motor_driver_node = MotorDriverNode(NODE_NAME)
@@ -564,10 +567,13 @@ def loop():
 
     print("Ready!")
 
+    
+
     try:
         if DATA_RECORDING:
             index = 1
             save_data_timer = time.time()
+            timer_test_PID = time.time()
             varyPWM(0)
 
             while index <= DATA_AMOUNT:
@@ -575,7 +581,7 @@ def loop():
                 # if time.time() - timer >= 5:
                 #     break
 
-                testPIDResponse(10, 0.005)
+                testPIDResponse(10, 0.5)
 
                 if time.time() - receiving_timer >= RECEIVING_PERIOD:
                     updateStoreRPMFromSerial()
