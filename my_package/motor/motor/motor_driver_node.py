@@ -145,6 +145,8 @@ RIGHT_MOTOR_PID_CONTROLLER = PIDController(
     RIGHT_MOTOR_MIN,
     RIGHT_MOTOR_MAX,
 )
+timer_test_PID = 0
+step_test_PID = 0
 
 
 # Node parameters
@@ -278,6 +280,7 @@ def resetKF():
         X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
     )
 
+
 def differientialDriveCalculate(linear_velocity, angular_velocity):
     velocity_matrix = np.matrix([[linear_velocity], [angular_velocity]])
     RPM_matrix = INVERSE_KINEMATICS_MODEL_MATRIX.dot(velocity_matrix)
@@ -289,7 +292,7 @@ def setupSetpoint(msg):
     global linear_velocity, linear_RPM_left, linear_RPM_right
     # Evaluate to have RPM value
 
-    linear_velocity = msg.linear.x  # RPM
+    linear_velocity = msg.linear.x  # m/s
     angular_velocity = msg.angular.z  # rad/s
 
     differiential_drive_matrix = differientialDriveCalculate(
@@ -528,6 +531,21 @@ def varyPWM(PWM):
     MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
 
 
+def testPIDResponse(step, time_interval):
+    global linear_velocity, linear_RPM_left, linear_RPM_right
+    if step <= 0:
+        raise Exception("step must be positive number!")
+    if time_interval <= 0:
+        raise Exception("time_interval must be positive number!")
+
+    if time.time() - timer_test_PID >= time_interval:
+        step_test_PID += 0.6 / step
+        step_test_PID = saturate(step_test_PID, 0, 0.6)
+        linear_velocity = step_test_PID
+        linear_RPM_left = MPStoRPM(linear_velocity)
+        linear_RPM_right = MPStoRPM(linear_velocity)
+
+
 def setup():
     checkConditions()
     initializeSerial()
@@ -557,6 +575,8 @@ def loop():
                 # if time.time() - timer >= 5:
                 #     break
 
+                testPIDResponse(10, 0.005)
+
                 if time.time() - receiving_timer >= RECEIVING_PERIOD:
                     updateStoreRPMFromSerial()
                     receiving_timer = time.time()
@@ -573,7 +593,9 @@ def loop():
                 rclpy.spin_once(motor_driver_node)
 
                 if time.time() - save_data_timer >= LEFT_MOTOR_SAMPLE_TIME:
-                    WORKBOOK.writeData(index + 1, 1, (index - 1) * LEFT_MOTOR_SAMPLE_TIME)
+                    WORKBOOK.writeData(
+                        index + 1, 1, (index - 1) * LEFT_MOTOR_SAMPLE_TIME
+                    )
                     WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
                     WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
                     WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
