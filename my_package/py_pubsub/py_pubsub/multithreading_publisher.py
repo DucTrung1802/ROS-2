@@ -5,9 +5,8 @@ from std_msgs.msg import String
 
 import threading
 
-POS = 0
-timer1 = time.time()
-timer2 = time.time()
+POS_1 = 0
+POS_2 = 0
 
 
 class MinimalPublisher(Node):
@@ -24,49 +23,87 @@ class MinimalPublisher(Node):
     def timer_callback(self):
         msg = String()
         msg.data = "hello"
+        # print("hello")
         self.publisher_1.publish(msg)
         # self.i += 1
 
 
 def task_1():
-    global POS
+    global POS_1
     while True:
-        POS += 1
-        print(POS)
-        time.sleep(1)
+        start = time.time()
+        POS_1 += 1
+        # print(POS)
+        time.sleep(0.005)
+        end = time.time()
+        print(
+            "External job 1 thread ID: "
+            + str(threading.get_ident())
+            + "; Time: "
+            + str(end - start)
+        )
+        print()
 
 
 def task_2():
+    global POS_2
+    while True:
+        start = time.time()
+        POS_2 += 1
+        # print(POS)
+        time.sleep(0.04)
+        end = time.time()
+        print(
+            "External job 2 thread ID: "
+            + str(threading.get_ident())
+            + "; Time: "
+            + str(end - start)
+        )
+        print()
+
+
+def task_3():
     global POS
     rclpy.init()
     minimal_publisher_1 = MinimalPublisher()
     while True:
-        rclpy.spin(minimal_publisher_1)
+        start = time.time()
+        rclpy.spin_once(minimal_publisher_1)
+        end = time.time()
+        print(
+            "Publishing thread ID: "
+            + str(threading.get_ident())
+            + "; Time: "
+            + str(end - start)
+        )
+        print()
 
 
 def threadingHandler():
     t1 = threading.Thread(target=task_1)
-    t1.start()
-    t1.join()
-
     t2 = threading.Thread(target=task_2)
+    t3 = threading.Thread(target=task_3)
+
+    t1.start()
     t2.start()
+    t3.start()
+
+    t1.join()
     t2.join()
+    t3.join()
 
 
 def main(args=None):
-    global POS, timer1, timer2
     # minimal_publisher_2 = MinimalPublisher()
 
-    while True:
-        # rclpy.spin_once(minimal_publisher_1)
-        threadingHandler()
+    # rclpy.spin_once(minimal_publisher_1)
+    threadingHandler()
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_publisher.destroy_node()
-    rclpy.shutdown()
+    # minimal_publisher_1.destroy_node()
+    # rclpy.shutdown()
 
 
 if __name__ == "__main__":
