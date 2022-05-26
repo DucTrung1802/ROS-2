@@ -24,6 +24,7 @@ class MinimalPublisher(Node):
     def timer_callback(self):
         msg = String()
         msg.data = "hello"
+        print("hello")
         self.publisher_1.publish(msg)
         # self.i += 1
 
@@ -41,7 +42,7 @@ def task_2():
     rclpy.init()
     minimal_publisher_1 = MinimalPublisher()
     while True:
-        rclpy.spin(minimal_publisher_1)
+        rclpy.spin_once(minimal_publisher_1)
 
 
 def threadingHandler():
@@ -49,9 +50,9 @@ def threadingHandler():
     t1.start()
     t1.join()
 
-    t2 = threading.Thread(target=task_2)
-    t2.start()
-    t2.join()
+    # t2 = threading.Thread(target=task_2)
+    # t2.start()
+    # t2.join()
 
 
 def main(args=None):
