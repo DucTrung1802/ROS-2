@@ -4,7 +4,6 @@
 import subprocess
 import time
 from click import prompt
-from openpyxl import Workbook
 import serial
 import re
 import json
@@ -12,6 +11,7 @@ import math
 import copy
 import hashlib
 import numpy as np
+import threading
 
 # ROS 2 libraries
 import rclpy
@@ -150,9 +150,6 @@ step_test_PID = 0
 
 
 # Node parameters
-receiving_timer = time.time()
-publish_timer = time.time()
-drive_timer = time.time()
 linear_velocity = 0
 previous_linear_velocity = 0
 current_state_is_straight = True
@@ -548,6 +545,143 @@ def testPIDResponse(step, time_interval):
         timer_test_PID = time.time()
 
 
+def stopAllThreads():
+    global flag_1, flag_2, flag_3, flag_4, flag_5
+
+    flag_1 = True
+    flag_2 = True
+    flag_3 = True
+    flag_4 = True
+    flag_5 = True
+
+
+def task_1():
+    global flag_1
+
+    while True:
+
+        if flag_1:
+            break
+
+        updateStoreRPMFromSerial()
+
+        time.sleep(RECEIVING_PERIOD)
+
+
+def task_2():
+    global flag_2
+
+    global motor_driver_node
+    motor_driver_node = MotorDriverNode(NODE_NAME)
+    while True:
+
+        if flag_2:
+            break
+
+        updateRPMFromStorePos()
+        motor_driver_node.setNeedPublish()
+        rclpy.spin_once(motor_driver_node)
+        motor_driver_node.resetNeedPublish()
+
+        time.sleep(PUBLISH_PERIOD)
+
+
+def task_3():
+    global flag_3
+
+    global motor_driver_node
+    while True:
+
+        if flag_3:
+            break
+
+        driveMotors()
+        rclpy.spin_once(motor_driver_node)
+
+
+def task_4():
+    global flag_4
+
+    while True:
+
+        if flag_4:
+            break
+
+        testPIDResponse(10, 0.5)
+
+
+def task_5():
+    global flag_5
+
+    index = 0
+    delta_time = 0
+    while index <= DATA_AMOUNT:
+        start = time.time()
+        WORKBOOK.writeData(index + 1, 1, delta_time)
+        WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
+        WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
+        WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
+        WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
+        WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
+        WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
+        WORKBOOK.writeData(index + 1, 9, total_receive)
+        WORKBOOK.writeData(index + 1, 10, error_receive)
+        WORKBOOK.writeData(
+            index + 1,
+            11,
+            round((total_receive - error_receive) / total_receive * 100, 2),
+        )
+        index += 1
+
+        time.sleep(LEFT_MOTOR_SAMPLE_TIME)
+
+        end = time.time()
+        delta_time = end - start
+
+    stopAllThreads()
+
+
+def threadingHandler():
+    global flag_1, flag_2, flag_3, flag_4, flag_5
+
+    # Setup flags (Thread will be stopped when the flag is set to True)
+    flag_1 = False
+    flag_2 = False
+    flag_3 = False
+    flag_4 = False
+    flag_5 = False
+
+    # Create threads
+    thread_1 = threading.Thread(target=task_1)
+    thread_2 = threading.Thread(target=task_2)
+    thread_3 = threading.Thread(target=task_3)
+
+    if DATA_RECORDING:
+        thread_4 = threading.Thread(target=task_4)
+        thread_5 = threading.Thread(target=task_5)
+
+    # Start threads
+    thread_1.start()
+    thread_2.start()
+    thread_3.start()
+
+    if DATA_RECORDING:
+        thread_4.start()
+        thread_5.start()
+
+    # Wait for all threads to stop
+    thread_1.join()
+    thread_2.join()
+    thread_3.join()
+
+    if DATA_RECORDING:
+        thread_4.join()
+        thread_5.join()
+
+    # Do something after all threads stop
+    # do_something()
+
+
 def setup():
     checkConditions()
     initializeSerial()
@@ -555,7 +689,6 @@ def setup():
 
 def loop():
     global receiving_timer, publish_timer, LEFT_RPM, RIGHT_RPM
-    global timer_test_PID
     rclpy.init()
 
     motor_driver_node = MotorDriverNode(NODE_NAME)
@@ -567,89 +700,25 @@ def loop():
 
     print("Ready!")
 
-    
-
     try:
         if DATA_RECORDING:
-            index = 1
-            save_data_timer = time.time()
-            timer_test_PID = time.time()
             varyPWM(0)
 
-            while index <= DATA_AMOUNT:
-
-                # if time.time() - timer >= 5:
-                #     break
-
-                testPIDResponse(10, 0.5)
-
-                if time.time() - receiving_timer >= RECEIVING_PERIOD:
-                    updateStoreRPMFromSerial()
-                    receiving_timer = time.time()
-
-                if time.time() - publish_timer >= PUBLISH_PERIOD:
-                    updateRPMFromStorePos()
-                    motor_driver_node.setNeedPublish()
-                    rclpy.spin_once(motor_driver_node)
-                    motor_driver_node.resetNeedPublish()
-
-                    publish_timer = time.time()
-
-                driveMotors()
-                rclpy.spin_once(motor_driver_node)
-
-                if time.time() - save_data_timer >= LEFT_MOTOR_SAMPLE_TIME:
-                    WORKBOOK.writeData(
-                        index + 1, 1, (index - 1) * LEFT_MOTOR_SAMPLE_TIME
-                    )
-                    WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
-                    WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
-                    WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
-                    WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
-                    WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
-                    WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
-                    WORKBOOK.writeData(index + 1, 9, total_receive)
-                    WORKBOOK.writeData(index + 1, 10, error_receive)
-                    WORKBOOK.writeData(
-                        index + 1,
-                        11,
-                        round((total_receive - error_receive) / total_receive * 100, 2),
-                    )
-                    index += 1
-                    save_data_timer = time.time()
+            threadingHandler()
 
         else:
-            while True:
-                # manuallyWrite()
 
-                # if time.time() - timer >= 6.283185:
-                #     break
-
-                if time.time() - receiving_timer >= RECEIVING_PERIOD:
-                    updateStoreRPMFromSerial()
-                    receiving_timer = time.time()
-
-                if time.time() - publish_timer >= PUBLISH_PERIOD:
-                    updateRPMFromStorePos()
-                    motor_driver_node.setNeedPublish()
-                    rclpy.spin_once(motor_driver_node)
-                    motor_driver_node.resetNeedPublish()
-
-                    # print("Left RPM: " + str(LEFT_RPM))
-                    # print("Right RPM: " + str(RIGHT_RPM))
-                    # print("Checksum: " + CHECKSUM)
-                    publish_timer = time.time()
-
-                driveMotors()
-                rclpy.spin_once(motor_driver_node)
+            threadingHandler()
 
     except KeyboardInterrupt:
         # JSON
+        print("Captured Ctrl + C")
         MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 
     finally:
+        print("The program has been stopped!")
         MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
