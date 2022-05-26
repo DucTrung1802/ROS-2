@@ -6,12 +6,11 @@ from sensor_msgs.msg import Range
 import RPi.GPIO as GPIO
 import time
 from sonar.SonarClass import Sonar
+import threading
 
 # Node parameters
 PUBLISH_FREQUENCY = 10
 NODE_NAME = "sonar"
-
-timer1 = time.time()
 
 
 def checkConditions():
@@ -26,32 +25,123 @@ def checkConditions():
 
 
 class SonarNode(Node):
-    def __init__(self, node_name, sonar_array_instance):
-        if isinstance(sonar_array_instance, list) and len(sonar_array_instance) < 0:
-            raise Exception("There is no Sonar data!")
-
-        super().__init__(node_name)
-        self.array_sonar = sonar_array_instance
-        self.array_publisher = []
-        for i in range(len(sonar_array_instance)):
-            self.array_publisher.append(
-                self.create_publisher(Range, "sonar_" + str(i + 1), 1)
+    def __init__(self, order, node_name, sonar_instance):
+        if not isinstance(sonar_instance, Sonar):
+            raise Exception(
+                "Invalid type of variable sonar_instance, must be an instance of 'Sonar'!"
             )
+
+        super().__init__(node_name + "_" + str(order))
+        self._order = order
+        self._node_name = node_name
+        self._sonar_instance = sonar_instance
+
+        self.sonar_pub = self.create_publisher(
+            Range, "/ultrasonic_sensor_" + str(self._order), 1
+        )
+
         self.timer = self.create_timer(0, self.timer_callback)
 
     def timer_callback(self):
-        for i in range(len(self.array_sonar)):
-            msg = Range()
-            msg.header.frame_id = "/sonar_frame_" + str(i + 1)
-            msg.header.stamp = self.get_clock().now().to_msg()
-            msg.radiation_type = self.array_sonar[i].getRadiationType()
-            msg.field_of_view = self.array_sonar[
-                i
-            ].getFieldOfView()  # rad ~ 45 degree (according to feature of HC-SR 04)
-            msg.min_range = self.array_sonar[i].getMinRange()
-            msg.max_range = self.array_sonar[i].getMaxRange()
-            msg.range = self.array_sonar[i].getMeasureDistance()
-            self.array_publisher[i].publish(msg)
+        msg = Range()
+        msg.header.frame_id = "ultrasonic_" + str(self._order) + "_link"
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.radiation_type = self._sonar_instance.getRadiationType()
+        msg.field_of_view = (
+            self._sonar_instance.getFieldOfView()
+        )  # rad ~ 15 degree (according to feature of HC-SR 04)
+        msg.min_range = self._sonar_instance.getMinRange()
+        msg.max_range = self._sonar_instance.getMaxRange()
+        msg.range = self._sonar_instance.getMeasureDistance()
+        self.sonar_pub.publish(msg)
+
+
+def task_1():
+    global flag_1, sonar_node_1
+    while True:
+
+        if flag_1:
+            break
+
+        rclpy.spin_once(sonar_node_1)
+
+        time.sleep(PUBLISH_PERIOD)
+
+
+def task_2():
+    global flag_2, sonar_node_2
+    while True:
+
+        if flag_2:
+            break
+
+        rclpy.spin_once(sonar_node_2)
+
+        time.sleep(PUBLISH_PERIOD)
+
+
+def task_3():
+    global flag_3, sonar_node_3
+    while True:
+
+        if flag_3:
+            break
+
+        rclpy.spin_once(sonar_node_3)
+
+        time.sleep(PUBLISH_PERIOD)
+
+
+def task_4():
+    global flag_4, sonar_node_4
+    while True:
+
+        if flag_4:
+            break
+
+        rclpy.spin_once(sonar_node_4)
+
+        time.sleep(PUBLISH_PERIOD)
+
+
+def task_5():
+    global flag_5, sonar_node_5
+    while True:
+
+        if flag_5:
+            break
+
+        rclpy.spin_once(sonar_node_5)
+
+        time.sleep(PUBLISH_PERIOD)
+
+
+def threadingHandler():
+    global flag_1, flag_2, flag_3, flag_4, flag_5
+
+    flag_1 = False
+    flag_2 = False
+    flag_3 = False
+    flag_4 = False
+    flag_5 = False
+
+    thread_1 = threading.Thread(target=task_1)
+    thread_2 = threading.Thread(target=task_2)
+    thread_3 = threading.Thread(target=task_3)
+    thread_4 = threading.Thread(target=task_4)
+    thread_5 = threading.Thread(target=task_5)
+
+    thread_1.start()
+    thread_2.start()
+    thread_3.start()
+    thread_4.start()
+    thread_5.start()
+
+    thread_1.join()
+    thread_2.join()
+    thread_3.join()
+    thread_4.join()
+    thread_5.join()
 
 
 def setup():
@@ -59,9 +149,9 @@ def setup():
 
 
 def loop():
-    global timer1
+    global sonar_node_1, sonar_node_2, sonar_node_3, sonar_node_4, sonar_node_5
+
     rclpy.init()
-    sonar_array = []
 
     # Configure this when add more sonar sensors
     sonar_1 = Sonar(
@@ -80,19 +170,14 @@ def loop():
         trigger_pin=23, echo_pin=24, min_range=0.04, max_range=1.5, field_of_view=0.78
     )
 
-    sonar_array.append(sonar_1)
-    sonar_array.append(sonar_2)
-    sonar_array.append(sonar_3)
-    sonar_array.append(sonar_4)
-    sonar_array.append(sonar_5)
-
-    sonar_node = SonarNode(NODE_NAME, sonar_array)
+    sonar_node_1 = SonarNode(order=1, node_name=NODE_NAME, sonar_instance=sonar_1)
+    sonar_node_2 = SonarNode(order=2, node_name=NODE_NAME, sonar_instance=sonar_2)
+    sonar_node_3 = SonarNode(order=3, node_name=NODE_NAME, sonar_instance=sonar_3)
+    sonar_node_4 = SonarNode(order=4, node_name=NODE_NAME, sonar_instance=sonar_4)
+    sonar_node_5 = SonarNode(order=5, node_name=NODE_NAME, sonar_instance=sonar_5)
 
     try:
-        while True:
-            if time.time() - timer1 >= PUBLISH_PERIOD:
-                rclpy.spin_once(sonar_node)
-                timer1 = time.time()
+        threadingHandler()
 
         # Reset by pressing CTRL + C
     except KeyboardInterrupt:
