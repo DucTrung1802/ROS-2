@@ -30,11 +30,12 @@ class MinimalPublisher(Node):
 
 def task_1():
     global POS_1
+    print("hello")
     while True:
         start = time.time()
         POS_1 += 1
         # print(POS)
-        time.sleep(0.005)
+        time.sleep(1)
         end = time.time()
         print(
             "External job 1 thread ID: "
@@ -85,12 +86,12 @@ def threadingHandler():
     t3 = threading.Thread(target=task_3)
 
     t1.start()
-    t2.start()
-    t3.start()
+    # t2.start()
+    # t3.start()
 
     t1.join()
-    t2.join()
-    t3.join()
+    # t2.join()
+    # t3.join()
 
 
 def main(args=None):
