@@ -29,12 +29,18 @@ class MinimalPublisher(Node):
 
 
 def task_1():
+    global flag_1, flag_2, flag_3
     global POS_1
+    print("hello")
     while True:
+
+        if flag_1:
+            break
+
         start = time.time()
         POS_1 += 1
         # print(POS)
-        time.sleep(0.005)
+        time.sleep(1)
         end = time.time()
         print(
             "External job 1 thread ID: "
@@ -44,14 +50,24 @@ def task_1():
         )
         print()
 
+        if POS_1 >= 3:
+            # flag_1 = True
+            flag_2 = True
+            flag_3 = True
+
 
 def task_2():
+    global flag_2
     global POS_2
     while True:
+
+        if flag_2:
+            break
+
         start = time.time()
         POS_2 += 1
         # print(POS)
-        time.sleep(0.04)
+        time.sleep(0.1)
         end = time.time()
         print(
             "External job 2 thread ID: "
@@ -63,10 +79,14 @@ def task_2():
 
 
 def task_3():
-    global POS
+    global flag_3
     rclpy.init()
     minimal_publisher_1 = MinimalPublisher()
     while True:
+
+        if flag_3:
+            break
+
         start = time.time()
         rclpy.spin_once(minimal_publisher_1)
         end = time.time()
@@ -80,6 +100,12 @@ def task_3():
 
 
 def threadingHandler():
+    global flag_1, flag_2, flag_3
+
+    flag_1 = False
+    flag_2 = False
+    flag_3 = False
+
     t1 = threading.Thread(target=task_1)
     t2 = threading.Thread(target=task_2)
     t3 = threading.Thread(target=task_3)
