@@ -106,17 +106,17 @@ def threadingHandler():
     flag_2 = False
     flag_3 = False
 
-    t1 = threading.Thread(target=task_1)
-    t2 = threading.Thread(target=task_2)
-    t3 = threading.Thread(target=task_3)
+    thread_1 = threading.Thread(target=task_1)
+    thread_2 = threading.Thread(target=task_2)
+    thread_3 = threading.Thread(target=task_3)
 
-    t1.start()
-    t2.start()
-    t3.start()
+    thread_1.start()
+    thread_2.start()
+    thread_3.start()
 
-    t1.join()
-    t2.join()
-    t3.join()
+    thread_1.join()
+    thread_2.join()
+    thread_3.join()
 
 
 def main(args=None):
