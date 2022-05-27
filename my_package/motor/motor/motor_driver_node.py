@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 # Python libraries
+from curses import raw
 import subprocess
 import time
 from click import prompt
@@ -86,7 +87,7 @@ TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 1023
 
 # DataRecorder parameters
-DATA_AMOUNT = 800
+DATA_AMOUNT = 10000
 
 # =================================================
 
@@ -407,7 +408,7 @@ def getMCUSerial():
 
 
 def initializeSerial():
-    global MCUSerialObject
+    global MCUSerialObject, improved_serial
     MCUSerial = getMCUSerial()
     if MCUSerial:
         MCUSerialObject = serial.Serial(
@@ -425,6 +426,7 @@ def initializeSerial():
     time.sleep(0.01)
     MCUSerialObject.reset_input_buffer()
     MCUSerialObject.setDTR(True)
+    improved_serial = ReadLine(MCUSerialObject)
 
     while skipLines:
         # Skip some lines of serial when MCU is reseted
@@ -436,16 +438,16 @@ def initializeSerial():
 
 def readSerialData():
     global serialData, dictionaryData
-    rawData = MCUSerialObject.readline()
+    rawData = improved_serial.readline()
     # print(rawData)
-    serialData = rawData.decode("windows-1252")  # decode s
-    serialData = serialData.rstrip()  # cut "\r\n" at last of string
-    filteredSerialData = re.sub(
-        "[^A-Za-z0-9\s[]{}]", "", serialData
-    )  # filter regular characters
+    serialData = rawData.decode("utf-8")  # decode s
+    print(len(serialData))
+    # filteredSerialData = re.sub(
+    #     "[^A-Za-z0-9\s[]{}]", "", serialData
+    # )  # filter regular characters
     # print(filteredSerialData)
     try:
-        dictionaryData = json.loads(filteredSerialData)
+        dictionaryData = json.loads(serialData)
     except:
         return
 
@@ -453,7 +455,7 @@ def readSerialData():
 def checksum():
     global error_receive
     dictionaryDataCheck = copy.deepcopy(dictionaryData)
-    dictionaryDataCheck.pop("checksum", None)
+    dictionaryDataCheck.pop("ck", None)
     dictionaryDataCheckString = json.dumps(dictionaryDataCheck)
     dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
     checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
@@ -462,6 +464,10 @@ def checksum():
 
     # print("STORE_CHECKSUM: " + STORE_CHECKSUM)
     # print("dictionaryDataCheck: " + checksumString)
+    # print("---------")
+
+    # print("STRING_SENT: |" + serialData + "|")
+    # print("STRING_CHECK: |" + dictionaryDataCheckString + "|")
     # print("---------")
 
     if checksumString != STORE_CHECKSUM:
@@ -556,22 +562,25 @@ def stopAllThreads():
 
 def task_1():
     global flag_1
-    improved_serial = ReadLine(MCUSerialObject)
-    while True:
+    index = 1
+    while index <= DATA_AMOUNT:
 
         if flag_1:
             break
 
         start = time.time()
-        rawData = improved_serial.readline()
-        print(str(rawData))
-        print(len(str(rawData)))
+        # rawData = improved_serial.readline()
+        # rawString = rawData.decode("utf-8")
+        # print(rawString)
+        # print(len(str(rawData)))
         # readSerialData()
-        # updateStoreRPMFromSerial()
-        # print(error_receive / total_receive)
+        updateStoreRPMFromSerial()
         # time.sleep(RECEIVING_PERIOD)
         end = time.time()
-        print("task 1 interval: " + str(end - start))
+        # print("task 1 interval: " + str(end - start))
+        WORKBOOK.writeData(index + 1, 1, end - start)
+        WORKBOOK.writeData(index + 1, 2, (total_receive - error_receive) * 100 / total_receive)
+        index += 1
 
 
 def task_2():
