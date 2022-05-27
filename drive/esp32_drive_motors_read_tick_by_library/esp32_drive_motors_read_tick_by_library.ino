@@ -116,7 +116,7 @@ const uint8_t CHANNEL_PWMB = 2;
 // Config serial parameters
 const int BAUD_RATE = 115200;
 // Sending
-const unsigned int SENDING_FREQUENCY = 2000; // Hz
+const unsigned int SENDING_FREQUENCY = 500; // Hz
 double PERIOD; // milliseconds
 volatile unsigned long long timerPivot = 0; // milliseconds
 
