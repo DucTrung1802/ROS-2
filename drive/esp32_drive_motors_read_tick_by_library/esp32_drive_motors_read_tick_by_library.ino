@@ -267,10 +267,10 @@ void readRPM() {
   // calculate checksum
   char buf[200];
   StaticJsonDocument<200> JSON_DOC_CHECK;
-  JSON_DOC_CHECK["left_tick"] = motor_data_send.left_tick;
-  JSON_DOC_CHECK["right_tick"] = motor_data_send.right_tick;
-  JSON_DOC_CHECK["left_RPM"] = motor_data_send.left_RPM;
-  JSON_DOC_CHECK["right_RPM"] = motor_data_send.right_RPM;
+  JSON_DOC_CHECK["lt"] = motor_data_send.left_tick;
+  JSON_DOC_CHECK["rt"] = motor_data_send.right_tick;
+  JSON_DOC_CHECK["lR"] = motor_data_send.left_RPM;
+  JSON_DOC_CHECK["rR"] = motor_data_send.right_RPM;
   serializeJson(JSON_DOC_CHECK, buf, 200);
   // Serial.println(buf);
   hash = MD5::make_hash(buf);
