@@ -295,17 +295,17 @@ void calculateSendingPeriod() {
 void sendJSON() {
   StaticJsonDocument<200> JSON_DOC_SEND;
 
-  // JSON_DOC_SEND["lt"] = motor_data_send.left_tick;
-  // JSON_DOC_SEND["rt"] = motor_data_send.right_tick;
-  // JSON_DOC_SEND["lR"] = motor_data_send.left_RPM;
-  // JSON_DOC_SEND["rR"] = motor_data_send.right_RPM;
-  // JSON_DOC_SEND["ck"] = motor_data_send.checksum;
+  JSON_DOC_SEND["lt"] = motor_data_send.left_tick;
+  JSON_DOC_SEND["rt"] = motor_data_send.right_tick;
+  JSON_DOC_SEND["lR"] = motor_data_send.left_RPM;
+  JSON_DOC_SEND["rR"] = motor_data_send.right_RPM;
+  JSON_DOC_SEND["ck"] = motor_data_send.checksum;
 
-  JSON_DOC_SEND["lt"] = 1000000;
-  JSON_DOC_SEND["rt"] = 1000000;
-  JSON_DOC_SEND["lR"] = 199.123456;
-  JSON_DOC_SEND["rR"] = 199.123456;
-  JSON_DOC_SEND["ck"] = "3931756a764b44099197a21ec5d67a57";
+  // JSON_DOC_SEND["lt"] = 1000000;
+  // JSON_DOC_SEND["rt"] = 1000000;
+  // JSON_DOC_SEND["lR"] = 199.123456;
+  // JSON_DOC_SEND["rR"] = 199.123456;
+  // JSON_DOC_SEND["ck"] = "3931756a764b44099197a21ec5d67a57";
 
   serializeJson(JSON_DOC_SEND, Serial);
   Serial.println();
