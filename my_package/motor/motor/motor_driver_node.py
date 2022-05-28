@@ -668,7 +668,7 @@ def task_5():
         comp_end = time.time()
 
         if LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start) >= 0:
-            time.sleep(LEFT_MOTOR_SAMPLE_TIME)
+            time.sleep(LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start))
 
         end = time.time()
 
