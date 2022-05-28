@@ -22,6 +22,7 @@ from geometry_msgs.msg import Twist
 from motor.MotorDriver import MotorDriver
 from motor.DataRecoder import DataRecoder
 from motor.PIDController import PIDController
+from motor.ReadLine import ReadLine
 
 
 # =========== Configurable parameters =============
@@ -29,8 +30,8 @@ from motor.PIDController import PIDController
 SKIP_SERIAL_LINES = 12
 LIDAR_USB_NAME = "FTDI USB Serial Device"
 MCU_USB_NAME = "cp210x"
-BAUD_RATE = 115200
-RECEIVING_FREQUENCY = 2000
+BAUD_RATE = 921600
+RECEIVING_FREQUENCY = 500
 
 # Node parameters
 PUBLISH_FREQUENCY = 100
@@ -78,14 +79,14 @@ RIGHT_MOTOR_MAX = 12
 
 
 # Test data
-DATA_RECORDING = True
+DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 1023
 
 # DataRecorder parameters
-DATA_AMOUNT = 800
+DATA_AMOUNT = 10000
 
 # =================================================
 
@@ -104,6 +105,8 @@ RIGHT_MOTOR = MotorDriver(
     pwm_frequency=RIGHT_MOTOR_PWM_FREQUENCY,
     sample_time=RIGHT_MOTOR_SAMPLE_TIME,
 )
+pwm_left = 0.0
+pwm_right = 0.0
 
 
 KINEMATICS_MODEL_MATRIX = np.matrix(
@@ -160,6 +163,7 @@ RECEIVING_PERIOD = 1
 """ The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided\
     callback function will be called. For no delay, set it equal ZERO. """
 PUBLISH_PERIOD = 0
+
 
 # Serial parameters
 MCUSerialObject = None
@@ -320,59 +324,57 @@ def setupSetpoint(msg):
 
 def driveMotors():
     global linear_RPM_left, linear_RPM_right
-    global drive_timer, pwm_left, pwm_right
+    global pwm_left, pwm_right
 
-    if time.time() - drive_timer >= LEFT_MOTOR.getSampleTime():
+    # print("linear_RPM_left: " + str(linear_RPM_left))
+    # print("linear_RPM_right: " + str(linear_RPM_right))
 
-        # print("linear_RPM_left: " + str(linear_RPM_left))
-        # print("linear_RPM_right: " + str(linear_RPM_right))
+    # linear_RPM_left = 42.4
+    # linear_RPM_right = -42.4
 
-        # linear_RPM_left = 42.4
-        # linear_RPM_right = -42.4
+    direction_1 = getDirection(linear_RPM_left)
+    direction_2 = getDirection(linear_RPM_right)
 
-        direction_1 = getDirection(linear_RPM_left)
-        direction_2 = getDirection(linear_RPM_right)
+    linear_RPM_left_abs = abs(linear_RPM_left)
+    linear_RPM_right_abs = abs(linear_RPM_right)
 
-        linear_RPM_left_abs = abs(linear_RPM_left)
-        linear_RPM_right_abs = abs(linear_RPM_right)
+    pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
+    pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
-        pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
-        pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
+    LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_RPM_left_abs, LEFT_RPM)
+    RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_RPM_right_abs, RIGHT_RPM)
 
-        LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_RPM_left_abs, LEFT_RPM)
-        RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_RPM_right_abs, RIGHT_RPM)
+    if linear_RPM_left_abs == 0:
+        pwm_left = 0.0
+    elif linear_RPM_left_abs > 0:
+        pwm_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
-        if linear_RPM_left_abs == 0:
-            pwm_left = 0.0
-        elif linear_RPM_left_abs > 0:
-            pwm_left = LEFT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
+    if linear_RPM_right_abs == 0:
+        pwm_right = 0.0
+    elif linear_RPM_right_abs > 0:
+        pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
-        if linear_RPM_right_abs == 0:
-            pwm_right = 0.0
-        elif linear_RPM_right_abs > 0:
-            pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
+    print("---")
+    print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(LEFT_RPM))
+    print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RIGHT_RPM))
+    print("---")
 
-        print("---")
-        print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(LEFT_RPM))
-        print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RIGHT_RPM))
-        print("---")
+    data = {
+        "motor_data": [
+            direction_1,
+            pwm_freq_1,
+            pwm_left,
+            direction_2,
+            pwm_freq_2,
+            pwm_right,
+        ]
+    }
 
-        data = {
-            "motor_data": [
-                direction_1,
-                pwm_freq_1,
-                pwm_left,
-                direction_2,
-                pwm_freq_2,
-                pwm_right,
-            ]
-        }
+    data = json.dumps(data)
+    # print(data)
+    MCUSerialObject.write(formSerialData(data))
 
-        data = json.dumps(data)
-        # print(data)
-        MCUSerialObject.write(formSerialData(data))
-
-        drive_timer = time.time()
+    time.sleep(LEFT_MOTOR.getSampleTime())
 
 
 def getMCUSerial():
@@ -408,7 +410,7 @@ def getMCUSerial():
 
 
 def initializeSerial():
-    global MCUSerialObject
+    global MCUSerialObject, improved_serial
     MCUSerial = getMCUSerial()
     if MCUSerial:
         MCUSerialObject = serial.Serial(
@@ -426,6 +428,7 @@ def initializeSerial():
     time.sleep(0.01)
     MCUSerialObject.reset_input_buffer()
     MCUSerialObject.setDTR(True)
+    improved_serial = ReadLine(MCUSerialObject)
 
     while skipLines:
         # Skip some lines of serial when MCU is reseted
@@ -437,16 +440,16 @@ def initializeSerial():
 
 def readSerialData():
     global serialData, dictionaryData
-    rawData = MCUSerialObject.readline()
+    rawData = improved_serial.readline()
     # print(rawData)
-    serialData = rawData.decode("windows-1252")  # decode s
-    serialData = serialData.rstrip()  # cut "\r\n" at last of string
-    filteredSerialData = re.sub(
-        "[^A-Za-z0-9\s[]{}]", "", serialData
-    )  # filter regular characters
+    serialData = rawData.decode("utf-8")  # decode s
+    # print(len(serialData))
+    # filteredSerialData = re.sub(
+    #     "[^A-Za-z0-9\s[]{}]", "", serialData
+    # )  # filter regular characters
     # print(filteredSerialData)
     try:
-        dictionaryData = json.loads(filteredSerialData)
+        dictionaryData = json.loads(serialData)
     except:
         return
 
@@ -454,7 +457,7 @@ def readSerialData():
 def checksum():
     global error_receive
     dictionaryDataCheck = copy.deepcopy(dictionaryData)
-    dictionaryDataCheck.pop("checksum", None)
+    dictionaryDataCheck.pop("ck", None)
     dictionaryDataCheckString = json.dumps(dictionaryDataCheck)
     dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
     checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
@@ -463,6 +466,10 @@ def checksum():
 
     # print("STORE_CHECKSUM: " + STORE_CHECKSUM)
     # print("dictionaryDataCheck: " + checksumString)
+    # print("---------")
+
+    # print("STRING_SENT: |" + serialData + "|")
+    # print("STRING_CHECK: |" + dictionaryDataCheckString + "|")
     # print("---------")
 
     if checksumString != STORE_CHECKSUM:
@@ -477,11 +484,11 @@ def updateStoreRPMFromSerial():
     # )
     try:
         readSerialData()
-        STORE_LEFT_TICK = dictionaryData["left_tick"]
-        STORE_RIGHT_TICK = dictionaryData["right_tick"]
-        STORE_RPM_LEFT = dictionaryData["left_RPM"]
-        STORE_RPM_RIGHT = dictionaryData["right_RPM"]
-        STORE_CHECKSUM = dictionaryData["checksum"]
+        STORE_LEFT_TICK = dictionaryData["lt"]
+        STORE_RIGHT_TICK = dictionaryData["rt"]
+        STORE_RPM_LEFT = dictionaryData["lR"]
+        STORE_RPM_RIGHT = dictionaryData["rR"]
+        STORE_CHECKSUM = dictionaryData["ck"]
         checksum()
 
     except:
@@ -557,7 +564,7 @@ def stopAllThreads():
 
 def task_1():
     global flag_1
-
+    index = 1
     while True:
 
         if flag_1:
@@ -565,38 +572,53 @@ def task_1():
 
         updateStoreRPMFromSerial()
 
-        time.sleep(RECEIVING_PERIOD)
+        # print("Left tick: " + str(STORE_LEFT_TICK))
+        # print("Right tick: " + str(STORE_RIGHT_TICK))
+        # print("-----")
+
+        # print(end - start)
+
+        # print("task 1 interval: " + str(end - start))
+        # WORKBOOK.writeData(index + 1, 1, end - start)
+        # WORKBOOK.writeData(index + 1, 2, (total_receive - error_receive) * 100 / total_receive)
+        index += 1
 
 
 def task_2():
     global flag_2
-
-    global motor_driver_node
+    rclpy.init()
     motor_driver_node = MotorDriverNode(NODE_NAME)
     while True:
 
         if flag_2:
             break
 
-        updateRPMFromStorePos()
-        motor_driver_node.setNeedPublish()
-        rclpy.spin_once(motor_driver_node)
-        motor_driver_node.resetNeedPublish()
+        comp_start = time.time()
 
-        time.sleep(PUBLISH_PERIOD)
+        updateRPMFromStorePos()
+        rclpy.spin_once(motor_driver_node)
+        driveMotors()
+        # motor_driver_node.resetNeedPublish()
+
+        # print("linear_RPM_left: " + str(linear_RPM_left))
+        # print("linear_RPM_right: " + str(linear_RPM_right))
+
+        comp_end = time.time()
+
+        # if PUBLISH_PERIOD - (comp_end - comp_start) >= 0:
+            # time.sleep(PUBLISH_PERIOD - (comp_end - comp_start))
 
 
 def task_3():
     global flag_3
 
-    global motor_driver_node
     while True:
 
         if flag_3:
             break
 
-        driveMotors()
-        rclpy.spin_once(motor_driver_node)
+        # rclpy.spin_once(motor_driver_node)
+        # driveMotors()
 
 
 def task_4():
@@ -607,7 +629,7 @@ def task_4():
         if flag_4:
             break
 
-        testPIDResponse(10, 0.5)
+        # testPIDResponse(10, 0.5)
 
 
 def task_5():
@@ -616,7 +638,11 @@ def task_5():
     index = 0
     delta_time = 0
     while index <= DATA_AMOUNT:
+
         start = time.time()
+
+        comp_start = time.time()
+        
         WORKBOOK.writeData(index + 1, 1, delta_time)
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
@@ -633,9 +659,13 @@ def task_5():
         )
         index += 1
 
-        time.sleep(LEFT_MOTOR_SAMPLE_TIME)
+        comp_end = time.time()
+
+        if LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start) >= 0:
+            time.sleep(LEFT_MOTOR_SAMPLE_TIME)
 
         end = time.time()
+
         delta_time = end - start
 
     stopAllThreads()
@@ -654,7 +684,7 @@ def threadingHandler():
     # Create threads
     thread_1 = threading.Thread(target=task_1)
     thread_2 = threading.Thread(target=task_2)
-    thread_3 = threading.Thread(target=task_3)
+    # thread_3 = threading.Thread(target=task_3)
 
     if DATA_RECORDING:
         thread_4 = threading.Thread(target=task_4)
@@ -663,19 +693,19 @@ def threadingHandler():
     # Start threads
     thread_1.start()
     thread_2.start()
-    thread_3.start()
+    # thread_3.start()
 
     if DATA_RECORDING:
-        thread_4.start()
+        # thread_4.start()
         thread_5.start()
 
     # Wait for all threads to stop
     thread_1.join()
     thread_2.join()
-    thread_3.join()
+    # thread_3.join()
 
     if DATA_RECORDING:
-        thread_4.join()
+        # thread_4.join()
         thread_5.join()
 
     # Do something after all threads stop
@@ -689,14 +719,9 @@ def setup():
 
 def loop():
     global receiving_timer, publish_timer, LEFT_RPM, RIGHT_RPM
-    rclpy.init()
-
-    motor_driver_node = MotorDriverNode(NODE_NAME)
 
     LEFT_MOTOR.resetDataCount()
     RIGHT_MOTOR.resetDataCount()
-
-    timer = time.time()
 
     print("Ready!")
 
@@ -707,7 +732,6 @@ def loop():
             threadingHandler()
 
         else:
-
             threadingHandler()
 
     except KeyboardInterrupt:

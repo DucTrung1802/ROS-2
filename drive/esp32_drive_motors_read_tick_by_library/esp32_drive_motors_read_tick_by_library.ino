@@ -9,59 +9,60 @@
 
 class RPMCalculator {
   // Declare private variable of class
-  private:
-    float _sample_time = 0.005;
-    float _encoder_tick_per_round = 480;
+private:
+  float _sample_time = 0.005;
+  float _encoder_tick_per_round = 480;
 
-    float _RPM_Filter = 0;
-    float _previous_RPM = 0;
+  float _RPM_Filter = 0;
+  float _previous_RPM = 0;
 
-    float _RPM_Filter_coefficient = 0.854;
-    float _RPM_coefficient = 0.0728;
-    float _previous_RPM_coefficient = 0.0728;
+  float _RPM_Filter_coefficient = 0.854;
+  float _RPM_coefficient = 0.0728;
+  float _previous_RPM_coefficient = 0.0728;
 
-    int32_t _current_tick = 0;
-    int32_t _previous_tick = 0;
-    long _previous_T = 0;
-  public:
-    void setupSampleTime(float sample_time) {
-      this->_sample_time = sample_time;
+  int32_t _current_tick = 0;
+  int32_t _previous_tick = 0;
+  long _previous_T = 0;
+
+public:
+  void setupSampleTime(float sample_time) {
+    this->_sample_time = sample_time;
+  }
+
+  void setupEncoderTickPerRound(unsigned int encoder_tick_per_round) {
+    this->_encoder_tick_per_round = encoder_tick_per_round;
+  }
+
+  void setupLowPassFilter(float RPM_Filter_coefficient, float RPM_coefficient, float previous_RPM_coefficient) {
+    this->_RPM_Filter_coefficient = RPM_Filter_coefficient;
+    this->_RPM_coefficient = RPM_coefficient;
+    this->_previous_RPM_coefficient = previous_RPM_coefficient;
+  }
+
+  void calculate(int32_t current_tick) {
+    long curr_T = micros();
+    if (((float)(curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
+      float delta_T = ((float)(curr_T - this->_previous_T)) / 1.0e6;
+      this->_current_tick = current_tick;
+      float encoder_tick_per_sec = abs(this->_current_tick - this->_previous_tick) / delta_T;
+      float RPM = encoder_tick_per_sec / this->_encoder_tick_per_round * 60.0;
+
+      // Low-pass filter (over 25Hz cut off)
+      this->_RPM_Filter = this->_RPM_Filter_coefficient * this->_RPM_Filter + RPM * this->_RPM_coefficient + this->_previous_RPM * this->_previous_RPM_coefficient;
+
+      this->_previous_RPM = this->_RPM_Filter;
+      this->_previous_tick = current_tick;
+      this->_previous_T = curr_T;
     }
+  }
 
-    void setupEncoderTickPerRound(unsigned int encoder_tick_per_round) {
-      this->_encoder_tick_per_round = encoder_tick_per_round;
-    }
+  float getRPM() {
+    return this->_RPM_Filter;
+  }
 
-    void setupLowPassFilter(float RPM_Filter_coefficient, float RPM_coefficient, float previous_RPM_coefficient) {
-      this->_RPM_Filter_coefficient = RPM_Filter_coefficient;
-      this->_RPM_coefficient = RPM_coefficient;
-      this->_previous_RPM_coefficient = previous_RPM_coefficient;
-    }
-
-    void calculate(int32_t current_tick) {
-      long curr_T = micros();
-      if (((float) (curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
-        float delta_T = ((float) (curr_T - this->_previous_T)) / 1.0e6;
-        this->_current_tick = current_tick;
-        float encoder_tick_per_sec = abs(this->_current_tick - this->_previous_tick) / delta_T;
-        float RPM = encoder_tick_per_sec / this->_encoder_tick_per_round * 60.0;
-
-        // Low-pass filter (over 25Hz cut off)
-        this->_RPM_Filter = this->_RPM_Filter_coefficient * this->_RPM_Filter + RPM * this->_RPM_coefficient + this->_previous_RPM * this->_previous_RPM_coefficient;
-
-        this->_previous_RPM = this->_RPM_Filter;
-        this->_previous_tick = current_tick;
-        this->_previous_T = curr_T;
-      }
-    }
-
-    float getRPM() {
-      return this->_RPM_Filter;
-    }
-
-    float getTick() {
-      return this->_current_tick;
-    }
+  float getTick() {
+    return this->_current_tick;
+  }
 };
 
 struct MotorDataSend {
@@ -83,7 +84,7 @@ struct MotorDataReceive {
 };
 
 
-const int RUNNING_TIME = 10000; // ms
+const int RUNNING_TIME = 10000;  // ms
 
 // Config pin parameters
 // Motor 1
@@ -105,20 +106,20 @@ const uint8_t STBY = 21;
 
 // Config pwm parameters
 const int FREQ_PWM_1 = 1000;
-const int RESOLUTION_PWM_1 = 10; // bits (1 - 16 bits)
+const int RESOLUTION_PWM_1 = 10;  // bits (1 - 16 bits)
 const uint8_t CHANNEL_PWMA = 1;
 
 const int FREQ_PWM_2 = 1000;
-const int RESOLUTION_PWM_2 = 10; // bits (1 - 16 bits)
+const int RESOLUTION_PWM_2 = 10;  // bits (1 - 16 bits)
 const uint8_t CHANNEL_PWMB = 2;
 
 
 // Config serial parameters
-const int BAUD_RATE = 115200;
+const int BAUD_RATE = 921600;
 // Sending
-const unsigned int SENDING_FREQUENCY = 2000; // Hz
-double PERIOD; // milliseconds
-volatile unsigned long long timerPivot = 0; // milliseconds
+const unsigned int SENDING_FREQUENCY = 500;  // Hz
+double PERIOD;                               // milliseconds
+volatile unsigned long long timerPivot = 0;  // milliseconds
 
 // Receiving
 volatile char serialChar;
@@ -185,7 +186,6 @@ void driveLeftWheel() {
     digitalWrite(AIN1, LOW);
     digitalWrite(AIN2, LOW);
   }
-
 }
 
 void driveRightWheel() {
@@ -236,8 +236,7 @@ void serial_receive() {
   }
 }
 
-void initializeMotor()
-{
+void initializeMotor() {
   digitalWrite(AIN1, HIGH);
   digitalWrite(AIN2, LOW);
   digitalWrite(BIN1, LOW);
@@ -254,7 +253,7 @@ void readRPM() {
 
   motor_data_send.left_RPM = rpm_calculator_1.getRPM();
   motor_data_send.left_tick = rpm_calculator_1.getTick();
-  
+
   motor_data_send.right_RPM = rpm_calculator_2.getRPM();
   motor_data_send.right_tick = rpm_calculator_2.getTick();
 
@@ -264,14 +263,14 @@ void readRPM() {
   if (motor_data_send.right_RPM < 1) {
     motor_data_send.right_RPM = 0;
   }
-  
+
   // calculate checksum
   char buf[200];
   StaticJsonDocument<200> JSON_DOC_CHECK;
-  JSON_DOC_CHECK["left_tick"] = motor_data_send.left_tick;
-  JSON_DOC_CHECK["right_tick"] = motor_data_send.right_tick;
-  JSON_DOC_CHECK["left_RPM"] = motor_data_send.left_RPM;
-  JSON_DOC_CHECK["right_RPM"] = motor_data_send.right_RPM;
+  JSON_DOC_CHECK["lt"] = motor_data_send.left_tick;
+  JSON_DOC_CHECK["rt"] = motor_data_send.right_tick;
+  JSON_DOC_CHECK["lR"] = motor_data_send.left_RPM;
+  JSON_DOC_CHECK["rR"] = motor_data_send.right_RPM;
   serializeJson(JSON_DOC_CHECK, buf, 200);
   // Serial.println(buf);
   hash = MD5::make_hash(buf);
@@ -296,13 +295,19 @@ void calculateSendingPeriod() {
 void sendJSON() {
   StaticJsonDocument<200> JSON_DOC_SEND;
 
-    JSON_DOC_SEND["left_tick"] = motor_data_send.left_tick;
-    JSON_DOC_SEND["right_tick"] = motor_data_send.right_tick;
-    JSON_DOC_SEND["left_RPM"] = motor_data_send.left_RPM;
-    JSON_DOC_SEND["right_RPM"] = motor_data_send.right_RPM;
-    JSON_DOC_SEND["checksum"] = motor_data_send.checksum;
+  JSON_DOC_SEND["lt"] = motor_data_send.left_tick;
+  JSON_DOC_SEND["rt"] = motor_data_send.right_tick;
+  JSON_DOC_SEND["lR"] = motor_data_send.left_RPM;
+  JSON_DOC_SEND["rR"] = motor_data_send.right_RPM;
+  JSON_DOC_SEND["ck"] = motor_data_send.checksum;
 
-    serializeJson(JSON_DOC_SEND, Serial);
+  // JSON_DOC_SEND["lt"] = 1000000;
+  // JSON_DOC_SEND["rt"] = 1000000;
+  // JSON_DOC_SEND["lR"] = 199.123456;
+  // JSON_DOC_SEND["rR"] = 199.123456;
+  // JSON_DOC_SEND["ck"] = "3931756a764b44099197a21ec5d67a57";
+
+  serializeJson(JSON_DOC_SEND, Serial);
   Serial.println();
 }
 

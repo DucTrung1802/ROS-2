@@ -1,16 +1,21 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Imu
+import tf_transformations
+import threading
 import RPi.GPIO as GPIO
 
 import time
 from mpu6050 import mpu6050
 
+# Initial pose parameters
+ROLL = 0.0
+PITCH = 0.0
+YAW = 0.0
+
 # Node parameters
 NODE_NAME = "imu_mpu6050"
 PUBLISH_FREQUENCY = 100
-
-timer1 = 0
 
 # Node parameters
 PUBLISH_PERIOD = 0
@@ -24,23 +29,40 @@ def checkConditions():
     PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
 
 
+def setupInitialPose(roll, pitch, yaw):
+    global quaternion
+    quaternion = tf_transformations.quaternion_from_euler(roll, pitch, yaw)
+    return quaternion
+
+
 class IMUPublisher(Node):
     def __init__(self):
         super().__init__(NODE_NAME)
         self.imu_pub = self.create_publisher(Imu, "/imu/data", 1)
 
-        timer_period1 = 0  # seconds
-        self.timer1 = self.create_timer(timer_period1, self.timer_callback)
+        self.timer1 = self.create_timer(0, self.timer_callback)
 
     def timer_callback(self):
         msg = Imu()
         msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = "imu_link"
+
+        initial_pose_quaternion = setupInitialPose(ROLL, PITCH, YAW)
+
+        # need test x,y,z,w or w,x,y,z
+        msg.orientation.x = initial_pose_quaternion[0]
+        msg.orientation.y = initial_pose_quaternion[1]
+        msg.orientation.z = initial_pose_quaternion[2]
+        msg.orientation.w = initial_pose_quaternion[3]
+
         msg.linear_acceleration.x = accel_data["x"]
         msg.linear_acceleration.y = accel_data["y"]
         msg.linear_acceleration.z = accel_data["z"]
+
         msg.angular_velocity.x = gyro_data["x"]
         msg.angular_velocity.y = gyro_data["y"]
         msg.angular_velocity.z = gyro_data["z"]
+
         self.imu_pub.publish(msg)
 
 
@@ -54,21 +76,44 @@ def getIMUData():
         print("An error has occurred while getting data from IMU MPU 6050!")
 
 
+def task_1():
+    global flag_1
+    rclpy.init()
+    imu_publisher = IMUPublisher()
+    while True:
+        getIMUData()
+        rclpy.spin_once(imu_publisher)
+
+        time.sleep(PUBLISH_PERIOD)
+
+
+def threadingHandler():
+    global flag_1, flag_2, flag_3
+
+    flag_1 = False
+    flag_2 = False
+    flag_3 = False
+
+    thread_1 = threading.Thread(target=task_1)
+    # thread_2 = threading.Thread(target=task_2)
+    # thread_3 = threading.Thread(target=task_3)
+
+    thread_1.start()
+    # thread_2.start()
+    # thread_3.start()
+
+    thread_1.join()
+    # thread_2.join()
+    # thread_3.join()
+
+
 def setup():
     checkConditions()
 
 
 def loop(args=None):
-    global POS, timer1
-    rclpy.init(args=args)
-    imu_publisher = IMUPublisher()
-
     try:
-        while True:
-            if time.time() - timer1 >= PUBLISH_PERIOD:
-                getIMUData()
-                rclpy.spin_once(imu_publisher)
-                timer1 = time.time()
+        threadingHandler()
 
     # Reset by pressing CTRL + C
     except KeyboardInterrupt:
