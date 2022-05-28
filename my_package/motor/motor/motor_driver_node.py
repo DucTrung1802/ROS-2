@@ -162,6 +162,7 @@ RECEIVING_PERIOD = 1
     callback function will be called. For no delay, set it equal ZERO. """
 PUBLISH_PERIOD = 0
 
+
 # Serial parameters
 MCUSerialObject = None
 foundMCU = False
@@ -437,11 +438,10 @@ def initializeSerial():
 
 def readSerialData():
     global serialData, dictionaryData
-    MCUSerialObject.reset_input_buffer()
     rawData = improved_serial.readline()
     # print(rawData)
     serialData = rawData.decode("utf-8")  # decode s
-    print(len(serialData))
+    # print(len(serialData))
     # filteredSerialData = re.sub(
     #     "[^A-Za-z0-9\s[]{}]", "", serialData
     # )  # filter regular characters
@@ -568,22 +568,11 @@ def task_1():
         if flag_1:
             break
 
-        start = time.time()
-
-        comp_start = time.time()
-
         updateStoreRPMFromSerial()
 
         # print("Left tick: " + str(STORE_LEFT_TICK))
         # print("Right tick: " + str(STORE_RIGHT_TICK))
         # print("-----")
-
-        comp_end = time.time()
-
-        if RECEIVING_PERIOD > (comp_end - comp_start):
-            time.sleep(RECEIVING_PERIOD - (comp_end - comp_start))
-
-        end = time.time()
 
         # print(end - start)
 
@@ -595,33 +584,40 @@ def task_1():
 
 def task_2():
     global flag_2
-
     global motor_driver_node
-    motor_driver_node = MotorDriverNode(NODE_NAME)
+
     while True:
 
         if flag_2:
             break
+
+        comp_start = time.time()
 
         updateRPMFromStorePos()
         motor_driver_node.setNeedPublish()
         rclpy.spin_once(motor_driver_node)
         motor_driver_node.resetNeedPublish()
 
-        time.sleep(PUBLISH_PERIOD)
+        # print("linear_RPM_left: " + str(linear_RPM_left))
+        # print("linear_RPM_right: " + str(linear_RPM_right))
+
+        comp_end = time.time()
+
+        if PUBLISH_PERIOD - (comp_end - comp_start) >= 0:
+            time.sleep(PUBLISH_PERIOD - (comp_end - comp_start))
 
 
 def task_3():
     global flag_3
-
     global motor_driver_node
+
     while True:
 
         if flag_3:
             break
 
-        driveMotors()
         rclpy.spin_once(motor_driver_node)
+        driveMotors()
 
 
 def task_4():
@@ -678,8 +674,8 @@ def threadingHandler():
 
     # Create threads
     thread_1 = threading.Thread(target=task_1)
-    # thread_2 = threading.Thread(target=task_2)
-    # thread_3 = threading.Thread(target=task_3)
+    thread_2 = threading.Thread(target=task_2)
+    thread_3 = threading.Thread(target=task_3)
 
     if DATA_RECORDING:
         thread_4 = threading.Thread(target=task_4)
@@ -687,8 +683,8 @@ def threadingHandler():
 
     # Start threads
     thread_1.start()
-    # thread_2.start()
-    # thread_3.start()
+    thread_2.start()
+    thread_3.start()
 
     if DATA_RECORDING:
         thread_4.start()
@@ -696,8 +692,8 @@ def threadingHandler():
 
     # Wait for all threads to stop
     thread_1.join()
-    # thread_2.join()
-    # thread_3.join()
+    thread_2.join()
+    thread_3.join()
 
     if DATA_RECORDING:
         thread_4.join()
@@ -708,13 +704,15 @@ def threadingHandler():
 
 
 def setup():
+    global motor_driver_node
     checkConditions()
     initializeSerial()
+    rclpy.init()
+    motor_driver_node = MotorDriverNode(NODE_NAME)
 
 
 def loop():
     global receiving_timer, publish_timer, LEFT_RPM, RIGHT_RPM
-    rclpy.init()
 
     LEFT_MOTOR.resetDataCount()
     RIGHT_MOTOR.resetDataCount()
