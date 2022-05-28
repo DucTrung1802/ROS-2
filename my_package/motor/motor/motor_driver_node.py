@@ -86,7 +86,7 @@ TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 1023
 
 # DataRecorder parameters
-DATA_AMOUNT = 10000
+DATA_AMOUNT = 2000
 
 # =================================================
 
@@ -332,6 +332,8 @@ def driveMotors():
     # linear_RPM_left = 42.4
     # linear_RPM_right = -42.4
 
+    start = time.time()
+
     direction_1 = getDirection(linear_RPM_left)
     direction_2 = getDirection(linear_RPM_right)
 
@@ -374,7 +376,12 @@ def driveMotors():
     # print(data)
     MCUSerialObject.write(formSerialData(data))
 
-    time.sleep(LEFT_MOTOR.getSampleTime())
+    end = time.time()
+
+    # print(end - start)
+
+    if LEFT_MOTOR.getSampleTime() - (end - start) >= 0:
+        time.sleep(LEFT_MOTOR.getSampleTime() - (end - start))
 
 
 def getMCUSerial():
@@ -606,7 +613,7 @@ def task_2():
         comp_end = time.time()
 
         # if PUBLISH_PERIOD - (comp_end - comp_start) >= 0:
-            # time.sleep(PUBLISH_PERIOD - (comp_end - comp_start))
+        # time.sleep(PUBLISH_PERIOD - (comp_end - comp_start))
 
 
 def task_3():
@@ -642,7 +649,7 @@ def task_5():
         start = time.time()
 
         comp_start = time.time()
-        
+
         WORKBOOK.writeData(index + 1, 1, delta_time)
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
