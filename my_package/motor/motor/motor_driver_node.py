@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 # Python libraries
-from curses import raw
 import subprocess
 import time
 from click import prompt
@@ -438,6 +437,7 @@ def initializeSerial():
 
 def readSerialData():
     global serialData, dictionaryData
+    MCUSerialObject.reset_input_buffer()
     rawData = improved_serial.readline()
     # print(rawData)
     serialData = rawData.decode("utf-8")  # decode s
@@ -563,23 +563,33 @@ def stopAllThreads():
 def task_1():
     global flag_1
     index = 1
-    while index <= DATA_AMOUNT:
+    while True:
 
         if flag_1:
             break
 
         start = time.time()
-        # rawData = improved_serial.readline()
-        # rawString = rawData.decode("utf-8")
-        # print(rawString)
-        # print(len(str(rawData)))
-        # readSerialData()
+
+        comp_start = time.time()
+
         updateStoreRPMFromSerial()
-        # time.sleep(RECEIVING_PERIOD)
+
+        # print("Left tick: " + str(STORE_LEFT_TICK))
+        # print("Right tick: " + str(STORE_RIGHT_TICK))
+        # print("-----")
+
+        comp_end = time.time()
+
+        if RECEIVING_PERIOD > (comp_end - comp_start):
+            time.sleep(RECEIVING_PERIOD - (comp_end - comp_start))
+
         end = time.time()
+
+        # print(end - start)
+
         # print("task 1 interval: " + str(end - start))
-        WORKBOOK.writeData(index + 1, 1, end - start)
-        WORKBOOK.writeData(index + 1, 2, (total_receive - error_receive) * 100 / total_receive)
+        # WORKBOOK.writeData(index + 1, 1, end - start)
+        # WORKBOOK.writeData(index + 1, 2, (total_receive - error_receive) * 100 / total_receive)
         index += 1
 
 
