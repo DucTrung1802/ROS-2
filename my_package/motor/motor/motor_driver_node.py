@@ -571,7 +571,6 @@ def stopAllThreads():
 
 def task_1():
     global flag_1
-    index = 1
     while True:
 
         if flag_1:
@@ -588,7 +587,6 @@ def task_1():
         # print("task 1 interval: " + str(end - start))
         # WORKBOOK.writeData(index + 1, 1, end - start)
         # WORKBOOK.writeData(index + 1, 2, (total_receive - error_receive) * 100 / total_receive)
-        index += 1
 
 
 def task_2():
@@ -694,7 +692,7 @@ def threadingHandler():
     # thread_3 = threading.Thread(target=task_3)
 
     if DATA_RECORDING:
-        thread_4 = threading.Thread(target=task_4)
+        # thread_4 = threading.Thread(target=task_4)
         thread_5 = threading.Thread(target=task_5)
 
     # Start threads
