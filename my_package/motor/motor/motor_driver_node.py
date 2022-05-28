@@ -83,10 +83,10 @@ DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 1023
+TEST_PWM = 716
 
 # DataRecorder parameters
-DATA_AMOUNT = 2000
+DATA_AMOUNT = 1000
 
 # =================================================
 
@@ -602,7 +602,7 @@ def task_2():
 
         updateRPMFromStorePos()
         rclpy.spin_once(motor_driver_node)
-        driveMotors()
+        # driveMotors()
         # motor_driver_node.resetNeedPublish()
 
         # print("linear_RPM_left: " + str(linear_RPM_left))
@@ -642,6 +642,7 @@ def task_5():
 
     index = 0
     delta_time = 0
+    varyPWM(TEST_PWM)
     while index <= DATA_AMOUNT:
 
         start = time.time()
