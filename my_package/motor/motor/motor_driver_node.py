@@ -105,6 +105,8 @@ RIGHT_MOTOR = MotorDriver(
     pwm_frequency=RIGHT_MOTOR_PWM_FREQUENCY,
     sample_time=RIGHT_MOTOR_SAMPLE_TIME,
 )
+pwm_left = 0.0
+pwm_right = 0.0
 
 
 KINEMATICS_MODEL_MATRIX = np.matrix(
@@ -584,8 +586,8 @@ def task_1():
 
 def task_2():
     global flag_2
-    global motor_driver_node
-
+    rclpy.init()
+    motor_driver_node = MotorDriverNode(NODE_NAME)
     while True:
 
         if flag_2:
@@ -594,30 +596,29 @@ def task_2():
         comp_start = time.time()
 
         updateRPMFromStorePos()
-        motor_driver_node.setNeedPublish()
         rclpy.spin_once(motor_driver_node)
-        motor_driver_node.resetNeedPublish()
+        driveMotors()
+        # motor_driver_node.resetNeedPublish()
 
         # print("linear_RPM_left: " + str(linear_RPM_left))
         # print("linear_RPM_right: " + str(linear_RPM_right))
 
         comp_end = time.time()
 
-        if PUBLISH_PERIOD - (comp_end - comp_start) >= 0:
-            time.sleep(PUBLISH_PERIOD - (comp_end - comp_start))
+        # if PUBLISH_PERIOD - (comp_end - comp_start) >= 0:
+            # time.sleep(PUBLISH_PERIOD - (comp_end - comp_start))
 
 
 def task_3():
     global flag_3
-    global motor_driver_node
 
     while True:
 
         if flag_3:
             break
 
-        rclpy.spin_once(motor_driver_node)
-        driveMotors()
+        # rclpy.spin_once(motor_driver_node)
+        # driveMotors()
 
 
 def task_4():
@@ -628,7 +629,7 @@ def task_4():
         if flag_4:
             break
 
-        testPIDResponse(10, 0.5)
+        # testPIDResponse(10, 0.5)
 
 
 def task_5():
@@ -637,7 +638,11 @@ def task_5():
     index = 0
     delta_time = 0
     while index <= DATA_AMOUNT:
+
         start = time.time()
+
+        comp_start = time.time()
+        
         WORKBOOK.writeData(index + 1, 1, delta_time)
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
@@ -654,9 +659,13 @@ def task_5():
         )
         index += 1
 
-        time.sleep(LEFT_MOTOR_SAMPLE_TIME)
+        comp_end = time.time()
+
+        if LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start) >= 0:
+            time.sleep(LEFT_MOTOR_SAMPLE_TIME)
 
         end = time.time()
+
         delta_time = end - start
 
     stopAllThreads()
@@ -675,7 +684,7 @@ def threadingHandler():
     # Create threads
     thread_1 = threading.Thread(target=task_1)
     thread_2 = threading.Thread(target=task_2)
-    thread_3 = threading.Thread(target=task_3)
+    # thread_3 = threading.Thread(target=task_3)
 
     if DATA_RECORDING:
         thread_4 = threading.Thread(target=task_4)
@@ -684,19 +693,19 @@ def threadingHandler():
     # Start threads
     thread_1.start()
     thread_2.start()
-    thread_3.start()
+    # thread_3.start()
 
     if DATA_RECORDING:
-        thread_4.start()
+        # thread_4.start()
         thread_5.start()
 
     # Wait for all threads to stop
     thread_1.join()
     thread_2.join()
-    thread_3.join()
+    # thread_3.join()
 
     if DATA_RECORDING:
-        thread_4.join()
+        # thread_4.join()
         thread_5.join()
 
     # Do something after all threads stop
@@ -704,11 +713,8 @@ def threadingHandler():
 
 
 def setup():
-    global motor_driver_node
     checkConditions()
     initializeSerial()
-    rclpy.init()
-    motor_driver_node = MotorDriverNode(NODE_NAME)
 
 
 def loop():
