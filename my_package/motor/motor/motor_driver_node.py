@@ -65,9 +65,9 @@ RIGHT_MOTOR_Q = 0
 RIGHT_MOTOR_R = 273
 
 # PID Controller parameters
-LEFT_MOTOR_Kp = 0.381
-LEFT_MOTOR_Ki = 2.353
-LEFT_MOTOR_Kd = 0.0013
+LEFT_MOTOR_Kp = 1.1
+LEFT_MOTOR_Ki = 0.5
+LEFT_MOTOR_Kd = 0
 LEFT_MOTOR_MIN = 0
 LEFT_MOTOR_MAX = 12
 
@@ -83,10 +83,10 @@ DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 510
+TEST_PWM = 716
 
 # DataRecorder parameters
-DATA_AMOUNT = 500
+DATA_AMOUNT = 1000
 
 # =================================================
 
@@ -542,17 +542,19 @@ def varyPWM(PWM):
     MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
 
 
-def testPIDResponse(step, time_interval):
+def testPIDResponse(max_range, step, time_interval):
     global linear_velocity, linear_RPM_left, linear_RPM_right
     global timer_test_PID, step_test_PID
+    if max_range <= 0:
+        raise Exception("max_range must be positive number!")
     if step <= 0:
         raise Exception("step must be positive number!")
-    if time_interval <= 0:
+    if time_interval < 0:
         raise Exception("time_interval must be positive number!")
 
     if time.time() - timer_test_PID >= time_interval:
-        step_test_PID += 0.6 / step
-        step_test_PID = saturate(step_test_PID, 0, 0.6)
+        step_test_PID += max_range / step
+        step_test_PID = saturate(step_test_PID, 0, max_range)
         linear_velocity = step_test_PID
         linear_RPM_left = MPStoRPM(linear_velocity)
         linear_RPM_right = MPStoRPM(linear_velocity)
@@ -602,8 +604,8 @@ def task_2():
 
         updateRPMFromStorePos()
         rclpy.spin_once(motor_driver_node)
-        if not DATA_RECORDING:
-            driveMotors()
+        testPIDResponse(max_range=0.6 * 0.7, step=1, time_interval=0)
+        driveMotors()
 
         # print("linear_RPM_left: " + str(linear_RPM_left))
         # print("linear_RPM_right: " + str(linear_RPM_right))
@@ -644,7 +646,7 @@ def task_5():
     delta_time = 0
     time.sleep(1)
     print("Ready")
-    varyPWM(TEST_PWM)
+    # varyPWM(TEST_PWM)
     while index <= DATA_AMOUNT:
 
 
