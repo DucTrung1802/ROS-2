@@ -3,6 +3,7 @@
 # Python libraries
 import subprocess
 import time
+from tkinter import RIGHT
 from click import prompt
 import serial
 import re
@@ -656,8 +657,10 @@ def manuallyTunePID():
     right_Ki = float(input("Ki = "))
     right_Kd = float(input("Kd = "))
 
-    LEFT_MOTOR_PID_CONTROLLER.changeCoefficients(left_Kp, left_Ki, left_Kd)
-    RIGHT_MOTOR_PID_CONTROLLER.changeCoefficients(right_Kp, right_Ki, right_Kd)
+    LEFT_MOTOR_PID_CONTROLLER.changeCoefficients(
+        left_Kp, left_Ki, left_Kd, LEFT_MOTOR.getSampleTime())
+    RIGHT_MOTOR_PID_CONTROLLER.changeCoefficients(
+        right_Kp, right_Ki, right_Kd, RIGHT_MOTOR.getSampleTime())
 
     print()
 
