@@ -546,7 +546,7 @@ def varyPWM(PWM):
     MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
 
 
-def testPIDResponse(max_range, step, time_interval):
+def testPIDResponse(max_range, step, time_interval=0):
     global linear_velocity, linear_RPM_left, linear_RPM_right
     global timer_test_PID, step_test_PID
     if max_range <= 0:
@@ -662,12 +662,13 @@ def manuallyTunePID():
     print()
 
     print("Setup setpoint")
-    max_range_coe = float(input("Max range coefficient (max is 1) = "))
+    max_RPM = float(input("Max RPM = "))
     step = float(input("Step = "))
-    time_interval = float(input("Time interval = "))
+    time_interval = float(
+        input("Time interval for each setpoint (s) = "))
+    run_time = step * time_interval
 
-    testPIDResponse(max_range=0.6 * max_range_coe,
-                    step=step, time_interval=time_interval)
+    return [max_RPM, step, time_interval, run_time]
 
 
 def task_5():
@@ -682,12 +683,21 @@ def task_5():
     # All testing must be after the "Ready" line!
     # ============ TESTING ============
 
-    manuallyTunePID()
+    max_RPM, step, time_interval, run_time = manuallyTunePID()
+
+    if run_time <= 0:
+        stopAllThreads()
+        raise Exception("Run time must be positive!")
+
+    timer = time.time()
     # varyPWM(TEST_PWM)
 
     # =================================
 
-    while index <= DATA_AMOUNT:
+    while time.time() - timer <= run_time:
+
+        testPIDResponse(max_range=RPMtoMPS(max_RPM),
+                        step=step, time_interval=time_interval)
 
         start = time.time()
 
