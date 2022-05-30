@@ -180,8 +180,8 @@ error_receive = 0
 KEY = "pwm_pulse"
 STORE_LEFT_TICK = 0
 STORE_RIGHT_TICK = 0
-STORE_RPM_LEFT = 0
-STORE_RPM_RIGHT = 0
+STORE_LEFT_RPM = 0
+STORE_RIGHT_RPM = 0
 STORE_CHECKSUM = ""
 LEFT_TICK = 0
 RIGHT_TICK = 0
@@ -486,7 +486,7 @@ def checksum():
 
 
 def updateStoreRPMFromSerial():
-    global STORE_LEFT_TICK, STORE_RIGHT_TICK, STORE_RPM_LEFT, STORE_RPM_RIGHT, STORE_CHECKSUM, total_receive, error_receive
+    global STORE_LEFT_TICK, STORE_RIGHT_TICK, STORE_LEFT_RPM, STORE_RIGHT_RPM, STORE_CHECKSUM, total_receive, error_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
     # print(
     #     "Error in serial communication: " + str(error_receive) + "/" + str(total_receive)
@@ -495,8 +495,8 @@ def updateStoreRPMFromSerial():
         readSerialData()
         STORE_LEFT_TICK = dictionaryData["lt"]
         STORE_RIGHT_TICK = dictionaryData["rt"]
-        STORE_RPM_LEFT = dictionaryData["lR"]
-        STORE_RPM_RIGHT = dictionaryData["rR"]
+        STORE_LEFT_RPM = dictionaryData["lR"]
+        STORE_RIGHT_RPM = dictionaryData["rR"]
         STORE_CHECKSUM = dictionaryData["ck"]
         checksum()
 
@@ -511,8 +511,8 @@ def updateRPMFromStorePos():
     global LEFT_TICK, RIGHT_TICK, LEFT_RPM, RIGHT_RPM, CHECKSUM
     LEFT_TICK = STORE_LEFT_TICK
     RIGHT_TICK = STORE_RIGHT_TICK
-    LEFT_RPM = STORE_RPM_LEFT
-    RIGHT_RPM = STORE_RPM_RIGHT
+    LEFT_RPM = STORE_LEFT_RPM
+    RIGHT_RPM = STORE_RIGHT_RPM
     CHECKSUM = STORE_CHECKSUM
 
 
@@ -634,7 +634,7 @@ def task_3():
 def task_4():
     global flag_4
 
-    index = 0
+    index = 1
     delta_time = 0
     time.sleep(1)
 
