@@ -388,9 +388,9 @@ void loop() {
   readRPM();
 
   if (micros() - timerPivot >= PERIOD) {
-    Serial.println(PERIOD);
-    unsigned long delta_time = micros() - timerPivot;
-    Serial.println(delta_time);
+    // Serial.println(PERIOD);
+    // unsigned long delta_time = micros() - timerPivot;
+    // Serial.println(delta_time);
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
     sendJSON();
 
