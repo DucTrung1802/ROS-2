@@ -88,7 +88,7 @@ TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 716
 
 # DataRecorder parameters
-DATA_AMOUNT = 1000
+DATA_AMOUNT = 700
 
 # =================================================
 
@@ -127,8 +127,7 @@ except:
     raise Exception("Cannot calculate inverse of kinematic model matrix!")
 
 # Kalman Filter instances
-LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P,
-                         Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
+LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
 RIGHT_MOTOR.setupValuesKF(
     X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
 )
@@ -191,8 +190,7 @@ RIGHT_RPM = 0
 CHECKSUM = ""
 
 # Data recorder
-WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY,
-                       LEFT_MOTOR.getSampleTime())
+WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
 
 
 def checkConditions():
@@ -310,8 +308,7 @@ def setupSetpoint(msg):
     linear_RPM_right = differiential_drive_matrix.item(0)
     linear_RPM_left = differiential_drive_matrix.item(1)
 
-    linear_RPM_left = saturate(
-        linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
+    linear_RPM_left = saturate(linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
 
     linear_RPM_right = saturate(
         linear_RPM_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
@@ -406,7 +403,7 @@ def getMCUSerial():
                 foundMCU = True
                 index = device.find("ttyUSB")
                 # print(index)
-                MCUSerial = device[index: index + 7]
+                MCUSerial = device[index : index + 7]
                 # print(MCUSerial)
                 break
 
@@ -472,8 +469,7 @@ def checksum():
     dictionaryDataCheck.pop("ck", None)
     dictionaryDataCheckString = json.dumps(dictionaryDataCheck)
     dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
-    checksumString = hashlib.md5(
-        dictionaryDataCheckString.encode()).hexdigest()
+    checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
 
     # print("Dict: " + dictionaryDataCheckString)
 
@@ -611,7 +607,8 @@ def task_2():
         updateRPMFromStorePos()
         rclpy.spin_once(motor_driver_node)
 
-        driveMotors()
+        if not (DATA_RECORDING or MANUALLY_TUNE_PID):
+            driveMotors()
 
         # print("linear_RPM_left: " + str(linear_RPM_left))
         # print("linear_RPM_right: " + str(linear_RPM_right))
@@ -650,13 +647,14 @@ def task_4():
 
     # =================================
 
+    WORKBOOK.writeData(index + 1, 1, delta_time)
+
     while index <= DATA_AMOUNT:
 
         start = time.time()
 
         comp_start = time.time()
 
-        WORKBOOK.writeData(index + 1, 1, delta_time)
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
         WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
@@ -670,16 +668,24 @@ def task_4():
             11,
             round((total_receive - error_receive) / total_receive * 100, 2),
         )
+
         index += 1
 
         comp_end = time.time()
 
-        if LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start) >= 0:
-            time.sleep(LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start))
+        if comp_end - comp_start <= LEFT_MOTOR_SAMPLE_TIME:
+            target_time = time.time() + LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start)
+            while time.time() <= target_time:
+                pass
+            # time.sleep(LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start))
 
         end = time.time()
 
         delta_time = end - start
+
+        WORKBOOK.writeData(index + 1, 1, delta_time)
+
+        # print(delta_time)
 
     stopAllThreads()
 
@@ -698,17 +704,18 @@ def manuallyTunePID():
     right_Kd = float(input("Kd = "))
 
     LEFT_MOTOR_PID_CONTROLLER.changeCoefficients(
-        left_Kp, left_Ki, left_Kd, LEFT_MOTOR.getSampleTime())
+        left_Kp, left_Ki, left_Kd, LEFT_MOTOR.getSampleTime()
+    )
     RIGHT_MOTOR_PID_CONTROLLER.changeCoefficients(
-        right_Kp, right_Ki, right_Kd, RIGHT_MOTOR.getSampleTime())
+        right_Kp, right_Ki, right_Kd, RIGHT_MOTOR.getSampleTime()
+    )
 
     print()
 
     print("Setup setpoint")
     max_RPM = float(input("Max RPM = "))
     step = float(input("Step = "))
-    time_interval = float(
-        input("Time interval for each setpoint (s) = "))
+    time_interval = float(input("Time interval for each setpoint (s) = "))
     run_time = step * time_interval
 
     return [max_RPM, step, time_interval, run_time]
@@ -739,8 +746,9 @@ def task_5():
 
     while time.time() - timer <= run_time:
 
-        testPIDResponse(max_range=RPMtoMPS(max_RPM),
-                        step=step, time_interval=time_interval)
+        testPIDResponse(
+            max_range=RPMtoMPS(max_RPM), step=step, time_interval=time_interval
+        )
 
         start = time.time()
 
@@ -792,8 +800,8 @@ def threadingHandler():
     if DATA_RECORDING:
         thread_4 = threading.Thread(target=task_4)
 
-    if MANUALLY_TUNE_PID:
-        thread_5 = threading.Thread(target=task_5)
+    # if MANUALLY_TUNE_PID:
+        # thread_5 = threading.Thread(target=task_5)
 
     # Start threads
     thread_1.start()
@@ -804,7 +812,8 @@ def threadingHandler():
         thread_4.start()
 
     if MANUALLY_TUNE_PID:
-        thread_5.start()
+        pass
+        # thread_5.start()
 
     # Wait for all threads to stop
     thread_1.join()
@@ -815,7 +824,8 @@ def threadingHandler():
         thread_4.join()
 
     if MANUALLY_TUNE_PID:
-        thread_5.join()
+        pass
+        # thread_5.join()
 
     # Do something after all threads stop
     # do_something()
@@ -844,15 +854,13 @@ def loop():
     except KeyboardInterrupt:
         # JSON
         print("Captured Ctrl + C")
-        MCUSerialObject.write(formSerialData(
-            "{motor_data:[0,1000,0,0,1000,0]}"))
+        MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 
     finally:
         print("The program has been stopped!")
-        MCUSerialObject.write(formSerialData(
-            "{motor_data:[0,1000,0,0,1000,0]}"))
+        MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 
