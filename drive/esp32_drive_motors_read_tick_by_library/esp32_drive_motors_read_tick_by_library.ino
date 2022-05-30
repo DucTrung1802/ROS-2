@@ -117,7 +117,7 @@ const uint8_t CHANNEL_PWMB = 2;
 // Config serial parameters
 const int BAUD_RATE = 921600;
 // Sending
-const unsigned int SENDING_FREQUENCY = 500;  // Hz
+const double SENDING_FREQUENCY = 500;  // Hz
 double PERIOD;                               // milliseconds
 volatile unsigned long long timerPivot = 0;  // milliseconds
 
@@ -388,6 +388,9 @@ void loop() {
   readRPM();
 
   if (micros() - timerPivot >= PERIOD) {
+    Serial.println(PERIOD);
+    unsigned long delta_time = micros() - timerPivot;
+    Serial.println(delta_time);
     // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
     sendJSON();
 
