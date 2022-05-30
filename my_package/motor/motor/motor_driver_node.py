@@ -80,6 +80,7 @@ RIGHT_MOTOR_MAX = 12
 
 
 # Test data
+MANUALLY_TUNE_PID = False
 DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
@@ -636,12 +637,51 @@ def task_3():
 def task_4():
     global flag_4
 
-    while True:
+    index = 0
+    delta_time = 0
+    time.sleep(1)
 
-        if flag_4:
-            break
+    print("Ready")
 
-        # testPIDResponse(10, 0.5)
+    # All testing must be after the "Ready" line!
+    # ============ TESTING ============
+
+    varyPWM(TEST_PWM)
+
+    # =================================
+
+    while index <= DATA_AMOUNT:
+
+        start = time.time()
+
+        comp_start = time.time()
+
+        WORKBOOK.writeData(index + 1, 1, delta_time)
+        WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
+        WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
+        WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
+        WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
+        WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
+        WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
+        WORKBOOK.writeData(index + 1, 9, total_receive)
+        WORKBOOK.writeData(index + 1, 10, error_receive)
+        WORKBOOK.writeData(
+            index + 1,
+            11,
+            round((total_receive - error_receive) / total_receive * 100, 2),
+        )
+        index += 1
+
+        comp_end = time.time()
+
+        if LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start) >= 0:
+            time.sleep(LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start))
+
+        end = time.time()
+
+        delta_time = end - start
+
+    stopAllThreads()
 
 
 def manuallyTunePID():
@@ -750,7 +790,9 @@ def threadingHandler():
     # thread_3 = threading.Thread(target=task_3)
 
     if DATA_RECORDING:
-        # thread_4 = threading.Thread(target=task_4)
+        thread_4 = threading.Thread(target=task_4)
+
+    if MANUALLY_TUNE_PID:
         thread_5 = threading.Thread(target=task_5)
 
     # Start threads
@@ -759,7 +801,9 @@ def threadingHandler():
     # thread_3.start()
 
     if DATA_RECORDING:
-        # thread_4.start()
+        thread_4.start()
+
+    if MANUALLY_TUNE_PID:
         thread_5.start()
 
     # Wait for all threads to stop
@@ -768,7 +812,9 @@ def threadingHandler():
     # thread_3.join()
 
     if DATA_RECORDING:
-        # thread_4.join()
+        thread_4.join()
+
+    if MANUALLY_TUNE_PID:
         thread_5.join()
 
     # Do something after all threads stop
