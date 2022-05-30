@@ -674,16 +674,17 @@ def task_4():
         comp_end = time.time()
 
         if comp_end - comp_start <= LEFT_MOTOR_SAMPLE_TIME:
-            target_time = time.time() + LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start)
+            # Run a test code to find the exceeding of time.sleep() then multiply the coefficient again
+            target_time = (
+                time.time()
+                + (LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start)) * 5 / 5.6
+            )
             while time.time() <= target_time:
-                pass
-            # time.sleep(LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start))
+                time.sleep(0.0001)
 
         end = time.time()
 
-        delta_time = end - start
-
-        WORKBOOK.writeData(index + 1, 1, delta_time)
+        WORKBOOK.writeData(index + 1, 1, end - start)
 
         # print(delta_time)
 
@@ -801,7 +802,7 @@ def threadingHandler():
         thread_4 = threading.Thread(target=task_4)
 
     # if MANUALLY_TUNE_PID:
-        # thread_5 = threading.Thread(target=task_5)
+    # thread_5 = threading.Thread(target=task_5)
 
     # Start threads
     thread_1.start()
