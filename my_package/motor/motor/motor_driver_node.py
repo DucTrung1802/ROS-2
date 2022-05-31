@@ -85,7 +85,7 @@ DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 716
+TEST_PWM = 511
 
 # DataRecorder parameters
 DATA_AMOUNT = 700
@@ -379,15 +379,20 @@ def driveMotors():
 
     data = json.dumps(data)
     # print(data)
-    MCUSerialObject.write(formSerialData(data))
+    # MCUSerialObject.write(formSerialData(data))
 
     end = time.time()
 
     # print(end - start)
 
+    start = time.time()
+
     if LEFT_MOTOR.getSampleTime() - (end - start) >= 0:
         time.sleep(LEFT_MOTOR.getSampleTime() - (end - start))
 
+    end = time.time()
+
+    print(end - start)
 
 def getMCUSerial():
     global foundMCU, foundLidar
@@ -611,7 +616,7 @@ def task_2():
         updateRPMFromStorePos()
         rclpy.spin_once(motor_driver_node)
 
-        if not (DATA_RECORDING or MANUALLY_TUNE_PID):
+        if not DATA_RECORDING:
             driveMotors()
 
         # print("linear_RPM_left: " + str(linear_RPM_left))
