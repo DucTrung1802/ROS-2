@@ -47,12 +47,12 @@ WHEEL_BASE = 0.44
 LEFT_MOTOR_DIAMETER = 0.09  # m
 LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
 LEFT_MOTOR_PWM_FREQUENCY = 1000  # Hz
-LEFT_MOTOR_SAMPLE_TIME = 0.005  # s
+LEFT_MOTOR_SAMPLE_TIME = 0.002  # s
 
 RIGHT_MOTOR_DIAMETER = 0.09  # m
 RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
 RIGHT_MOTOR_PWM_FREQUENCY = 1000  # Hz
-RIGHT_MOTOR_SAMPLE_TIME = 0.005  # s
+RIGHT_MOTOR_SAMPLE_TIME = 0.002  # s
 
 # Kalman Filter parameters
 LEFT_MOTOR_X = 0
@@ -127,8 +127,7 @@ except:
     raise Exception("Cannot calculate inverse of kinematic model matrix!")
 
 # Kalman Filter instances
-LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P,
-                         Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
+LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
 RIGHT_MOTOR.setupValuesKF(
     X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
 )
@@ -191,8 +190,7 @@ RIGHT_RPM = 0
 CHECKSUM = ""
 
 # Data recorder
-WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY,
-                       LEFT_MOTOR.getSampleTime())
+WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
 
 
 def checkConditions():
@@ -310,8 +308,7 @@ def setupSetpoint(msg):
     linear_RPM_right = differiential_drive_matrix.item(0)
     linear_RPM_left = differiential_drive_matrix.item(1)
 
-    linear_RPM_left = saturate(
-        linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
+    linear_RPM_left = saturate(linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
 
     linear_RPM_right = saturate(
         linear_RPM_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
@@ -412,7 +409,7 @@ def getMCUSerial():
                 foundMCU = True
                 index = device.find("ttyUSB")
                 # print(index)
-                MCUSerial = device[index: index + 7]
+                MCUSerial = device[index : index + 7]
                 # print(MCUSerial)
                 break
 
@@ -478,8 +475,7 @@ def checksum():
     dictionaryDataCheck.pop("ck", None)
     dictionaryDataCheckString = json.dumps(dictionaryDataCheck)
     dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
-    checksumString = hashlib.md5(
-        dictionaryDataCheckString.encode()).hexdigest()
+    checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
 
     # print("Dict: " + dictionaryDataCheckString)
 
@@ -865,15 +861,13 @@ def loop():
     except KeyboardInterrupt:
         # JSON
         print("Captured Ctrl + C")
-        MCUSerialObject.write(formSerialData(
-            "{motor_data:[0,1000,0,0,1000,0]}"))
+        MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 
     finally:
         print("The program has been stopped!")
-        MCUSerialObject.write(formSerialData(
-            "{motor_data:[0,1000,0,0,1000,0]}"))
+        MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 
