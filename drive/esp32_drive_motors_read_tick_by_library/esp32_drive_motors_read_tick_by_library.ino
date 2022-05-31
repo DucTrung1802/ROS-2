@@ -10,7 +10,7 @@
 class RPMCalculator {
   // Declare private variable of class
 private:
-  float _sample_time = 0.002;
+  float _sample_time = 0.005;
   float _encoder_tick_per_round = 480;
 
   float _RPM_Filter = 0;
