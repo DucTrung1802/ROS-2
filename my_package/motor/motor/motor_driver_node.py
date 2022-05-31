@@ -379,7 +379,7 @@ def driveMotors():
 
     data = json.dumps(data)
     # print(data)
-    # MCUSerialObject.write(formSerialData(data))
+    MCUSerialObject.write(formSerialData(data))
 
     end = time.time()
 
