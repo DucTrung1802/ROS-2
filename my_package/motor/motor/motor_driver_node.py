@@ -80,8 +80,8 @@ RIGHT_MOTOR_MAX = 12
 
 
 # Test data
-MANUALLY_TUNE_PID = False
-DATA_RECORDING = True
+MANUALLY_TUNE_PID = True
+DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
@@ -388,11 +388,12 @@ def driveMotors():
     start = time.time()
 
     if LEFT_MOTOR.getSampleTime() - (end - start) >= 0:
-        time.sleep(LEFT_MOTOR.getSampleTime() - (end - start))
+        time.sleep((LEFT_MOTOR.getSampleTime() - (end - start)) * 5 / 5.11)
 
     end = time.time()
 
-    print(end - start)
+    # print(end - start)
+
 
 def getMCUSerial():
     global foundMCU, foundLidar
