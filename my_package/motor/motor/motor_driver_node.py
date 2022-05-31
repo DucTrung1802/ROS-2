@@ -127,7 +127,8 @@ except:
     raise Exception("Cannot calculate inverse of kinematic model matrix!")
 
 # Kalman Filter instances
-LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
+LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P,
+                         Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
 RIGHT_MOTOR.setupValuesKF(
     X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
 )
@@ -190,7 +191,8 @@ RIGHT_RPM = 0
 CHECKSUM = ""
 
 # Data recorder
-WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
+WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY,
+                       LEFT_MOTOR.getSampleTime())
 
 
 def checkConditions():
@@ -308,7 +310,8 @@ def setupSetpoint(msg):
     linear_RPM_right = differiential_drive_matrix.item(0)
     linear_RPM_left = differiential_drive_matrix.item(1)
 
-    linear_RPM_left = saturate(linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
+    linear_RPM_left = saturate(
+        linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
 
     linear_RPM_right = saturate(
         linear_RPM_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
@@ -403,7 +406,7 @@ def getMCUSerial():
                 foundMCU = True
                 index = device.find("ttyUSB")
                 # print(index)
-                MCUSerial = device[index : index + 7]
+                MCUSerial = device[index: index + 7]
                 # print(MCUSerial)
                 break
 
@@ -469,7 +472,8 @@ def checksum():
     dictionaryDataCheck.pop("ck", None)
     dictionaryDataCheckString = json.dumps(dictionaryDataCheck)
     dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
-    checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
+    checksumString = hashlib.md5(
+        dictionaryDataCheckString.encode()).hexdigest()
 
     # print("Dict: " + dictionaryDataCheckString)
 
@@ -801,8 +805,8 @@ def threadingHandler():
     if DATA_RECORDING:
         thread_4 = threading.Thread(target=task_4)
 
-    # if MANUALLY_TUNE_PID:
-    # thread_5 = threading.Thread(target=task_5)
+    if MANUALLY_TUNE_PID:
+        thread_5 = threading.Thread(target=task_5)
 
     # Start threads
     thread_1.start()
@@ -813,8 +817,8 @@ def threadingHandler():
         thread_4.start()
 
     if MANUALLY_TUNE_PID:
-        pass
-        # thread_5.start()
+        # pass
+        thread_5.start()
 
     # Wait for all threads to stop
     thread_1.join()
@@ -825,8 +829,8 @@ def threadingHandler():
         thread_4.join()
 
     if MANUALLY_TUNE_PID:
-        pass
-        # thread_5.join()
+        # pass
+        thread_5.join()
 
     # Do something after all threads stop
     # do_something()
@@ -855,13 +859,15 @@ def loop():
     except KeyboardInterrupt:
         # JSON
         print("Captured Ctrl + C")
-        MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
+        MCUSerialObject.write(formSerialData(
+            "{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 
     finally:
         print("The program has been stopped!")
-        MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
+        MCUSerialObject.write(formSerialData(
+            "{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 
