@@ -3,6 +3,7 @@
 # Python libraries
 import subprocess
 import time
+from tkinter import RIGHT
 from click import prompt
 import serial
 import re
@@ -65,9 +66,9 @@ RIGHT_MOTOR_Q = 0
 RIGHT_MOTOR_R = 273
 
 # PID Controller parameters
-LEFT_MOTOR_Kp = 0.07713
-LEFT_MOTOR_Ki = 0.4553
-LEFT_MOTOR_Kd = 0.00092
+LEFT_MOTOR_Kp = 0.5
+LEFT_MOTOR_Ki = 0
+LEFT_MOTOR_Kd = 0
 LEFT_MOTOR_MIN = 0
 LEFT_MOTOR_MAX = 12
 
@@ -79,14 +80,15 @@ RIGHT_MOTOR_MAX = 12
 
 
 # Test data
+MANUALLY_TUNE_PID = True
 DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 1023
+TEST_PWM = 511
 
 # DataRecorder parameters
-DATA_AMOUNT = 10000
+DATA_AMOUNT = 700
 
 # =================================================
 
@@ -178,8 +180,8 @@ error_receive = 0
 KEY = "pwm_pulse"
 STORE_LEFT_TICK = 0
 STORE_RIGHT_TICK = 0
-STORE_RPM_LEFT = 0
-STORE_RPM_RIGHT = 0
+STORE_LEFT_RPM = 0
+STORE_RIGHT_RPM = 0
 STORE_CHECKSUM = ""
 LEFT_TICK = 0
 RIGHT_TICK = 0
@@ -332,6 +334,8 @@ def driveMotors():
     # linear_RPM_left = 42.4
     # linear_RPM_right = -42.4
 
+    start = time.time()
+
     direction_1 = getDirection(linear_RPM_left)
     direction_2 = getDirection(linear_RPM_right)
 
@@ -354,10 +358,10 @@ def driveMotors():
     elif linear_RPM_right_abs > 0:
         pwm_right = RIGHT_MOTOR_PID_CONTROLLER.getOutputValue() * 1023.0 / 12.0
 
-    print("---")
-    print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(LEFT_RPM))
-    print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RIGHT_RPM))
-    print("---")
+    # print("---")
+    # print("Left PWM: " + str(pwm_left) + "; Left RPM: " + str(LEFT_RPM))
+    # print("Right PWM: " + str(pwm_right) + "; Right RPM: " + str(RIGHT_RPM))
+    # print("---")
 
     data = {
         "motor_data": [
@@ -374,7 +378,18 @@ def driveMotors():
     # print(data)
     MCUSerialObject.write(formSerialData(data))
 
-    time.sleep(LEFT_MOTOR.getSampleTime())
+    end = time.time()
+
+    # print(end - start)
+
+    start = time.time()
+
+    if LEFT_MOTOR.getSampleTime() - (end - start) >= 0:
+        time.sleep((LEFT_MOTOR.getSampleTime() - (end - start)) * 5 / 5.11)
+
+    end = time.time()
+
+    # print(end - start)
 
 
 def getMCUSerial():
@@ -477,7 +492,7 @@ def checksum():
 
 
 def updateStoreRPMFromSerial():
-    global STORE_LEFT_TICK, STORE_RIGHT_TICK, STORE_RPM_LEFT, STORE_RPM_RIGHT, STORE_CHECKSUM, total_receive, error_receive
+    global STORE_LEFT_TICK, STORE_RIGHT_TICK, STORE_LEFT_RPM, STORE_RIGHT_RPM, STORE_CHECKSUM, total_receive, error_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
     # print(
     #     "Error in serial communication: " + str(error_receive) + "/" + str(total_receive)
@@ -486,8 +501,8 @@ def updateStoreRPMFromSerial():
         readSerialData()
         STORE_LEFT_TICK = dictionaryData["lt"]
         STORE_RIGHT_TICK = dictionaryData["rt"]
-        STORE_RPM_LEFT = dictionaryData["lR"]
-        STORE_RPM_RIGHT = dictionaryData["rR"]
+        STORE_LEFT_RPM = dictionaryData["lR"]
+        STORE_RIGHT_RPM = dictionaryData["rR"]
         STORE_CHECKSUM = dictionaryData["ck"]
         checksum()
 
@@ -502,8 +517,8 @@ def updateRPMFromStorePos():
     global LEFT_TICK, RIGHT_TICK, LEFT_RPM, RIGHT_RPM, CHECKSUM
     LEFT_TICK = STORE_LEFT_TICK
     RIGHT_TICK = STORE_RIGHT_TICK
-    LEFT_RPM = STORE_RPM_LEFT
-    RIGHT_RPM = STORE_RPM_RIGHT
+    LEFT_RPM = STORE_LEFT_RPM
+    RIGHT_RPM = STORE_RIGHT_RPM
     CHECKSUM = STORE_CHECKSUM
 
 
@@ -535,17 +550,19 @@ def varyPWM(PWM):
     MCUSerialObject.write(formSerialData(json.dumps(test_dict)))
 
 
-def testPIDResponse(step, time_interval):
+def testPIDResponse(max_range, step, time_interval=0):
     global linear_velocity, linear_RPM_left, linear_RPM_right
     global timer_test_PID, step_test_PID
+    if max_range <= 0:
+        raise Exception("max_range must be positive number!")
     if step <= 0:
         raise Exception("step must be positive number!")
-    if time_interval <= 0:
+    if time_interval < 0:
         raise Exception("time_interval must be positive number!")
 
     if time.time() - timer_test_PID >= time_interval:
-        step_test_PID += 0.6 / step
-        step_test_PID = saturate(step_test_PID, 0, 0.6)
+        step_test_PID += max_range / step
+        step_test_PID = saturate(step_test_PID, 0, max_range)
         linear_velocity = step_test_PID
         linear_RPM_left = MPStoRPM(linear_velocity)
         linear_RPM_right = MPStoRPM(linear_velocity)
@@ -564,7 +581,6 @@ def stopAllThreads():
 
 def task_1():
     global flag_1
-    index = 1
     while True:
 
         if flag_1:
@@ -581,7 +597,6 @@ def task_1():
         # print("task 1 interval: " + str(end - start))
         # WORKBOOK.writeData(index + 1, 1, end - start)
         # WORKBOOK.writeData(index + 1, 2, (total_receive - error_receive) * 100 / total_receive)
-        index += 1
 
 
 def task_2():
@@ -597,8 +612,9 @@ def task_2():
 
         updateRPMFromStorePos()
         rclpy.spin_once(motor_driver_node)
-        driveMotors()
-        # motor_driver_node.resetNeedPublish()
+
+        if not DATA_RECORDING:
+            driveMotors()
 
         # print("linear_RPM_left: " + str(linear_RPM_left))
         # print("linear_RPM_right: " + str(linear_RPM_right))
@@ -606,7 +622,7 @@ def task_2():
         comp_end = time.time()
 
         # if PUBLISH_PERIOD - (comp_end - comp_start) >= 0:
-            # time.sleep(PUBLISH_PERIOD - (comp_end - comp_start))
+        # time.sleep(PUBLISH_PERIOD - (comp_end - comp_start))
 
 
 def task_3():
@@ -624,12 +640,92 @@ def task_3():
 def task_4():
     global flag_4
 
-    while True:
+    index = 1
+    delta_time = 0
+    time.sleep(1)
 
-        if flag_4:
-            break
+    print("Ready")
 
-        # testPIDResponse(10, 0.5)
+    # All testing must be after the "Ready" line!
+    # ============ TESTING ============
+
+    varyPWM(TEST_PWM)
+
+    # =================================
+
+    WORKBOOK.writeData(index + 1, 1, delta_time)
+
+    while index <= DATA_AMOUNT:
+
+        start = time.time()
+
+        comp_start = time.time()
+
+        WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
+        WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
+        WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
+        WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
+        WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
+        WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
+        WORKBOOK.writeData(index + 1, 9, total_receive)
+        WORKBOOK.writeData(index + 1, 10, error_receive)
+        WORKBOOK.writeData(
+            index + 1,
+            11,
+            round((total_receive - error_receive) / total_receive * 100, 2),
+        )
+
+        index += 1
+
+        comp_end = time.time()
+
+        if comp_end - comp_start <= LEFT_MOTOR_SAMPLE_TIME:
+            # Run a test code to find the exceeding of time.sleep() then multiply the coefficient again
+            target_time = (
+                time.time()
+                + (LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start)) * 5 / 5.6
+            )
+            while time.time() <= target_time:
+                time.sleep(0.0001)
+
+        end = time.time()
+
+        WORKBOOK.writeData(index + 1, 1, end - start)
+
+        # print(delta_time)
+
+    stopAllThreads()
+
+
+def manuallyTunePID():
+    print("Tune PID")
+
+    print("=== LEFT MOTOR ===")
+    left_Kp = float(input("Kp = "))
+    left_Ki = float(input("Ki = "))
+    left_Kd = float(input("Kd = "))
+
+    print("=== RIGHT MOTOR ===")
+    right_Kp = float(input("Kp = "))
+    right_Ki = float(input("Ki = "))
+    right_Kd = float(input("Kd = "))
+
+    LEFT_MOTOR_PID_CONTROLLER.changeCoefficients(
+        left_Kp, left_Ki, left_Kd, LEFT_MOTOR.getSampleTime()
+    )
+    RIGHT_MOTOR_PID_CONTROLLER.changeCoefficients(
+        right_Kp, right_Ki, right_Kd, RIGHT_MOTOR.getSampleTime()
+    )
+
+    print()
+
+    print("Setup setpoint")
+    max_RPM = float(input("Max RPM = "))
+    step = float(input("Step = "))
+    time_interval = float(input("Time interval for each setpoint (s) = "))
+    run_time = step * time_interval
+
+    return [max_RPM, step, time_interval, run_time]
 
 
 def task_5():
@@ -637,12 +733,34 @@ def task_5():
 
     index = 0
     delta_time = 0
-    while index <= DATA_AMOUNT:
+    time.sleep(1)
+
+    print("Ready")
+
+    # All testing must be after the "Ready" line!
+    # ============ TESTING ============
+
+    max_RPM, step, time_interval, run_time = manuallyTunePID()
+
+    if run_time <= 0:
+        stopAllThreads()
+        raise Exception("Run time must be positive!")
+
+    timer = time.time()
+    # varyPWM(TEST_PWM)
+
+    # =================================
+
+    while time.time() - timer <= run_time:
+
+        testPIDResponse(
+            max_range=RPMtoMPS(max_RPM), step=step, time_interval=time_interval
+        )
 
         start = time.time()
 
         comp_start = time.time()
-        
+
         WORKBOOK.writeData(index + 1, 1, delta_time)
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
@@ -662,7 +780,7 @@ def task_5():
         comp_end = time.time()
 
         if LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start) >= 0:
-            time.sleep(LEFT_MOTOR_SAMPLE_TIME)
+            time.sleep(LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start))
 
         end = time.time()
 
@@ -688,6 +806,8 @@ def threadingHandler():
 
     if DATA_RECORDING:
         thread_4 = threading.Thread(target=task_4)
+
+    if MANUALLY_TUNE_PID:
         thread_5 = threading.Thread(target=task_5)
 
     # Start threads
@@ -696,7 +816,10 @@ def threadingHandler():
     # thread_3.start()
 
     if DATA_RECORDING:
-        # thread_4.start()
+        thread_4.start()
+
+    if MANUALLY_TUNE_PID:
+        # pass
         thread_5.start()
 
     # Wait for all threads to stop
@@ -705,7 +828,10 @@ def threadingHandler():
     # thread_3.join()
 
     if DATA_RECORDING:
-        # thread_4.join()
+        thread_4.join()
+
+    if MANUALLY_TUNE_PID:
+        # pass
         thread_5.join()
 
     # Do something after all threads stop
@@ -722,8 +848,6 @@ def loop():
 
     LEFT_MOTOR.resetDataCount()
     RIGHT_MOTOR.resetDataCount()
-
-    print("Ready!")
 
     try:
         if DATA_RECORDING:
