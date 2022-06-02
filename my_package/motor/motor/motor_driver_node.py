@@ -126,7 +126,8 @@ except:
     raise Exception("Cannot calculate inverse of kinematic model matrix!")
 
 # Kalman Filter instances
-LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
+LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P,
+                         Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
 RIGHT_MOTOR.setupValuesKF(
     X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
 )
@@ -189,7 +190,8 @@ RIGHT_RPM = 0
 CHECKSUM = ""
 
 # Data recorder
-WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
+WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY,
+                       LEFT_MOTOR.getSampleTime())
 
 
 def checkConditions():
@@ -307,7 +309,8 @@ def setupSetpoint(msg):
     linear_RPM_right = differiential_drive_matrix.item(0)
     linear_RPM_left = differiential_drive_matrix.item(1)
 
-    linear_RPM_left = saturate(linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
+    linear_RPM_left = saturate(
+        linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
 
     linear_RPM_right = saturate(
         linear_RPM_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
@@ -408,7 +411,7 @@ def getMCUSerial():
                 foundMCU = True
                 index = device.find("ttyUSB")
                 # print(index)
-                MCUSerial = device[index : index + 7]
+                MCUSerial = device[index: index + 7]
                 # print(MCUSerial)
                 break
 
@@ -474,7 +477,8 @@ def checksum():
     dictionaryDataCheck.pop("ck", None)
     dictionaryDataCheckString = json.dumps(dictionaryDataCheck)
     dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
-    checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
+    checksumString = hashlib.md5(
+        dictionaryDataCheckString.encode()).hexdigest()
 
     # print("Dict: " + dictionaryDataCheckString)
 
@@ -763,10 +767,12 @@ def task_5():
         WORKBOOK.writeData(index + 1, 1, delta_time)
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
-        WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
+        # WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
+        WORKBOOK.writeData(index + 1, 4, LEFT_MOTOR_PID_CONTROLLER.getKi())
         WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
         WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
-        WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
+        # WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
+        WORKBOOK.writeData(index + 1, 8, RIGHT_MOTOR_PID_CONTROLLER.getKi())
         WORKBOOK.writeData(index + 1, 9, total_receive)
         WORKBOOK.writeData(index + 1, 10, error_receive)
         WORKBOOK.writeData(
@@ -860,13 +866,15 @@ def loop():
     except KeyboardInterrupt:
         # JSON
         print("Captured Ctrl + C")
-        MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
+        MCUSerialObject.write(formSerialData(
+            "{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 
     finally:
         print("The program has been stopped!")
-        MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
+        MCUSerialObject.write(formSerialData(
+            "{motor_data:[0,1000,0,0,1000,0]}"))
         MCUSerialObject.close()
         WORKBOOK.saveWorkBook()
 

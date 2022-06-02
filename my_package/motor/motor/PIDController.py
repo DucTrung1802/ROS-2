@@ -16,7 +16,8 @@ class PIDController:
         if T <= 0:  # T is sample time
             raise Exception("T must be positive!")
         if min > max:
-            raise Exception("Minimum value must smaller or equal to maximum value!")
+            raise Exception(
+                "Minimum value must smaller or equal to maximum value!")
 
     def __applyCoefficients(self, Kp, Ki, Kd, T):
         self.__Kp = Kp
@@ -80,8 +81,6 @@ class PIDController:
         else:
             self.__Ki = self.__Ki_on
 
-        print(self.__Ki)
-
         self.__computeCoefficients()
 
     def changeCoefficients(self, Kp, Ki, Kd, T):
@@ -128,3 +127,6 @@ class PIDController:
 
     def getOutputValue(self):
         return self.__saturate(self.__uk)
+
+    def getKi(self):
+        return self.__Ki
