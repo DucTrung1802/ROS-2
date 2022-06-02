@@ -22,6 +22,7 @@ class PIDController:
     def __applyCoefficients(self, Kp, Ki, Kd, T):
         self.__Kp = Kp
         self.__Ki = Ki
+        self.__Ki_on = Ki
         self.__Kd = Kd
         self.__T = T
 
@@ -36,8 +37,6 @@ class PIDController:
         self.__delta = 2 * self.__T
 
     def __initializeCoefficient(self, Kp, Ki, Kd, T, min, max):
-
-        self.__Ki_on = Ki
 
         self.__applyCoefficients(Kp, Ki, Kd, T)
 
