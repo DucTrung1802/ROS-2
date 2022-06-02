@@ -80,6 +80,8 @@ class PIDController:
         else:
             self.__Ki = self.__Ki_on
 
+        print(self.__Ki)
+
         self.__computeCoefficients()
 
     def changeCoefficients(self, Kp, Ki, Kd, T):
