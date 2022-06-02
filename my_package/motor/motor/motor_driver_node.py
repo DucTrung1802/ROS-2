@@ -3,7 +3,6 @@
 # Python libraries
 import subprocess
 import time
-from tkinter import RIGHT
 from click import prompt
 import serial
 import re
