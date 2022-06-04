@@ -25,20 +25,20 @@ class DataRecoder(object):
     def __initializeWorkBook(self):
         self.__work_book = Workbook()
         for i in range(1, 12):
-            self.__work_book.active.column_dimensions[get_column_letter(i)].width = 20
+            self.__work_book.active.column_dimensions[get_column_letter(
+                i)].width = 20
         self.writeData(1, 1, "Time (s)")
         self.writeData(1, 2, "Setpoint Motor 1 (RPM)")
         self.writeData(1, 3, "Motor 1 (RPM)")
-        self.writeData(1, 4, "Motor 1 Voltage (V)")
+        self.writeData(1, 4, "Ki Motor 1")
 
         self.writeData(1, 6, "Setpoint Motor 2 (RPM)")
         self.writeData(1, 7, "Motor 2 (RPM)")
-        self.writeData(1, 8, "Motor 2 Voltage (V)")
+        self.writeData(1, 8, "Ki Motor 2")
 
         self.writeData(1, 9, "Successful Receive")
         self.writeData(1, 10, "Error Receive")
         self.writeData(1, 11, "Rate of Successful (%)")
-
 
     def saveWorkBook(self):
         # self.__folder_name = os.path.dirname(os.path.realpath(__file__))
