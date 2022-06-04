@@ -155,19 +155,19 @@ def loop():
 
     # Configure this when add more sonar sensors
     sonar_1 = Sonar(
-        trigger_pin=17, echo_pin=27, min_range=0.04, max_range=1.5, field_of_view=0.78
+        trigger_pin=17, echo_pin=27, min_range=0.04, max_range=1.5, field_of_view=0.244
     )
     sonar_2 = Sonar(
-        trigger_pin=10, echo_pin=9, min_range=0.04, max_range=1.5, field_of_view=0.78
+        trigger_pin=10, echo_pin=9, min_range=0.04, max_range=1.5, field_of_view=0.244
     )
     sonar_3 = Sonar(
-        trigger_pin=5, echo_pin=6, min_range=0.04, max_range=1.5, field_of_view=0.78
+        trigger_pin=5, echo_pin=6, min_range=0.04, max_range=1.5, field_of_view=0.244
     )
     sonar_4 = Sonar(
-        trigger_pin=13, echo_pin=19, min_range=0.04, max_range=1.5, field_of_view=0.78
+        trigger_pin=13, echo_pin=19, min_range=0.04, max_range=1.5, field_of_view=0.244
     )
     sonar_5 = Sonar(
-        trigger_pin=23, echo_pin=24, min_range=0.04, max_range=1.5, field_of_view=0.78
+        trigger_pin=23, echo_pin=24, min_range=0.04, max_range=1.5, field_of_view=0.244
     )
 
     sonar_node_1 = SonarNode(order=1, node_name=NODE_NAME, sonar_instance=sonar_1)
