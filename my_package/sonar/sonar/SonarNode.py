@@ -60,7 +60,7 @@ class SonarNode(Node):
             msg.min_range = self.__sonar_array[i].getMinRange()
             msg.max_range = self.__sonar_array[i].getMaxRange()
             msg.range = self.__sonar_array[i].getRange()
-            self.__sonar_publisher.publish(msg)
+            self.__sonar_publisher[i].publish(msg)
 
 
 def task_1(sonar):
