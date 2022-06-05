@@ -56,20 +56,23 @@ class SonarNode(Node):
         self.sonar_pub.publish(msg)
 
 
-def task_1():
-    global flag_1, sonar_node_1
+def task_1(sonar):
+    global flag_1
+    if not isinstance(sonar, Sonar):
+        raise Exception("Task 1: parameter sonar is not an instance of Sonar!")
+
     while True:
 
         if flag_1:
             break
 
-        rclpy.spin_once(sonar_node_1)
+        sonar.measureRange()
 
         time.sleep(PUBLISH_PERIOD)
 
 
 def task_2():
-    global flag_2, sonar_node_2
+    global flag_2
     while True:
 
         if flag_2:
@@ -81,7 +84,7 @@ def task_2():
 
 
 def task_3():
-    global flag_3, sonar_node_3
+    global flag_3
     while True:
 
         if flag_3:
@@ -93,7 +96,7 @@ def task_3():
 
 
 def task_4():
-    global flag_4, sonar_node_4
+    global flag_4
     while True:
 
         if flag_4:
@@ -105,7 +108,7 @@ def task_4():
 
 
 def task_5():
-    global flag_5, sonar_node_5
+    global flag_5
     while True:
 
         if flag_5:
@@ -116,20 +119,34 @@ def task_5():
         time.sleep(PUBLISH_PERIOD)
 
 
-def threadingHandler():
-    global flag_1, flag_2, flag_3, flag_4, flag_5
+def task_6():
+    global flag_6, sonar_node_6
+    while True:
+
+        if flag_6:
+            break
+
+        rclpy.spin_once(sonar_node_6)
+
+        time.sleep(PUBLISH_PERIOD)
+
+
+def threadingHandler(sonar_array):
+    global flag_1, flag_2, flag_3, flag_4, flag_5, flag_6
 
     flag_1 = False
     flag_2 = False
     flag_3 = False
     flag_4 = False
     flag_5 = False
+    flag_6 = False
 
-    thread_1 = threading.Thread(target=task_1)
-    thread_2 = threading.Thread(target=task_2)
-    thread_3 = threading.Thread(target=task_3)
-    thread_4 = threading.Thread(target=task_4)
-    thread_5 = threading.Thread(target=task_5)
+    thread_1 = threading.Thread(target=task_1, args=(sonar_array[0],))
+    thread_2 = threading.Thread(target=task_2, args=(sonar_array[1],))
+    thread_3 = threading.Thread(target=task_3, args=(sonar_array[2],))
+    thread_4 = threading.Thread(target=task_4, args=(sonar_array[3],))
+    thread_5 = threading.Thread(target=task_5, args=(sonar_array[4],))
+    thread_6 = threading.Thread(target=task_6, args=(sonar_array,))
 
     thread_1.start()
     thread_2.start()
@@ -153,6 +170,8 @@ def loop():
 
     rclpy.init()
 
+    sonar_array = []
+
     # Configure this when add more sonar sensors
     sonar_1 = Sonar(
         trigger_pin=17, echo_pin=27, min_range=0.04, max_range=1.5, field_of_view=0.244
@@ -170,14 +189,14 @@ def loop():
         trigger_pin=23, echo_pin=24, min_range=0.04, max_range=1.5, field_of_view=0.244
     )
 
-    sonar_node_1 = SonarNode(order=1, node_name=NODE_NAME, sonar_instance=sonar_1)
-    sonar_node_2 = SonarNode(order=2, node_name=NODE_NAME, sonar_instance=sonar_2)
-    sonar_node_3 = SonarNode(order=3, node_name=NODE_NAME, sonar_instance=sonar_3)
-    sonar_node_4 = SonarNode(order=4, node_name=NODE_NAME, sonar_instance=sonar_4)
-    sonar_node_5 = SonarNode(order=5, node_name=NODE_NAME, sonar_instance=sonar_5)
+    sonar_array.append(sonar_1)
+    sonar_array.append(sonar_2)
+    sonar_array.append(sonar_3)
+    sonar_array.append(sonar_4)
+    sonar_array.append(sonar_5)
 
     try:
-        threadingHandler()
+        threadingHandler(sonar_array)
 
         # Reset by pressing CTRL + C
     except KeyboardInterrupt:
