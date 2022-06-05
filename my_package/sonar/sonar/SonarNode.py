@@ -10,7 +10,7 @@ import threading
 
 # Node parameters
 PUBLISH_FREQUENCY = 10
-NODE_NAME = "sonar"
+NODE_NAME = "sonars"
 
 
 def checkConditions():
@@ -25,35 +25,42 @@ def checkConditions():
 
 
 class SonarNode(Node):
-    def __init__(self, order, node_name, sonar_instance):
-        if not isinstance(sonar_instance, Sonar):
-            raise Exception(
-                "Invalid type of variable sonar_instance, must be an instance of 'Sonar'!"
+    def __init__(self, node_name, sonar_array_instance):
+
+        self.__checkConditions(sonar_array_instance)
+
+        super().__init__(node_name)
+        self.__node_name = node_name
+        self.__sonar_array = sonar_array_instance
+        self.__sonar_publisher = []
+
+        for i in self.__sonar_array:
+            self.__sonar_publisher.append(
+                self.create_publisher(Range, "/ultrasonic_sensor_" + str(i + 1), 1)
             )
 
-        super().__init__(node_name + "_" + str(order))
-        self._order = order
-        self._node_name = node_name
-        self._sonar_instance = sonar_instance
+        self.__timer = self.create_timer(PUBLISH_PERIOD, self.timer_callback)
 
-        self.sonar_pub = self.create_publisher(
-            Range, "/ultrasonic_sensor_" + str(self._order), 1
-        )
-
-        self.timer = self.create_timer(0, self.timer_callback)
+    def __checkConditions(self, sonar_array_instance):
+        for i in sonar_array_instance:
+            if not isinstance(sonar_array_instance[i], Sonar):
+                raise Exception(
+                    "Invalid type of variable sonar_array_instance, must an array of 'Sonar' intance!"
+                )
 
     def timer_callback(self):
-        msg = Range()
-        msg.header.frame_id = "ultrasonic_" + str(self._order) + "_link"
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.radiation_type = self._sonar_instance.getRadiationType()
-        msg.field_of_view = (
-            self._sonar_instance.getFieldOfView()
-        )  # rad ~ 15 degree (according to feature of HC-SR 04)
-        msg.min_range = self._sonar_instance.getMinRange()
-        msg.max_range = self._sonar_instance.getMaxRange()
-        msg.range = self._sonar_instance.getMeasureDistance()
-        self.sonar_pub.publish(msg)
+        for i in self.__sonar_array:
+            msg = Range()
+            msg.header.frame_id = "ultrasonic_" + str(i + 1) + "_link"
+            msg.header.stamp = self.get_clock().now().to_msg()
+            msg.radiation_type = self.__sonar_array[i].getRadiationType()
+            msg.field_of_view = self.__sonar_array[
+                i
+            ].getFieldOfView()  # rad ~ 15 degree (according to feature of HC-SR 04)
+            msg.min_range = self.__sonar_array[i].getMinRange()
+            msg.max_range = self.__sonar_array[i].getMaxRange()
+            msg.range = self.__sonar_array[i].getMeasureDistance()
+            self.sonar_pub.publish(msg)
 
 
 def task_1(sonar):
@@ -68,67 +75,70 @@ def task_1(sonar):
 
         sonar.measureRange()
 
-        time.sleep(PUBLISH_PERIOD)
 
-
-def task_2():
+def task_2(sonar):
     global flag_2
+    if not isinstance(sonar, Sonar):
+        raise Exception("Task 2: parameter sonar is not an instance of Sonar!")
+
     while True:
 
         if flag_2:
             break
 
-        rclpy.spin_once(sonar_node_2)
-
-        time.sleep(PUBLISH_PERIOD)
+        sonar.measureRange()
 
 
-def task_3():
+def task_3(sonar):
     global flag_3
+    if not isinstance(sonar, Sonar):
+        raise Exception("Task 3: parameter sonar is not an instance of Sonar!")
+
     while True:
 
         if flag_3:
             break
 
-        rclpy.spin_once(sonar_node_3)
-
-        time.sleep(PUBLISH_PERIOD)
+        sonar.measureRange()
 
 
-def task_4():
+def task_4(sonar):
     global flag_4
+    if not isinstance(sonar, Sonar):
+        raise Exception("Task 4: parameter sonar is not an instance of Sonar!")
+
     while True:
 
         if flag_4:
             break
 
-        rclpy.spin_once(sonar_node_4)
-
-        time.sleep(PUBLISH_PERIOD)
+        sonar.measureRange()
 
 
-def task_5():
+def task_5(sonar):
     global flag_5
+    if not isinstance(sonar, Sonar):
+        raise Exception("Task 5: parameter sonar is not an instance of Sonar!")
+
     while True:
 
         if flag_5:
             break
 
-        rclpy.spin_once(sonar_node_5)
-
-        time.sleep(PUBLISH_PERIOD)
+        sonar.measureRange()
 
 
-def task_6():
-    global flag_6, sonar_node_6
+def task_6(sonar_array):
+    global flag_6
+    rclpy.init()
     while True:
 
         if flag_6:
             break
 
-        rclpy.spin_once(sonar_node_6)
+        sonar_node = SonarNode(node_name=NODE_NAME, sonar_array_instance=sonar_array)
 
-        time.sleep(PUBLISH_PERIOD)
+        rclpy.spin(sonar_node)
 
 
 def threadingHandler(sonar_array):
@@ -153,12 +163,14 @@ def threadingHandler(sonar_array):
     thread_3.start()
     thread_4.start()
     thread_5.start()
+    thread_6.start()
 
     thread_1.join()
     thread_2.join()
     thread_3.join()
     thread_4.join()
     thread_5.join()
+    thread_6.join()
 
 
 def setup():
@@ -167,8 +179,6 @@ def setup():
 
 def loop():
     global sonar_node_1, sonar_node_2, sonar_node_3, sonar_node_4, sonar_node_5
-
-    rclpy.init()
 
     sonar_array = []
 
