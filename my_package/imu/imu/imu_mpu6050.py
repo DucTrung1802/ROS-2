@@ -15,7 +15,7 @@ YAW = 0.0
 
 # Node parameters
 NODE_NAME = "imu_mpu6050"
-PUBLISH_FREQUENCY = 100
+PUBLISH_FREQUENCY = 50
 
 # Node parameters
 PUBLISH_PERIOD = 0
@@ -40,7 +40,8 @@ class IMUPublisher(Node):
         super().__init__(NODE_NAME)
         self.imu_pub = self.create_publisher(Imu, "/imu/data", 1)
 
-        self.timer1 = self.create_timer(0, self.timer_callback)
+        self.timer1 = self.create_timer(
+            PUBLISH_PERIOD, self.timer_callback)
 
     def timer_callback(self):
         msg = Imu()
@@ -78,13 +79,25 @@ def getIMUData():
 
 def task_1():
     global flag_1
+    while True:
+
+        if flag_1:
+            break
+
+        getIMUData()
+
+
+def task_2():
+    global flag_2
     rclpy.init()
     imu_publisher = IMUPublisher()
+    time.sleep(0.5)
     while True:
-        getIMUData()
-        rclpy.spin_once(imu_publisher)
 
-        time.sleep(PUBLISH_PERIOD)
+        if flag_2:
+            break
+
+        rclpy.spin(imu_publisher)
 
 
 def threadingHandler():
@@ -95,15 +108,15 @@ def threadingHandler():
     flag_3 = False
 
     thread_1 = threading.Thread(target=task_1)
-    # thread_2 = threading.Thread(target=task_2)
+    thread_2 = threading.Thread(target=task_2)
     # thread_3 = threading.Thread(target=task_3)
 
     thread_1.start()
-    # thread_2.start()
+    thread_2.start()
     # thread_3.start()
 
     thread_1.join()
-    # thread_2.join()
+    thread_2.join()
     # thread_3.join()
 
 
