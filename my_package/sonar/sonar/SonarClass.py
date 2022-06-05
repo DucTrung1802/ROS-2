@@ -139,6 +139,8 @@ class Sonar(object):
 
         self.__range = distance
 
+        time.sleep(0.05)
+
     def getMinRange(self):
         return self.__min_range
 
