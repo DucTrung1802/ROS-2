@@ -26,6 +26,9 @@ def checkConditions():
 
 class SonarNode(Node):
     def __init__(self, node_name, sonar_array_instance):
+
+        self.__checkConditions(sonar_array_instance)
+
         super().__init__(node_name)
         self.__node_name = node_name
         self.__sonar_array = sonar_array_instance
@@ -38,8 +41,15 @@ class SonarNode(Node):
 
         self.__timer = self.create_timer(PUBLISH_PERIOD, self.timer_callback)
 
+    def __checkConditions(self, sonar_array_instance):
+        for i in range(len(sonar_array_instance)):
+            if not isinstance(sonar_array_instance[i], Sonar):
+                raise Exception(
+                    "Invalid type of variable sonar_array_instance, must an array of 'Sonar' intance!"
+                )
+
     def timer_callback(self):
-        for i in self.__sonar_array:
+        for i in range(len(self.__sonar_array)):
             msg = Range()
             msg.header.frame_id = "ultrasonic_" + str(i + 1) + "_link"
             msg.header.stamp = self.get_clock().now().to_msg()
