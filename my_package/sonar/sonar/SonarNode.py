@@ -34,7 +34,7 @@ class SonarNode(Node):
         self.__sonar_array = sonar_array_instance
         self.__sonar_publisher = []
 
-        for i in self.__sonar_array:
+        for i in range(len(self.__sonar_array)):
             self.__sonar_publisher.append(
                 self.create_publisher(Range, "/ultrasonic_sensor_" + str(i + 1), 1)
             )
