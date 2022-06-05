@@ -42,6 +42,7 @@ class SonarNode(Node):
         self.__timer = self.create_timer(PUBLISH_PERIOD, self.timer_callback)
 
     def __checkConditions(self, sonar_array_instance):
+        print(sonar_array_instance)
         for i in sonar_array_instance:
             if not isinstance(sonar_array_instance[i], Sonar):
                 raise Exception(
