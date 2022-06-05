@@ -35,6 +35,7 @@ class Sonar(object):
             self.__min_range = min_range
             self.__max_range = max_range
             self.__field_of_view = field_of_view
+            self.__range = 0.0
             self.__radiation_type = 0
 
             self.__number_of_error = 0
@@ -46,7 +47,8 @@ class Sonar(object):
     def __checkCondition(
         self, trigger_pin, echo_pin, min_range, max_range, field_of_view
     ):
-        trigger_pin_condition = isinstance(trigger_pin, int) and 2 <= trigger_pin <= 27
+        trigger_pin_condition = isinstance(
+            trigger_pin, int) and 2 <= trigger_pin <= 27
         echo_pin_condition = (
             isinstance(trigger_pin, int)
             and 2 <= trigger_pin <= 27
@@ -130,7 +132,8 @@ class Sonar(object):
         # multiply with the sonic speed (343 m/s)
         # and divide by 2, because there and back
         distance = (time_elapsed * 343) / 2
-        distance = self.__saturate(distance, self.__min_range, self.__max_range)
+        distance = self.__saturate(
+            distance, self.__min_range, self.__max_range)
 
         self.__range = distance
 
