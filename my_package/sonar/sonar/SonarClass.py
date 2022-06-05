@@ -3,6 +3,13 @@ import time
 import RPi.GPIO as GPIO
 import time
 
+# limit measure time:
+# maximum measure distane: 3m
+# sonic speed: 343 m/s
+# maximum measure time:3 / 343 * 2 = 0.017492s
+
+MAXIMUM_MEASURE_TIME = 0.017492 # s
+
 timer1 = time.time()
 
 GPIO.setmode(GPIO.BCM)
@@ -29,6 +36,8 @@ class Sonar(object):
             self.__max_range = max_range
             self.__field_of_view = field_of_view
             self.__radiation_type = 0
+            
+            self.__number_of_error = 0
 
             # set GPIO direction (IN / OUT)
             GPIO.setup(self.__trigger_pin, GPIO.OUT)
@@ -65,6 +74,10 @@ class Sonar(object):
             return index
 
     def getMeasureDistance(self):
+        # set Trigger to LOW for stability
+        GPIO.output(self.__trigger_pin, False)
+        time.sleep(0.0001)
+
         # set Trigger to HIGH
         GPIO.output(self.__trigger_pin, True)
 
@@ -72,24 +85,39 @@ class Sonar(object):
         time.sleep(0.00001)
         GPIO.output(self.__trigger_pin, False)
 
+        # save StartTime
         StartTime = time.time()
         StopTime = time.time()
 
-        # save StartTime
-        while GPIO.input(self.__echo_pin) == 0:
+
+        start_pivot_time = time.time()
+        maximum_measure_time = start_pivot_time + MAXIMUM_MEASURE_TIME
+
+        # TODO
+        
+        while GPIO.input(self.__echo_pin) == 0 and time.time() <= maximum_measure_time:
             StartTime = time.time()
+            end_pivot_time = time.time
+        if end_pivot_time - start_pivot_time > MAXIMUM_MEASURE_TIME:
+            self.__number_of_error += 1
+        else:
+            self.__number_of_error = 0
+            
+        if self.__number_of_error >= 3:
+            raise Exception("An error has occurred with the sonar has TRIGGER PIN: " + str(self.__trigger_pin) + " and ECHO PIN: " + str(self.__echo_pin) + "!")
 
         # save time of arrival
-        while GPIO.input(self.__echo_pin) == 1:
+        while GPIO.input(self.__echo_pin) == 1 and :
             StopTime = time.time()
 
         # time difference between start and arrival
         TimeElapsed = StopTime - StartTime
         # multiply with the sonic speed (343 m/s)
         # and divide by 2, because there and back
-        distance = (TimeElapsed * 343) / 2 
+        distance = (TimeElapsed * 343) / 2
         distance = self.__saturate(distance, self.__min_range, self.__max_range)
-        return distance
+
+        self.__range = distance
 
     def getMinRange(self):
         return self.__min_range
@@ -102,3 +130,6 @@ class Sonar(object):
 
     def getRadiationType(self):
         return self.__radiation_type
+
+    def getRange(self):
+        return self.__range
