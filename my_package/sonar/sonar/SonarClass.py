@@ -111,8 +111,19 @@ class Sonar(object):
         time.sleep(0.00001)
         GPIO.output(self.__trigger_pin, False)
 
-        start_time = self.__checkEchoPinStatus(False)
-        stop_time = self.__checkEchoPinStatus(True)
+        # start_time = time.time()
+        # stop_time = self.__checkEchoPinStatus(True)
+
+        start_time = time.time()
+        stop_time = time.time()
+
+        # save StartTime
+        while GPIO.input(self.__echo_pin) == 0:
+            start_time = time.time()
+
+        # save time of arrival
+        while GPIO.input(self.__echo_pin) == 1:
+            stop_time = time.time()
 
         # time difference between start and arrival
         time_elapsed = stop_time - start_time
