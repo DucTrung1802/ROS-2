@@ -5,7 +5,7 @@ import time
 from sensor_msgs.msg import Range
 import RPi.GPIO as GPIO
 import time
-from sonar.SonarClass import Sonar
+from sonar.SonarClass import Sonar as Sonar
 import threading
 
 # Node parameters
