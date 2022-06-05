@@ -8,7 +8,7 @@ import time
 # sonic speed: 343 m/s
 # maximum measure time:3 / 343 * 2 = 0.017492s
 
-MAXIMUM_MEASURE_TIME = 0.017492 # s
+MAXIMUM_MEASURE_TIME = 0.017492  # s
 
 timer1 = time.time()
 
@@ -36,7 +36,7 @@ class Sonar(object):
             self.__max_range = max_range
             self.__field_of_view = field_of_view
             self.__radiation_type = 0
-            
+
             self.__number_of_error = 0
 
             # set GPIO direction (IN / OUT)
@@ -73,7 +73,32 @@ class Sonar(object):
         else:
             return index
 
-    def getMeasureDistance(self):
+    def __checkEchoPinStatus(self, status_to_check):
+        pivot_time = time.time()
+
+        while (
+            GPIO.input(self.__echo_pin) == bool(status_to_check)
+            and time.time() <= MAXIMUM_MEASURE_TIME
+        ):
+            current_time = time.time()
+
+        if current_time - pivot_time > MAXIMUM_MEASURE_TIME:
+            self.__number_of_error += 1
+        else:
+            self.__number_of_error = 0
+
+        if self.__number_of_error >= 3:
+            raise Exception(
+                "An error has occurred with the sonar has TRIGGER PIN: "
+                + str(self.__trigger_pin)
+                + " and ECHO PIN: "
+                + str(self.__echo_pin)
+                + "!"
+            )
+
+        return current_time
+
+    def measureRange(self):
         # set Trigger to LOW for stability
         GPIO.output(self.__trigger_pin, False)
         time.sleep(0.0001)
@@ -81,40 +106,18 @@ class Sonar(object):
         # set Trigger to HIGH
         GPIO.output(self.__trigger_pin, True)
 
-        # set Trigger after 0.01ms to LOW
+        # set Trigger to LOW after 0.01ms
         time.sleep(0.00001)
         GPIO.output(self.__trigger_pin, False)
 
-        # save StartTime
-        StartTime = time.time()
-        StopTime = time.time()
-
-
-        start_pivot_time = time.time()
-        maximum_measure_time = start_pivot_time + MAXIMUM_MEASURE_TIME
-
-        # TODO
-        
-        while GPIO.input(self.__echo_pin) == 0 and time.time() <= maximum_measure_time:
-            StartTime = time.time()
-            end_pivot_time = time.time
-        if end_pivot_time - start_pivot_time > MAXIMUM_MEASURE_TIME:
-            self.__number_of_error += 1
-        else:
-            self.__number_of_error = 0
-            
-        if self.__number_of_error >= 3:
-            raise Exception("An error has occurred with the sonar has TRIGGER PIN: " + str(self.__trigger_pin) + " and ECHO PIN: " + str(self.__echo_pin) + "!")
-
-        # save time of arrival
-        while GPIO.input(self.__echo_pin) == 1 and :
-            StopTime = time.time()
+        start_time = self.__checkEchoPinStatus(False)
+        stop_time = self.__checkEchoPinStatus(True)
 
         # time difference between start and arrival
-        TimeElapsed = StopTime - StartTime
+        time_elapsed = stop_time - start_time
         # multiply with the sonic speed (343 m/s)
         # and divide by 2, because there and back
-        distance = (TimeElapsed * 343) / 2
+        distance = (time_elapsed * 343) / 2
         distance = self.__saturate(distance, self.__min_range, self.__max_range)
 
         self.__range = distance
