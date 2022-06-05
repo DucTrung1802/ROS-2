@@ -75,6 +75,7 @@ class Sonar(object):
 
     def __checkEchoPinStatus(self, status_to_check):
         pivot_time = time.time()
+        current_time = time.time()
 
         while (
             GPIO.input(self.__echo_pin) == bool(status_to_check)
