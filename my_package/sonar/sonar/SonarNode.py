@@ -59,7 +59,7 @@ class SonarNode(Node):
             ].getFieldOfView()  # rad ~ 15 degree (according to feature of HC-SR 04)
             msg.min_range = self.__sonar_array[i].getMinRange()
             msg.max_range = self.__sonar_array[i].getMaxRange()
-            msg.range = self.__sonar_array[i].getMeasureDistance()
+            msg.range = self.__sonar_array[i].getRange()
             self.sonar_pub.publish(msg)
 
 
