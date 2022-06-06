@@ -80,6 +80,7 @@ RIGHT_MOTOR_MAX = 12
 
 
 # Test data
+TEST_ONLY_ON_LAPTOP = True
 MANUALLY_TUNE_PID = False
 DATA_RECORDING = False
 DIRECTION_LEFT = 1
@@ -337,10 +338,13 @@ def differientialDriveCalculate(linear_velocity, angular_velocity):
 def setupSetpoint(msg):
     global previous_linear_velocity, current_state_is_straight, previous_current_state_is_straight
     global linear_velocity, linear_RPM_left, linear_RPM_right
+    global odom_dictionary
     # Evaluate to have RPM value
 
     linear_velocity = msg.linear.x  # m/s
     angular_velocity = msg.angular.z  # rad/s
+    odom_dictionary["twist"]["twist"]["linear"]["x"] = msg.linear.x
+    odom_dictionary["twist"]["twist"]["angular"]["z"] = msg.angular.z
 
     differiential_drive_matrix = differientialDriveCalculate(
         linear_velocity, angular_velocity
@@ -670,6 +674,7 @@ def task_3():
     global flag_3
     rclpy.init()
     motor_driver_node = MotorDriverNode(NODE_NAME)
+    print("Start Publishing")
     while True:
 
         if flag_3:
@@ -854,8 +859,10 @@ def threadingHandler():
         thread_5 = threading.Thread(target=task_5)
 
     # Start threads
-    # thread_1.start()
-    # thread_2.start()
+    if not TEST_ONLY_ON_LAPTOP:
+        thread_1.start()
+        thread_2.start()
+
     thread_3.start()
 
     if DATA_RECORDING:
@@ -866,9 +873,11 @@ def threadingHandler():
         thread_5.start()
 
     # Wait for all threads to stop
-    # thread_1.join()
-    # thread_2.join()
-    # thread_3.join()
+    if not TEST_ONLY_ON_LAPTOP:
+        thread_1.join()
+        thread_2.join()
+
+    thread_3.join()
 
     if DATA_RECORDING:
         thread_4.join()
@@ -883,7 +892,8 @@ def threadingHandler():
 
 def setup():
     checkConditions()
-    # initializeSerial()
+    if not TEST_ONLY_ON_LAPTOP:
+        initializeSerial()
 
 
 def loop():
@@ -904,15 +914,19 @@ def loop():
     except KeyboardInterrupt:
         # JSON
         print("Captured Ctrl + C")
-        # MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
-        # MCUSerialObject.close()
-        WORKBOOK.saveWorkBook()
+        if not TEST_ONLY_ON_LAPTOP:
+            MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
+            MCUSerialObject.close()
+        if DATA_RECORDING or MANUALLY_TUNE_PID:
+            WORKBOOK.saveWorkBook()
 
     finally:
         print("The program has been stopped!")
-        # MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
-        # MCUSerialObject.close()
-        WORKBOOK.saveWorkBook()
+        if not TEST_ONLY_ON_LAPTOP:
+            MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
+            MCUSerialObject.close()
+        if DATA_RECORDING or MANUALLY_TUNE_PID:
+            WORKBOOK.saveWorkBook()
 
 
 def main():
