@@ -102,14 +102,14 @@ if not (float(WHEEL_BASE) and WHEEL_BASE > 0):
 # Motor instances
 LEFT_MOTOR = MotorDriver(
     diameter=LEFT_MOTOR_DIAMETER,
-    pulse_per_round_of_encoder=LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER,
+    tick_per_round_of_encoder=LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER,
     pwm_frequency=LEFT_MOTOR_PWM_FREQUENCY,
     sample_time=LEFT_MOTOR_SAMPLE_TIME,
 )
 
 RIGHT_MOTOR = MotorDriver(
     diameter=RIGHT_MOTOR_DIAMETER,
-    pulse_per_round_of_encoder=RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER,
+    tick_per_round_of_encoder=RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER,
     pwm_frequency=RIGHT_MOTOR_PWM_FREQUENCY,
     sample_time=RIGHT_MOTOR_SAMPLE_TIME,
 )
