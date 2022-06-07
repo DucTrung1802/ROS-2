@@ -54,7 +54,7 @@ class PoseCalculator(object):
 
         if self.__checkRadius(radius):
             self.__radius = radius
-        elif not self.__checkRadius(self, radius):
+        elif not self.__checkRadius(radius):
             raise Exception("Invalid value of wheels radius!")
 
         if self.__checkTick(left_wheel_tick_per_round):
@@ -75,7 +75,17 @@ class PoseCalculator(object):
     def __initializeParameters(self):
         """Initialize private parameters."""
 
-        self.__position = [self.__postion_x, self.__postion_y, self.__postion_z]
+        self.__x = 0.0
+        self.__y = 0.0
+        self.__z = 0.0
+
+        self.__last_x = 0.0
+        self.__last_y = 0.0
+        self.__last_z = 0.0
+
+        self.__position = [self.__x, self.__y, self.__z]
+
+        self.__theta = 0.0
 
         self.__orientation_x = 0.0
         self.__orientation_y = 0.0
@@ -88,13 +98,6 @@ class PoseCalculator(object):
             self.__orientation_z,
             self.__orientation_w,
         ]
-
-        self.__x = 0.0
-        self.__y = 0.0
-        self.__last_x = 0.0
-        self.__last_y = 0.0
-
-        self.__theta = 0.0
 
         self.__current_left_angle = 0.0
         self.__current_right_angle = 0.0
@@ -124,7 +127,8 @@ class PoseCalculator(object):
             )
         )  # rad (0 <= self.__theta < 2 pi)
 
-        orientation = tf_transformations.quaternion_from_euler(0.0, 0.0, self.__theta)
+        orientation = tf_transformations.quaternion_from_euler(
+            0.0, 0.0, self.__theta)
 
         # Calculate x
         self.__x = self.__last_x + self.__radius * (

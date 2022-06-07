@@ -133,7 +133,8 @@ except:
     raise Exception("Cannot calculate inverse of kinematic model matrix!")
 
 # Kalman Filter instances
-LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
+LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P,
+                         Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
 RIGHT_MOTOR.setupValuesKF(
     X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
 )
@@ -161,7 +162,7 @@ step_test_PID = 0
 
 # PoseCalculator instance
 POSE_CALCULATOR = PoseCalculator(
-    radius=LEFT_MOTOR.getRadius,
+    radius=LEFT_MOTOR.getRadius(),
     left_wheel_tick_per_round=LEFT_MOTOR.getTickPerRoundOfEncoder(),
     right_wheel_tick_per_round=RIGHT_MOTOR.getTickPerRoundOfEncoder(),
     wheel_base=WHEEL_BASE,
@@ -220,7 +221,8 @@ odom_dictionary = {
 
 
 # Data recorder
-WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
+WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY,
+                       LEFT_MOTOR.getSampleTime())
 
 
 def checkConditions():
@@ -368,7 +370,8 @@ def setupSetpoint(msg):
     linear_RPM_right = differiential_drive_matrix.item(0)
     linear_RPM_left = differiential_drive_matrix.item(1)
 
-    linear_RPM_left = saturate(linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
+    linear_RPM_left = saturate(
+        linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
 
     linear_RPM_right = saturate(
         linear_RPM_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
@@ -469,7 +472,7 @@ def getMCUSerial():
                 foundMCU = True
                 index = device.find("ttyUSB")
                 # print(index)
-                MCUSerial = device[index : index + 7]
+                MCUSerial = device[index: index + 7]
                 # print(MCUSerial)
                 break
 
@@ -535,7 +538,8 @@ def checksum():
     dictionaryDataCheck.pop("ck", None)
     dictionaryDataCheckString = json.dumps(dictionaryDataCheck)
     dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
-    checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
+    checksumString = hashlib.md5(
+        dictionaryDataCheckString.encode()).hexdigest()
 
     # print("Dict: " + dictionaryDataCheckString)
 
@@ -924,7 +928,8 @@ def loop():
         # JSON
         print("Captured Ctrl + C")
         if not TEST_ONLY_ON_LAPTOP:
-            MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
+            MCUSerialObject.write(formSerialData(
+                "{motor_data:[0,1000,0,0,1000,0]}"))
             MCUSerialObject.close()
         if DATA_RECORDING or MANUALLY_TUNE_PID:
             WORKBOOK.saveWorkBook()
@@ -932,7 +937,8 @@ def loop():
     finally:
         print("The program has been stopped!")
         if not TEST_ONLY_ON_LAPTOP:
-            MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
+            MCUSerialObject.write(formSerialData(
+                "{motor_data:[0,1000,0,0,1000,0]}"))
             MCUSerialObject.close()
         if DATA_RECORDING or MANUALLY_TUNE_PID:
             WORKBOOK.saveWorkBook()
