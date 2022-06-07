@@ -1,5 +1,7 @@
 import math
 
+import tf_transformations
+
 
 class PoseCalculator(object):
     def __init__(
@@ -73,37 +75,84 @@ class PoseCalculator(object):
     def __initializeParameters(self):
         """Initialize private parameters."""
 
-        self.__postion_x = 0.0
-        self.__postion_y = 0.0
-        self.__postion_z = 0.0
-
-        self.__position = (self.__postion_x, self.__postion_y, self.__postion_z)
+        self.__position = [self.__postion_x, self.__postion_y, self.__postion_z]
 
         self.__orientation_x = 0.0
         self.__orientation_y = 0.0
         self.__orientation_z = 0.0
         self.__orientation_w = 1.0
 
-        self.__orientation = (
+        self.__orientation = [
             self.__orientation_x,
             self.__orientation_y,
             self.__orientation_z,
             self.__orientation_w,
-        )
+        ]
 
         self.__x = 0.0
         self.__y = 0.0
+        self.__last_x = 0.0
+        self.__last_y = 0.0
+
         self.__theta = 0.0
 
-    def __tickToRad(self, tick):
-        return (tick / 480) * 2 * math.pi
+        self.__current_left_angle = 0.0
+        self.__current_right_angle = 0.0
+        self.__last_left_angle = 0.0
+        self.__last_right_angle = 0.0
+
+    def __leftTickToRad(self, tick):
+        return (tick / self.__left_wheel_tick_per_round) * 2 * math.pi
+
+    def __rightTickToRad(self, tick):
+        return (tick / self.__right_wheel_tick_per_round) * 2 * math.pi
 
     def calculatePose(self, left_tick, right_tick):
-        self.__theta = math.fmod(
-            (
-                self.__radius
-                * (self.__tickToRad(right_tick) - self.__tickToRad(left_tick))
-                / self.__wheel_base
-            ),
-            2 * math.pi,
+
+        self.__current_left_angle = self.__leftTickToRad(left_tick)
+        self.__current_right_angle = self.__rightTickToRad(right_tick)
+
+        # Calculate theta
+        self.__theta = float(
+            math.fmod(
+                (
+                    self.__radius
+                    * (self.__current_right_angle - self.__current_left_angle)
+                    / self.__wheel_base
+                ),
+                2 * math.pi,
+            )
         )  # rad (0 <= self.__theta < 2 pi)
+
+        orientation = tf_transformations.quaternion_from_euler(0.0, 0.0, self.__theta)
+
+        # Calculate x
+        self.__x = self.__last_x + self.__radius * (
+            (self.__current_right_angle - self.__last_right_angle)
+            + (self.__current_left_angle - self.__last_left_angle)
+        ) / 2 * math.cos(self.__theta)
+
+        # Calculate y
+        self.__y = self.__last_y + self.__radius * (
+            (self.__current_right_angle - self.__last_right_angle)
+            + (self.__current_left_angle - self.__last_left_angle)
+        ) / 2 * math.sin(self.__theta)
+
+        # Update output values
+        self.__position[0] = self.__x
+        self.__position[1] = self.__y
+
+        self.__orientation[0] = orientation[0]
+        self.__orientation[1] = orientation[1]
+        self.__orientation[2] = orientation[2]
+        self.__orientation[3] = orientation[3]
+
+        # Update past values
+        self.__last_x = self.__x
+        self.__last_y = self.__y
+
+        self.__last_left_angle = self.__current_left_angle
+        self.__last_right_angle = self.__current_right_angle
+
+    def getOutputPose(self):
+        return (self.__position, self.__orientation)
