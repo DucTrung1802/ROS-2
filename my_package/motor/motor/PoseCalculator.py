@@ -4,26 +4,23 @@ import math
 class PoseCalculator(object):
     def __init__(
         self,
-        left_wheel_radius,
-        right_wheel_radius,
+        radius,
         left_wheel_tick_per_round,
         right_wheel_tick_per_round,
-        wheel_base
+        wheel_base,
     ):
         """
         Args:
-            left_wheel_radius (float): diameter of left wheel (m)
-            right_wheel_radius (float): diameter of right wheel (m)
+            radius (float): radius of both wheels (m)
             left_wheel_tick_per_round (int): tick per round of left wheel (tick)
             right_wheel_tick_per_round (int): tick per round of right wheel (tick)
             wheel_base (float): the distance between 2 centers of the wheels (m)
         """
         self.__checkConditions(
-            left_wheel_radius,
-            right_wheel_radius,
+            radius,
             left_wheel_tick_per_round,
             right_wheel_tick_per_round,
-            wheel_base
+            wheel_base,
         )
         self.__initializeParameters()
 
@@ -38,7 +35,7 @@ class PoseCalculator(object):
             return True
         else:
             return False
-        
+
     def __checkWheelBase(self, wheel_base):
         if float(wheel_base) and wheel_base > 0:
             return True
@@ -47,22 +44,16 @@ class PoseCalculator(object):
 
     def __checkConditions(
         self,
-        left_wheel_radius,
-        right_wheel_radius,
+        radius,
         left_wheel_tick_per_round,
         right_wheel_tick_per_round,
-        wheel_base
+        wheel_base,
     ):
 
-        if self.__checkRadius(left_wheel_radius):
-            self.__left_wheel_radius = left_wheel_radius
-        elif not self.__checkRadius(self, left_wheel_radius):
-            raise Exception("Invalid value of left wheel radius!")
-
-        if self.__checkRadius(right_wheel_radius):
-            self.__right_wheel_radius = right_wheel_radius
-        elif not self.__checkRadius(self, right_wheel_radius):
-            raise Exception("Invalid value of right wheel radius!")
+        if self.__checkRadius(radius):
+            self.__radius = radius
+        elif not self.__checkRadius(self, radius):
+            raise Exception("Invalid value of wheels radius!")
 
         if self.__checkTick(left_wheel_tick_per_round):
             self.__left_wheel_tick_per_round = left_wheel_tick_per_round
@@ -73,13 +64,11 @@ class PoseCalculator(object):
             self.__right_wheel_tick_per_round = right_wheel_tick_per_round
         elif not self.__checkTick(right_wheel_tick_per_round):
             raise Exception("Invalid value of right wheel tick per round!")
-        
+
         if self.__checkWheelBase(wheel_base):
             self.__wheel_base = wheel_base
         elif not self.__checkTick(wheel_base):
             raise Exception("Invalid value of wheel base!")
-        
-        
 
     def __initializeParameters(self):
         """Initialize private parameters."""
@@ -106,9 +95,15 @@ class PoseCalculator(object):
         self.__y = 0.0
         self.__theta = 0.0
 
-
-    def tickToRad(self, tick):
-        
+    def __tickToRad(self, tick):
+        return (tick / 480) * 2 * math.pi
 
     def calculatePose(self, left_tick, right_tick):
-        self.__theta = 
+        self.__theta = math.fmod(
+            (
+                self.__radius
+                * (self.__tickToRad(right_tick) - self.__tickToRad(left_tick))
+                / self.__wheel_base
+            ),
+            2 * math.pi,
+        )  # rad (0 <= self.__theta < 2 pi)
