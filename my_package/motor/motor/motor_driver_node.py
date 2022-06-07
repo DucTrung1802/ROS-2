@@ -18,13 +18,15 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32
 from std_msgs.msg import Float32
+from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
+
+# User-defined class
 from motor.MotorDriver import MotorDriver
 from motor.DataRecoder import DataRecoder
 from motor.PIDController import PIDController
 from motor.ReadLine import ReadLine
-from nav_msgs.msg import Odometry
-
+from motor.PoseCalculator import PoseCalculator
 
 # =========== Configurable parameters =============
 # Serial parameters
@@ -91,6 +93,9 @@ TEST_PWM = 511
 # DataRecorder parameters
 DATA_AMOUNT = 700
 
+if not (float(WHEEL_BASE) and WHEEL_BASE > 0):
+    raise Exception("Invalid value of wheel base length!")
+
 # =================================================
 
 # Non-configure parameters
@@ -154,6 +159,13 @@ RIGHT_MOTOR_PID_CONTROLLER = PIDController(
 timer_test_PID = 0
 step_test_PID = 0
 
+# PoseCalculator instance
+POSE_CALCULATOR = PoseCalculator(
+    radius=LEFT_MOTOR.getRadius,
+    left_wheel_tick_per_round=LEFT_MOTOR.getTickPerRoundOfEncoder(),
+    right_wheel_tick_per_round=RIGHT_MOTOR.getTickPerRoundOfEncoder(),
+    wheel_base=WHEEL_BASE,
+)
 
 # Node parameters
 linear_velocity = 0
@@ -570,6 +582,19 @@ def updateRPMFromStorePos():
     CHECKSUM = STORE_CHECKSUM
 
 
+def updatePublishDictionary():
+    global odom_dictionary
+    pose = POSE_CALCULATOR.getOutputPose()
+    odom_dictionary["pose"]["pose"]["position"]["x"] = pose[0][0]
+    odom_dictionary["pose"]["pose"]["position"]["y"] = pose[0][1]
+    odom_dictionary["pose"]["pose"]["position"]["z"] = pose[0][2]
+
+    odom_dictionary["pose"]["pose"]["orientation"]["x"] = pose[1][0]
+    odom_dictionary["pose"]["pose"]["orientation"]["y"] = pose[1][1]
+    odom_dictionary["pose"]["pose"]["orientation"]["z"] = pose[1][2]
+    odom_dictionary["pose"]["pose"]["orientation"]["w"] = pose[1][3]
+
+
 def manuallyWrite():
     # A command is appended with "#" to mark as finish
     command = prompt("Command") + "#"
@@ -635,16 +660,9 @@ def task_1():
             break
 
         updateStoreRPMFromSerial()
-
-        # print("Left tick: " + str(STORE_LEFT_TICK))
-        # print("Right tick: " + str(STORE_RIGHT_TICK))
-        # print("-----")
-
-        # print(end - start)
-
-        # print("task 1 interval: " + str(end - start))
-        # WORKBOOK.writeData(index + 1, 1, end - start)
-        # WORKBOOK.writeData(index + 1, 2, (total_receive - error_receive) * 100 / total_receive)
+        updateRPMFromStorePos()
+        POSE_CALCULATOR.calculatePose(LEFT_TICK, RIGHT_TICK)
+        updatePublishDictionary()
 
 
 def task_2():
@@ -656,18 +674,10 @@ def task_2():
 
         comp_start = time.time()
 
-        updateRPMFromStorePos()
-
         if not DATA_RECORDING:
             driveMotors()
 
-        # print("linear_RPM_left: " + str(linear_RPM_left))
-        # print("linear_RPM_right: " + str(linear_RPM_right))
-
         comp_end = time.time()
-
-        # if PUBLISH_PERIOD - (comp_end - comp_start) >= 0:
-        # time.sleep(PUBLISH_PERIOD - (comp_end - comp_start))
 
 
 def task_3():
@@ -862,8 +872,7 @@ def threadingHandler():
     if not TEST_ONLY_ON_LAPTOP:
         thread_1.start()
         thread_2.start()
-
-    thread_3.start()
+        thread_3.start()
 
     if DATA_RECORDING:
         thread_4.start()
