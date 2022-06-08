@@ -88,7 +88,7 @@ DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 700
+TEST_PWM = 500
 
 # DataRecorder parameters
 DATA_AMOUNT = 750
@@ -690,7 +690,7 @@ def task_3():
         if flag_3:
             break
 
-        rclpy.spin(motor_driver_node)
+        rclpy.spin_once(motor_driver_node)
 
 
 def task_4():
@@ -713,8 +713,7 @@ def task_4():
 
     while index <= DATA_AMOUNT:
 
-        if flag_4:
-            break
+        print("Data: " + str(index) + "/" + str(DATA_AMOUNT))
 
         start = time.time()
 
