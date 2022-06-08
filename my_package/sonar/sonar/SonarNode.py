@@ -131,12 +131,11 @@ def task_5(sonar):
 def task_6(sonar_array):
     global flag_6
     rclpy.init()
+    sonar_node = SonarNode(node_name=NODE_NAME, sonar_array_instance=sonar_array)
     while True:
 
         if flag_6:
             break
-
-        sonar_node = SonarNode(node_name=NODE_NAME, sonar_array_instance=sonar_array)
 
         rclpy.spin(sonar_node)
 
