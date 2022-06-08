@@ -206,6 +206,7 @@ def loop():
     sonar_array.append(sonar_5)
 
     try:
+        print("Start Publishing")
         threadingHandler(sonar_array)
 
         # Reset by pressing CTRL + C
