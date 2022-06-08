@@ -9,6 +9,13 @@ import time
 # maximum measure time:3 / 343 * 2 = 0.017492s
 
 MAXIMUM_MEASURE_TIME = 0.017492  # s
+MEASURE_FREQUENCY = 200
+
+if not (int(MEASURE_FREQUENCY) and MEASURE_FREQUENCY > 0):
+    raise Exception("Invalid value of MEASURE_FREQUENCY!")
+
+MEASURE_PERIOD = 1 / MEASURE_FREQUENCY
+
 
 timer1 = time.time()
 
@@ -47,8 +54,7 @@ class Sonar(object):
     def __checkCondition(
         self, trigger_pin, echo_pin, min_range, max_range, field_of_view
     ):
-        trigger_pin_condition = isinstance(
-            trigger_pin, int) and 2 <= trigger_pin <= 27
+        trigger_pin_condition = isinstance(trigger_pin, int) and 2 <= trigger_pin <= 27
         echo_pin_condition = (
             isinstance(trigger_pin, int)
             and 2 <= trigger_pin <= 27
@@ -134,12 +140,11 @@ class Sonar(object):
         # multiply with the sonic speed (343 m/s)
         # and divide by 2, because there and back
         distance = (time_elapsed * 343) / 2
-        distance = self.__saturate(
-            distance, self.__min_range, self.__max_range)
+        distance = self.__saturate(distance, self.__min_range, self.__max_range)
 
         self.__range = distance
 
-        time.sleep(0.05)
+        time.sleep(MEASURE_PERIOD)
 
     def getMinRange(self):
         return self.__min_range
