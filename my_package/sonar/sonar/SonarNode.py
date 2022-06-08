@@ -132,6 +132,7 @@ def task_6(sonar_array):
     global flag_6
     rclpy.init()
     sonar_node = SonarNode(node_name=NODE_NAME, sonar_array_instance=sonar_array)
+    print("Start Publishing")
     while True:
 
         if flag_6:
@@ -205,7 +206,6 @@ def loop():
     sonar_array.append(sonar_5)
 
     try:
-        print("Start Publishing")
         threadingHandler(sonar_array)
 
         # Reset by pressing CTRL + C
