@@ -110,9 +110,6 @@ class Sonar(object):
         return current_time
 
     def measureRange(self):
-        # set Trigger to LOW for stability
-        GPIO.output(self.__trigger_pin, False)
-        time.sleep(0.0001)
 
         # set Trigger to HIGH
         GPIO.output(self.__trigger_pin, True)
