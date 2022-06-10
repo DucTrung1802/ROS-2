@@ -5,7 +5,7 @@ import time
 from sensor_msgs.msg import Range
 import RPi.GPIO as GPIO
 import time
-from sonar.SonarClass import Sonar
+from sonar.Sonar import Sonar
 import threading
 
 # Node parameters
@@ -65,6 +65,7 @@ class SonarNode(Node):
 
 def task_1(sonar):
     global flag_1
+    print("Start thread 1")
     if not isinstance(sonar, Sonar):
         raise Exception("Task 1: parameter sonar is not an instance of Sonar!")
 
@@ -74,10 +75,12 @@ def task_1(sonar):
             break
 
         sonar.measureRange()
+        print("Task 1 is running...")
 
 
 def task_2(sonar):
     global flag_2
+    print("Start thread 2")
     if not isinstance(sonar, Sonar):
         raise Exception("Task 2: parameter sonar is not an instance of Sonar!")
 
@@ -87,10 +90,12 @@ def task_2(sonar):
             break
 
         sonar.measureRange()
+        print("Task 2 is running...")
 
 
 def task_3(sonar):
     global flag_3
+    print("Start thread 3")
     if not isinstance(sonar, Sonar):
         raise Exception("Task 3: parameter sonar is not an instance of Sonar!")
 
@@ -100,10 +105,12 @@ def task_3(sonar):
             break
 
         sonar.measureRange()
+        print("Task 3 is running...")
 
 
 def task_4(sonar):
     global flag_4
+    print("Start thread 4")
     if not isinstance(sonar, Sonar):
         raise Exception("Task 4: parameter sonar is not an instance of Sonar!")
 
@@ -113,10 +120,12 @@ def task_4(sonar):
             break
 
         sonar.measureRange()
+        print("Task 4 is running...")
 
 
 def task_5(sonar):
     global flag_5
+    print("Start thread 5")
     if not isinstance(sonar, Sonar):
         raise Exception("Task 5: parameter sonar is not an instance of Sonar!")
 
@@ -126,23 +135,28 @@ def task_5(sonar):
             break
 
         sonar.measureRange()
+        print("Task 5 is running...")
 
 
-def task_6(sonar_array):
+def task_6(sonar_node):
     global flag_6
-    rclpy.init()
-    sonar_node = SonarNode(node_name=NODE_NAME, sonar_array_instance=sonar_array)
-    print("Start Publishing")
+    print("Start thread 6")
     while True:
 
         if flag_6:
             break
 
-        rclpy.spin(sonar_node)
+        rclpy.spin_once(sonar_node)
+        print("Task 6 is running...")
 
 
 def threadingHandler(sonar_array):
     global flag_1, flag_2, flag_3, flag_4, flag_5, flag_6
+
+    rclpy.init()
+    print("Creating instance...")
+    sonar_node = SonarNode(node_name=NODE_NAME, sonar_array_instance=sonar_array)
+    print("Created instance!")
 
     flag_1 = False
     flag_2 = False
@@ -156,7 +170,7 @@ def threadingHandler(sonar_array):
     thread_3 = threading.Thread(target=task_3, args=(sonar_array[2],))
     thread_4 = threading.Thread(target=task_4, args=(sonar_array[3],))
     thread_5 = threading.Thread(target=task_5, args=(sonar_array[4],))
-    thread_6 = threading.Thread(target=task_6, args=(sonar_array,))
+    thread_6 = threading.Thread(target=task_6, args=(sonar_node,))
 
     thread_1.start()
     thread_2.start()
@@ -174,10 +188,12 @@ def threadingHandler(sonar_array):
 
 
 def setup():
+    print("Start setup")
     checkConditions()
 
 
 def loop():
+    print("Start loop")
     global sonar_node_1, sonar_node_2, sonar_node_3, sonar_node_4, sonar_node_5
 
     sonar_array = []
@@ -204,6 +220,8 @@ def loop():
     sonar_array.append(sonar_3)
     sonar_array.append(sonar_4)
     sonar_array.append(sonar_5)
+
+    print(sonar_array)
 
     try:
         threadingHandler(sonar_array)
