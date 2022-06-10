@@ -3,28 +3,26 @@ import time
 
 
 class MotorDriver(object):
-    def __init__(
-        self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
-    ):
+    def __init__(self, diameter, tick_per_round_of_encoder, pwm_frequency, sample_time):
         """Motor driver class
 
         Args:
             diameter (float): diameter of wheel (m)
-            pulse_per_round_of_encoder (int): as name
+            tick_per_round_of_encoder (int): as name
             pwm_frequency (int): pwm frequency
             sample_time (float): sample time to drive motor
         """
         self.__checkConditions(
-            diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
+            diameter, tick_per_round_of_encoder, pwm_frequency, sample_time
         )
         self.__initializeParameters()
 
     def __checkConditions(
-        self, diameter, pulse_per_round_of_encoder, pwm_frequency, sample_time
+        self, diameter, tick_per_round_of_encoder, pwm_frequency, sample_time
     ):
         """Check conditions of MotorDriver parameters."""
         self.__checkDiamater(diameter)
-        self.__checkPulsePerRoundOfEncoder(pulse_per_round_of_encoder)
+        self.__checkPulsePerRoundOfEncoder(tick_per_round_of_encoder)
         self.__checkPwmFrequency(pwm_frequency)
         self.__checkSampleTime(sample_time)
 
@@ -34,11 +32,11 @@ class MotorDriver(object):
         else:
             raise Exception("Invalid value of diameter!")
 
-    def __checkPulsePerRoundOfEncoder(self, pulse_per_round_of_encoder):
-        if float(pulse_per_round_of_encoder) and pulse_per_round_of_encoder > 0:
-            self.__pulse_per_round_of_encoder = pulse_per_round_of_encoder
+    def __checkPulsePerRoundOfEncoder(self, tick_per_round_of_encoder):
+        if float(tick_per_round_of_encoder) and tick_per_round_of_encoder > 0:
+            self.__tick_per_round_of_encoder = tick_per_round_of_encoder
         else:
-            raise Exception("Invalid value of pulse_per_round_of_encoder!")
+            raise Exception("Invalid value of tick_per_round_of_encoder!")
 
     def __checkPwmFrequency(self, pwm_frequency):
         if float(pwm_frequency) and pwm_frequency > 0:
@@ -89,7 +87,7 @@ class MotorDriver(object):
             )
             self.__RPM = (
                 self.__encoder_count_per_second
-                / self.__pulse_per_round_of_encoder
+                / self.__tick_per_round_of_encoder
                 * 60.0
             )
             self.__lowPassFilter()
@@ -120,6 +118,15 @@ class MotorDriver(object):
 
     def changeCoefficientKalmanFilter(self):
         pass
+
+    def getRadius(self):
+        return float(self.__diameter / 2.0)
+
+    def getDiameter(self):
+        return self.__diameter
+
+    def getTickPerRoundOfEncoder(self):
+        return self.__tick_per_round_of_encoder
 
     def getTicks(self):
         return self.__previous_tick
