@@ -84,7 +84,7 @@ RIGHT_MOTOR_MAX = 12
 # Test data
 TEST_ONLY_ON_LAPTOP = False
 MANUALLY_TUNE_PID = False
-DATA_RECORDING = True
+DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
@@ -255,7 +255,7 @@ class MotorDriverNode(Node):
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = "odom"
 
-        msg.child_frame_id = "idunno"
+        msg.child_frame_id = "base_footprint"
 
         msg.pose.pose.position.x = odom_dictionary["pose"]["pose"]["position"]["x"]
         msg.pose.pose.position.y = odom_dictionary["pose"]["pose"]["position"]["y"]
