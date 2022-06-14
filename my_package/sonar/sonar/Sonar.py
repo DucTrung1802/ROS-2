@@ -72,8 +72,17 @@ class Sonar(object):
         else:
             return False
 
+    def __saturate(self, index, min, max):
+        if index <= min:
+            return min
+        elif index >= max:
+            return max
+        else:
+            return index
+
     def measureRange(self):
-        self.__range = self.__sonar.basic_distance(self.__trigger_pin, self.__echo_pin)
+        range = self.__sonar.basic_distance(self.__trigger_pin, self.__echo_pin) / 100.0 # m
+        self.__range = self.__saturate(range, self.__min_range, self.__max_range)
 
     def getMinRange(self):
         return self.__min_range
