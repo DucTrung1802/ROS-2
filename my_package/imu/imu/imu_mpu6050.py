@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Imu
@@ -6,7 +9,8 @@ import threading
 import RPi.GPIO as GPIO
 
 import time
-from mpu6050 import mpu6050
+import board
+import adafruit_mpu6050
 
 # Initial pose parameters
 ROLL = 0.0
@@ -15,7 +19,7 @@ YAW = 0.0
 
 # Node parameters
 NODE_NAME = "imu_mpu6050"
-PUBLISH_FREQUENCY = 50
+PUBLISH_FREQUENCY = 100
 
 # Node parameters
 PUBLISH_PERIOD = 0
@@ -56,35 +60,36 @@ class IMUPublisher(Node):
         msg.orientation.z = initial_pose_quaternion[2]
         msg.orientation.w = initial_pose_quaternion[3]
 
-        msg.linear_acceleration.x = accel_data["x"]
-        msg.linear_acceleration.y = accel_data["y"]
-        msg.linear_acceleration.z = accel_data["z"]
+        msg.linear_acceleration.x = accel_data[0]
+        msg.linear_acceleration.y = accel_data[1]
+        msg.linear_acceleration.z = accel_data[2]
 
-        msg.angular_velocity.x = gyro_data["x"]
-        msg.angular_velocity.y = gyro_data["y"]
-        msg.angular_velocity.z = gyro_data["z"]
+        msg.angular_velocity.x = gyro_data[0]
+        msg.angular_velocity.y = gyro_data[1]
+        msg.angular_velocity.z = gyro_data[2]
 
         self.imu_pub.publish(msg)
 
 
-def getIMUData():
+def getIMUData(mpu):
     global accel_data, gyro_data
     try:
-        mpu = mpu6050(0x68)
-        accel_data = mpu.get_accel_data()
-        gyro_data = mpu.get_gyro_data()
+        accel_data = mpu.acceleration
+        gyro_data = mpu.gyro
     except:
         print("An error has occurred while getting data from IMU MPU 6050!")
 
 
 def task_1():
     global flag_1
+    i2c = board.I2C()  # uses board.SCL and board.SDA
+    mpu = adafruit_mpu6050.MPU6050(i2c)
     while True:
 
         if flag_1:
             break
 
-        getIMUData()
+        getIMUData(mpu)
 
 
 def task_2():

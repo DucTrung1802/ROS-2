@@ -3,8 +3,9 @@ import time
 import RPi.GPIO as GPIO
 import time
 
-timer1 = time.time()
+from hcsr04sensor import sensor
 
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
 
@@ -28,11 +29,26 @@ class Sonar(object):
             self.__min_range = min_range
             self.__max_range = max_range
             self.__field_of_view = field_of_view
+            self.__range = 0.0
             self.__radiation_type = 0
+            self.__sonar = sensor.Measurement
 
             # set GPIO direction (IN / OUT)
             GPIO.setup(self.__trigger_pin, GPIO.OUT)
             GPIO.setup(self.__echo_pin, GPIO.IN)
+
+        else:
+            raise Exception(
+                "Invalid initial values of Sonar with Trigger Pin: "
+                + str(trigger_pin)
+                + " and Echo Pin: "
+                + str(echo_pin)
+                + "!"
+            )
+
+        print(
+            "Complete initializing Sonar with TRIGGER PIN: " + str(self.__trigger_pin)
+        )
 
     def __checkCondition(
         self, trigger_pin, echo_pin, min_range, max_range, field_of_view
@@ -56,40 +72,17 @@ class Sonar(object):
         else:
             return False
 
-    def __saturate(self, index, min_index, max_index):
-        if index < min_index:
-            return min_index
-        elif index > max_index:
-            return max_index
+    def __saturate(self, index, min, max):
+        if index <= min:
+            return min
+        elif index >= max:
+            return max
         else:
             return index
 
-    def getMeasureDistance(self):
-        # set Trigger to HIGH
-        GPIO.output(self.__trigger_pin, True)
-
-        # set Trigger after 0.01ms to LOW
-        time.sleep(0.00001)
-        GPIO.output(self.__trigger_pin, False)
-
-        StartTime = time.time()
-        StopTime = time.time()
-
-        # save StartTime
-        while GPIO.input(self.__echo_pin) == 0:
-            StartTime = time.time()
-
-        # save time of arrival
-        while GPIO.input(self.__echo_pin) == 1:
-            StopTime = time.time()
-
-        # time difference between start and arrival
-        TimeElapsed = StopTime - StartTime
-        # multiply with the sonic speed (343 m/s)
-        # and divide by 2, because there and back
-        distance = (TimeElapsed * 343) / 2 
-        distance = self.__saturate(distance, self.__min_range, self.__max_range)
-        return distance
+    def measureRange(self):
+        range = self.__sonar.basic_distance(self.__trigger_pin, self.__echo_pin) / 100.0 # m
+        self.__range = self.__saturate(range, self.__min_range, self.__max_range)
 
     def getMinRange(self):
         return self.__min_range
@@ -102,3 +95,6 @@ class Sonar(object):
 
     def getRadiationType(self):
         return self.__radiation_type
+
+    def getRange(self):
+        return self.__range

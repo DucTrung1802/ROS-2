@@ -12,18 +12,22 @@ import copy
 import hashlib
 import numpy as np
 import threading
+import timeit
 
 # ROS 2 libraries
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32
 from std_msgs.msg import Float32
+from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
+
+# User-defined class
 from motor.MotorDriver import MotorDriver
 from motor.DataRecoder import DataRecoder
 from motor.PIDController import PIDController
 from motor.ReadLine import ReadLine
-
+from motor.PoseCalculator import PoseCalculator
 
 # =========== Configurable parameters =============
 # Serial parameters
@@ -34,7 +38,7 @@ BAUD_RATE = 921600
 RECEIVING_FREQUENCY = 500
 
 # Node parameters
-PUBLISH_FREQUENCY = 100
+PUBLISH_FREQUENCY = 30
 NODE_NAME = "motor_driver"
 
 # Motor parameters
@@ -79,15 +83,19 @@ RIGHT_MOTOR_MAX = 12
 
 
 # Test data
+TEST_ONLY_ON_LAPTOP = False
 MANUALLY_TUNE_PID = False
-DATA_RECORDING = False
+DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 511
+TEST_PWM = 0
 
 # DataRecorder parameters
-DATA_AMOUNT = 700
+DATA_AMOUNT = 750
+
+if not (float(WHEEL_BASE) and WHEEL_BASE > 0):
+    raise Exception("Invalid value of wheel base length!")
 
 # =================================================
 
@@ -95,14 +103,14 @@ DATA_AMOUNT = 700
 # Motor instances
 LEFT_MOTOR = MotorDriver(
     diameter=LEFT_MOTOR_DIAMETER,
-    pulse_per_round_of_encoder=LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER,
+    tick_per_round_of_encoder=LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER,
     pwm_frequency=LEFT_MOTOR_PWM_FREQUENCY,
     sample_time=LEFT_MOTOR_SAMPLE_TIME,
 )
 
 RIGHT_MOTOR = MotorDriver(
     diameter=RIGHT_MOTOR_DIAMETER,
-    pulse_per_round_of_encoder=RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER,
+    tick_per_round_of_encoder=RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER,
     pwm_frequency=RIGHT_MOTOR_PWM_FREQUENCY,
     sample_time=RIGHT_MOTOR_SAMPLE_TIME,
 )
@@ -126,8 +134,7 @@ except:
     raise Exception("Cannot calculate inverse of kinematic model matrix!")
 
 # Kalman Filter instances
-LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P,
-                         Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
+LEFT_MOTOR.setupValuesKF(X=LEFT_MOTOR_X, P=LEFT_MOTOR_P, Q=LEFT_MOTOR_Q, R=LEFT_MOTOR_R)
 RIGHT_MOTOR.setupValuesKF(
     X=RIGHT_MOTOR_X, P=RIGHT_MOTOR_P, Q=RIGHT_MOTOR_Q, R=RIGHT_MOTOR_R
 )
@@ -153,6 +160,13 @@ RIGHT_MOTOR_PID_CONTROLLER = PIDController(
 timer_test_PID = 0
 step_test_PID = 0
 
+# PoseCalculator instance
+POSE_CALCULATOR = PoseCalculator(
+    radius=LEFT_MOTOR.getRadius(),
+    left_wheel_tick_per_round=LEFT_MOTOR.getTickPerRoundOfEncoder(),
+    right_wheel_tick_per_round=RIGHT_MOTOR.getTickPerRoundOfEncoder(),
+    wheel_base=WHEEL_BASE,
+)
 
 # Node parameters
 linear_velocity = 0
@@ -189,9 +203,25 @@ LEFT_RPM = 0
 RIGHT_RPM = 0
 CHECKSUM = ""
 
+# Publishing dictionary
+odom_dictionary = {
+    "pose": {
+        "pose": {
+            "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+            "orientation": {"x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0},
+        }
+    },
+    "twist": {
+        "twist": {
+            "linear": {"x": 0.0, "y": 0.0, "z": 0.0},
+            "angular": {"x": 0.0, "y": 0.0, "z": 0.0},
+        }
+    },
+}
+
+
 # Data recorder
-WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY,
-                       LEFT_MOTOR.getSampleTime())
+WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
 
 
 def checkConditions():
@@ -208,41 +238,68 @@ def checkConditions():
 class MotorDriverNode(Node):
     def __init__(self, node_name):
         super().__init__(node_name)
-        self.__need_publish = True
-        self.left_tick_pub = self.create_publisher(Int32, "left_tick", 1)
-        self.right_tick_pub = self.create_publisher(Int32, "right_tick", 1)
-        self.left_RPM_pub = self.create_publisher(Float32, "left_RPM", 1)
-        self.right_RPM_pub = self.create_publisher(Float32, "right_RPM", 1)
-        self.timer = self.create_timer(0, self.publisherCallback)
+        self.odom_pub = self.create_publisher(Odometry, "/wheel/odometry", 1)
+        # self.left_tick_pub = self.create_publisher(Int32, "left_tick", 1)
+        # self.right_tick_pub = self.create_publisher(Int32, "right_tick", 1)
+        # self.left_RPM_pub = self.create_publisher(Float32, "left_RPM", 1)
+        # self.right_RPM_pub = self.create_publisher(Float32, "right_RPM", 1)
+        self.timer = self.create_timer(PUBLISH_PERIOD, self.publisherCallback)
 
         self.controller_sub = self.create_subscription(
             Twist, "cmd_vel", self.subscriberCallback, 1
         )
         self.controller_sub  # prevent unused variable warning
 
-    def setNeedPublish(self):
-        self.__need_publish = True
-
-    def resetNeedPublish(self):
-        self.__need_publish = False
-
     def publisherCallback(self):
-        if self.__need_publish:
-            left_RPM = Float32()
-            right_RPM = Float32()
-            left_RPM.data = float(LEFT_RPM)
-            right_RPM.data = float(RIGHT_RPM)
-            self.left_RPM_pub.publish(left_RPM)
-            self.right_RPM_pub.publish(right_RPM)
 
-            left_tick = Int32()
-            right_tick = Int32()
-            left_tick.data = int(LEFT_TICK)
-            right_tick.data = int(RIGHT_TICK)
-            self.left_tick_pub.publish(left_tick)
-            self.right_tick_pub.publish(right_tick)
+        msg = Odometry()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = "odom"
 
-            # self.get_logger().info('Publishing: "%s"' % msg.data)
+        msg.child_frame_id = "base_footprint"
+
+        msg.pose.pose.position.x = odom_dictionary["pose"]["pose"]["position"]["x"]
+        msg.pose.pose.position.y = odom_dictionary["pose"]["pose"]["position"]["y"]
+        msg.pose.pose.position.z = odom_dictionary["pose"]["pose"]["position"]["z"]
+
+        msg.pose.pose.orientation.x = odom_dictionary["pose"]["pose"]["orientation"][
+            "x"
+        ]
+        msg.pose.pose.orientation.y = odom_dictionary["pose"]["pose"]["orientation"][
+            "y"
+        ]
+        msg.pose.pose.orientation.z = odom_dictionary["pose"]["pose"]["orientation"][
+            "z"
+        ]
+        msg.pose.pose.orientation.w = odom_dictionary["pose"]["pose"]["orientation"][
+            "w"
+        ]
+
+        msg.twist.twist.linear.x = odom_dictionary["twist"]["twist"]["linear"]["x"]
+        msg.twist.twist.linear.y = odom_dictionary["twist"]["twist"]["linear"]["y"]
+        msg.twist.twist.linear.z = odom_dictionary["twist"]["twist"]["linear"]["z"]
+
+        msg.twist.twist.angular.x = odom_dictionary["twist"]["twist"]["angular"]["x"]
+        msg.twist.twist.angular.y = odom_dictionary["twist"]["twist"]["angular"]["y"]
+        msg.twist.twist.angular.z = odom_dictionary["twist"]["twist"]["angular"]["z"]
+
+        self.odom_pub.publish(msg)
+
+        # left_RPM = Float32()
+        # right_RPM = Float32()
+        # left_RPM.data = float(LEFT_RPM)
+        # right_RPM.data = float(RIGHT_RPM)
+        # self.left_RPM_pub.publish(left_RPM)
+        # self.right_RPM_pub.publish(right_RPM)
+
+        # left_tick = Int32()
+        # right_tick = Int32()
+        # left_tick.data = int(LEFT_TICK)
+        # right_tick.data = int(RIGHT_TICK)
+        # self.left_tick_pub.publish(left_tick)
+        # self.right_tick_pub.publish(right_tick)
+
+        # self.get_logger().info('Publishing: "%s"' % msg.data)
 
     def subscriberCallback(self, msg):
         setupSetpoint(msg)
@@ -294,10 +351,13 @@ def differientialDriveCalculate(linear_velocity, angular_velocity):
 def setupSetpoint(msg):
     global previous_linear_velocity, current_state_is_straight, previous_current_state_is_straight
     global linear_velocity, linear_RPM_left, linear_RPM_right
+    global odom_dictionary
     # Evaluate to have RPM value
 
     linear_velocity = msg.linear.x  # m/s
     angular_velocity = msg.angular.z  # rad/s
+    odom_dictionary["twist"]["twist"]["linear"]["x"] = msg.linear.x
+    odom_dictionary["twist"]["twist"]["angular"]["z"] = msg.angular.z
 
     differiential_drive_matrix = differientialDriveCalculate(
         linear_velocity, angular_velocity
@@ -309,8 +369,7 @@ def setupSetpoint(msg):
     linear_RPM_right = differiential_drive_matrix.item(0)
     linear_RPM_left = differiential_drive_matrix.item(1)
 
-    linear_RPM_left = saturate(
-        linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
+    linear_RPM_left = saturate(linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
 
     linear_RPM_right = saturate(
         linear_RPM_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
@@ -411,7 +470,7 @@ def getMCUSerial():
                 foundMCU = True
                 index = device.find("ttyUSB")
                 # print(index)
-                MCUSerial = device[index: index + 7]
+                MCUSerial = device[index : index + 7]
                 # print(MCUSerial)
                 break
 
@@ -477,8 +536,7 @@ def checksum():
     dictionaryDataCheck.pop("ck", None)
     dictionaryDataCheckString = json.dumps(dictionaryDataCheck)
     dictionaryDataCheckString = dictionaryDataCheckString.replace(" ", "")
-    checksumString = hashlib.md5(
-        dictionaryDataCheckString.encode()).hexdigest()
+    checksumString = hashlib.md5(dictionaryDataCheckString.encode()).hexdigest()
 
     # print("Dict: " + dictionaryDataCheckString)
 
@@ -523,6 +581,19 @@ def updateRPMFromStorePos():
     LEFT_RPM = STORE_LEFT_RPM
     RIGHT_RPM = STORE_RIGHT_RPM
     CHECKSUM = STORE_CHECKSUM
+
+
+def updatePublishDictionary():
+    global odom_dictionary
+    pose = POSE_CALCULATOR.getOutputPose()
+    odom_dictionary["pose"]["pose"]["position"]["x"] = pose[0][0]
+    odom_dictionary["pose"]["pose"]["position"]["y"] = pose[0][1]
+    odom_dictionary["pose"]["pose"]["position"]["z"] = pose[0][2]
+
+    odom_dictionary["pose"]["pose"]["orientation"]["x"] = pose[1][0]
+    odom_dictionary["pose"]["pose"]["orientation"]["y"] = pose[1][1]
+    odom_dictionary["pose"]["pose"]["orientation"]["z"] = pose[1][2]
+    odom_dictionary["pose"]["pose"]["orientation"]["w"] = pose[1][3]
 
 
 def manuallyWrite():
@@ -590,22 +661,13 @@ def task_1():
             break
 
         updateStoreRPMFromSerial()
-
-        # print("Left tick: " + str(STORE_LEFT_TICK))
-        # print("Right tick: " + str(STORE_RIGHT_TICK))
-        # print("-----")
-
-        # print(end - start)
-
-        # print("task 1 interval: " + str(end - start))
-        # WORKBOOK.writeData(index + 1, 1, end - start)
-        # WORKBOOK.writeData(index + 1, 2, (total_receive - error_receive) * 100 / total_receive)
+        updateRPMFromStorePos()
+        POSE_CALCULATOR.calculatePose(LEFT_TICK, RIGHT_TICK)
+        updatePublishDictionary()
 
 
 def task_2():
     global flag_2
-    rclpy.init()
-    motor_driver_node = MotorDriverNode(NODE_NAME)
     while True:
 
         if flag_2:
@@ -613,31 +675,23 @@ def task_2():
 
         comp_start = time.time()
 
-        updateRPMFromStorePos()
-        rclpy.spin_once(motor_driver_node)
-
         if not DATA_RECORDING:
             driveMotors()
 
-        # print("linear_RPM_left: " + str(linear_RPM_left))
-        # print("linear_RPM_right: " + str(linear_RPM_right))
-
         comp_end = time.time()
-
-        # if PUBLISH_PERIOD - (comp_end - comp_start) >= 0:
-        # time.sleep(PUBLISH_PERIOD - (comp_end - comp_start))
 
 
 def task_3():
     global flag_3
-
+    rclpy.init()
+    motor_driver_node = MotorDriverNode(NODE_NAME)
+    print("Start Publishing")
     while True:
 
         if flag_3:
             break
 
-        # rclpy.spin_once(motor_driver_node)
-        # driveMotors()
+        rclpy.spin_once(motor_driver_node)
 
 
 def task_4():
@@ -660,9 +714,11 @@ def task_4():
 
     while index <= DATA_AMOUNT:
 
-        start = time.time()
+        print("Data: " + str(index) + "/" + str(DATA_AMOUNT))
 
-        comp_start = time.time()
+        start = timeit.default_timer()
+
+        comp_start = timeit.default_timer()
 
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
@@ -680,18 +736,18 @@ def task_4():
 
         index += 1
 
-        comp_end = time.time()
+        comp_end = timeit.default_timer()
 
         if comp_end - comp_start <= LEFT_MOTOR_SAMPLE_TIME:
             # Run a test code to find the exceeding of time.sleep() then multiply the coefficient again
             target_time = (
-                time.time()
+                timeit.default_timer()
                 + (LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start)) * 5 / 5.6
             )
-            while time.time() <= target_time:
+            while timeit.default_timer() <= target_time:
                 time.sleep(0.0001)
 
-        end = time.time()
+        end = timeit.default_timer()
 
         WORKBOOK.writeData(index + 1, 1, end - start)
 
@@ -807,7 +863,7 @@ def threadingHandler():
     # Create threads
     thread_1 = threading.Thread(target=task_1)
     thread_2 = threading.Thread(target=task_2)
-    # thread_3 = threading.Thread(target=task_3)
+    thread_3 = threading.Thread(target=task_3)
 
     if DATA_RECORDING:
         thread_4 = threading.Thread(target=task_4)
@@ -816,9 +872,10 @@ def threadingHandler():
         thread_5 = threading.Thread(target=task_5)
 
     # Start threads
-    thread_1.start()
-    thread_2.start()
-    # thread_3.start()
+    if not TEST_ONLY_ON_LAPTOP:
+        thread_1.start()
+        thread_2.start()
+        thread_3.start()
 
     if DATA_RECORDING:
         thread_4.start()
@@ -828,9 +885,11 @@ def threadingHandler():
         thread_5.start()
 
     # Wait for all threads to stop
-    thread_1.join()
-    thread_2.join()
-    # thread_3.join()
+    if not TEST_ONLY_ON_LAPTOP:
+        thread_1.join()
+        thread_2.join()
+
+    thread_3.join()
 
     if DATA_RECORDING:
         thread_4.join()
@@ -845,7 +904,8 @@ def threadingHandler():
 
 def setup():
     checkConditions()
-    initializeSerial()
+    if not TEST_ONLY_ON_LAPTOP:
+        initializeSerial()
 
 
 def loop():
@@ -866,17 +926,19 @@ def loop():
     except KeyboardInterrupt:
         # JSON
         print("Captured Ctrl + C")
-        MCUSerialObject.write(formSerialData(
-            "{motor_data:[0,1000,0,0,1000,0]}"))
-        MCUSerialObject.close()
-        WORKBOOK.saveWorkBook()
+        if not TEST_ONLY_ON_LAPTOP:
+            MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
+            MCUSerialObject.close()
+        if DATA_RECORDING or MANUALLY_TUNE_PID:
+            WORKBOOK.saveWorkBook()
 
     finally:
         print("The program has been stopped!")
-        MCUSerialObject.write(formSerialData(
-            "{motor_data:[0,1000,0,0,1000,0]}"))
-        MCUSerialObject.close()
-        WORKBOOK.saveWorkBook()
+        if not TEST_ONLY_ON_LAPTOP:
+            MCUSerialObject.write(formSerialData("{motor_data:[0,1000,0,0,1000,0]}"))
+            MCUSerialObject.close()
+        if DATA_RECORDING or MANUALLY_TUNE_PID:
+            WORKBOOK.saveWorkBook()
 
 
 def main():
