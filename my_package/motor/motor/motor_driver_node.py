@@ -12,6 +12,7 @@ import copy
 import hashlib
 import numpy as np
 import threading
+import timeit
 
 # ROS 2 libraries
 import rclpy
@@ -84,11 +85,11 @@ RIGHT_MOTOR_MAX = 12
 # Test data
 TEST_ONLY_ON_LAPTOP = False
 MANUALLY_TUNE_PID = False
-DATA_RECORDING = False
+DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
-TEST_PWM = 500
+TEST_PWM = 0
 
 # DataRecorder parameters
 DATA_AMOUNT = 750
@@ -715,9 +716,9 @@ def task_4():
 
         print("Data: " + str(index) + "/" + str(DATA_AMOUNT))
 
-        start = time.time()
+        start = timeit.default_timer()
 
-        comp_start = time.time()
+        comp_start = timeit.default_timer()
 
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
@@ -735,18 +736,18 @@ def task_4():
 
         index += 1
 
-        comp_end = time.time()
+        comp_end = timeit.default_timer()
 
         if comp_end - comp_start <= LEFT_MOTOR_SAMPLE_TIME:
             # Run a test code to find the exceeding of time.sleep() then multiply the coefficient again
             target_time = (
-                time.time()
+                timeit.default_timer()
                 + (LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start)) * 5 / 5.6
             )
-            while time.time() <= target_time:
+            while timeit.default_timer() <= target_time:
                 time.sleep(0.0001)
 
-        end = time.time()
+        end = timeit.default_timer()
 
         WORKBOOK.writeData(index + 1, 1, end - start)
 
