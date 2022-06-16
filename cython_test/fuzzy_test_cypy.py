@@ -1,11 +1,15 @@
 import cython
-from typing import List, Dict
 
+@cython.cclass
 class MadamniFuzzySystem(object):
+    __x: cython.double 
+    __time: cython.int
+    
     def __init__(self, x: cython.double, time: cython.int):
-        self.__x: cython.double = x
-        self.__time: cython.int = int(time)
+        self.__x = x
+        self.__time = time
 
+    @cython.ccall
     def output(self):
         sum: cython.double = 0
         i: cython.int
