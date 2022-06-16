@@ -1154,7 +1154,7 @@ static PyObject *__pyx_codeobj__2;
 
 /* "example_cython.pyx":1
  * def test(int x):             # <<<<<<<<<<<<<<
- *     cdef int y = 0
+ *     cdef double y = 0
  *     cdef int i
  */
 
@@ -1186,7 +1186,7 @@ static PyObject *__pyx_pw_14example_cython_1test(PyObject *__pyx_self, PyObject 
 }
 
 static PyObject *__pyx_pf_14example_cython_test(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_x) {
-  int __pyx_v_y;
+  double __pyx_v_y;
   int __pyx_v_i;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -1201,14 +1201,14 @@ static PyObject *__pyx_pf_14example_cython_test(CYTHON_UNUSED PyObject *__pyx_se
 
   /* "example_cython.pyx":2
  * def test(int x):
- *     cdef int y = 0             # <<<<<<<<<<<<<<
+ *     cdef double y = 0             # <<<<<<<<<<<<<<
  *     cdef int i
  *     for i in range(x):
  */
-  __pyx_v_y = 0;
+  __pyx_v_y = 0.0;
 
   /* "example_cython.pyx":4
- *     cdef int y = 0
+ *     cdef double y = 0
  *     cdef int i
  *     for i in range(x):             # <<<<<<<<<<<<<<
  *         y += i
@@ -1234,7 +1234,7 @@ static PyObject *__pyx_pf_14example_cython_test(CYTHON_UNUSED PyObject *__pyx_se
  *     return y             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_y); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
@@ -1242,7 +1242,7 @@ static PyObject *__pyx_pf_14example_cython_test(CYTHON_UNUSED PyObject *__pyx_se
 
   /* "example_cython.pyx":1
  * def test(int x):             # <<<<<<<<<<<<<<
- *     cdef int y = 0
+ *     cdef double y = 0
  *     cdef int i
  */
 
@@ -1329,7 +1329,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
   /* "example_cython.pyx":1
  * def test(int x):             # <<<<<<<<<<<<<<
- *     cdef int y = 0
+ *     cdef double y = 0
  *     cdef int i
  */
   __pyx_tuple_ = PyTuple_Pack(4, __pyx_n_s_x, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_i); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 1, __pyx_L1_error)
@@ -1616,7 +1616,7 @@ if (!__Pyx_RefNanny) {
 
   /* "example_cython.pyx":1
  * def test(int x):             # <<<<<<<<<<<<<<
- *     cdef int y = 0
+ *     cdef double y = 0
  *     cdef int i
  */
   __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_14example_cython_1test, NULL, __pyx_n_s_example_cython); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
