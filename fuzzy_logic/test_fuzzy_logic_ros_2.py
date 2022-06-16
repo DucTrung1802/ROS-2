@@ -4,7 +4,6 @@ from fuzzy_logic.variables import FuzzyVariable
 from fuzzy_logic.mamdani_fs import MamdaniFuzzySystem
 from fuzzy_logic.mf import TriangularMF
 import timeit
-from numba import njit
 
 # input1
 e1 = Term('NB', TriangularMF(-200, -140, -70))

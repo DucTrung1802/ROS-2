@@ -1,0 +1,302 @@
+make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 3.81
+# Copyright (C) 2006  Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.
+# There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+# This program built for i386-pc-mingw32
+ 
+
+# Make data base, printed on Thu Jun 16 04:32:47 2022
+
+# Variables
+
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# environment
+OMP_WAIT_POLICY = PASSIVE
+# makefile
+MAKEFLAGS = Rrqp
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+HOMEDRIVE = C:
+# automatic
+@F = $(notdir $@)
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# makefile
+CURDIR := e:/HK 20212/Final Project/ROS-2/fuzzy_logic
+# default
+SHELL := sh.exe
+# environment
+WINDIR = C:\WINDOWS
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
+# environment
+VBOX_MSI_INSTALL_PATH = C:\Program Files\Oracle\VirtualBox\
+# environment
+ONEDRIVE = C:\Users\Ly Duc Hung\OneDrive
+# environment
+PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+# makefile
+MAKEFILE_LIST := 
+# environment
+TMP = C:\Users\LYDUCH~1\AppData\Local\Temp
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+PROGRAMW6432 = C:\Program Files
+# environment
+PROGRAMDATA = C:\ProgramData
+# environment
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-6ca99631-6c7e-40e4-a317-6b4a4ce45995-sock
+# environment
+VSCODE_CWD = C:\Users\Ly Duc Hung\AppData\Local\Programs\Microsoft VS Code
+# environment
+PATH = C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Users\Ly Duc Hung\AppData\Local\Programs\Python\Python310\Scripts\;C:\Program Files (x86)\QuickTime\QTSystem\;C:\Windows\System32;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\dotnet\;C:\Program Files\PuTTY\;C:\Program Files\nodejs\;C:\Users\Ly Duc Hung\AppData\Local\Programs\Python\Python310\;C:\Users\Ly Duc Hung\AppData\Local\Programs\Python\Python310\python.exe;C:\Program Files\Git\cmd;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\OpenSSH-Win64;C:\MinGW64\bin;C:\Program Files (x86)\GnuWin32\bin;C:\Users\Ly Duc Hung\AppData\Local\Programs\Python\Python310\Scripts\;C:\Users\Ly Duc Hung\AppData\Local\Programs\Python\Python310\;C:\Users\Ly Duc Hung\AppData\Local\Programs\Microsoft VS Code\bin;E:\FPT IoT\Java\IntelliJ IDEA Community Edition 2021.3.3\bin;C:\Users\Ly Duc Hung\AppData\Local\gitkraken\bin;C:\Users\Ly Duc Hung\AppData\Roaming\npm;C:\Users\Ly Duc Hung\AppData\Local\Programs\Python\Python310\python.exe;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.32.31326\bin\Hostx64\x64;C:\MinGW64\bin;
+# environment
+COMMONPROGRAMW6432 = C:\Program Files\Common Files
+# environment
+ZES_ENABLE_SYSMAN = 1
+# environment
+PROCESSOR_ARCHITECTURE = x86
+# environment
+USERPROFILE = C:\Users\Ly Duc Hung
+# environment
+ALLUSERSPROFILE = C:\ProgramData
+# environment
+VSCODE_LOG_STACK = false
+# environment
+NUMBER_OF_PROCESSORS = 6
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# default
+.FEATURES := target-specific order-only second-expansion else-if archives
+# automatic
+%F = $(notdir $%)
+# environment
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_18700_GNVKGRXCXGPEIJFG
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+COMPUTERNAME = DESKTOP-E4ADGSC
+# environment
+PROGRAMFILES = C:\Program Files (x86)
+# environment
+DRIVERDATA = C:\Windows\System32\Drivers\DriverData
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
+# environment
+USERNAME = Ly Duc Hung
+# environment
+PUBLIC = C:\Users\Public
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+VSCODE_CODE_CACHE_PATH = C:\Users\Ly Duc Hung\AppData\Roaming\Code\CachedData\4af164ea3a06f701fe3e89a2bcbb421d2026b68f
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# environment
+COMMONPROGRAMFILES = C:\Program Files (x86)\Common Files
+# environment
+LOGONSERVER = \\DESKTOP-E4ADGSC
+# environment
+ONEDRIVECONSUMER = C:\Users\Ly Duc Hung\OneDrive
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# environment
+USERDOMAIN = DESKTOP-E4ADGSC
+# environment
+INTELLIJ IDEA COMMUNITY EDITION = E:\FPT IoT\Java\IntelliJ IDEA Community Edition 2021.3.3\bin;
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# default
+MAKE_VERSION := 3.81
+# makefile
+.DEFAULT_GOAL := 
+# environment
+PROGRAMFILES(X86) = C:\Program Files (x86)
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+LOCALAPPDATA = C:\Users\Ly Duc Hung\AppData\Local
+# environment
+PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
+# default
+MAKE_COMMAND := make.exe
+# environment
+PROCESSOR_ARCHITEW6432 = AMD64
+# default
+.VARIABLES := 
+# environment
+TMPDIR = C:\Users\Public\Documents\Wondershare\CreatorTemp
+# automatic
+*F = $(notdir $*)
+# environment
+PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
+# environment
+OS = Windows_NT
+# environment
+VSCODE_IPC_HOOK = \\.\pipe\a582e90e0a18c1b3b57b03f49ae2d32e-1.68.0-main-sock
+# environment
+KMP_BLOCKTIME = 0
+# environment
+HOMEPATH = \Users\Ly Duc Hung
+# environment
+COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
+# environment
+PROMPT = $P$G
+# environment
+MFLAGS = -Rrqp
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+SYSTEMROOT = C:\WINDOWS
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# automatic
++F = $(notdir $+)
+# environment
+APPDATA = C:\Users\Ly Duc Hung\AppData\Roaming
+# environment
+TEMP = C:\Users\LYDUCH~1\AppData\Local\Temp
+# environment
+COMSPEC = C:\WINDOWS\system32\cmd.exe
+# default
+MAKEFILES := 
+# automatic
+<F = $(notdir $<)
+# environment
+LC_ALL = C
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# environment
+SYSTEMDRIVE = C:
+# environment
+SESSIONNAME = Console
+# environment
+PROCESSOR_REVISION = 9e0a
+# environment
+MOZ_PLUGIN_PATH = C:\Program Files (x86)\Foxit Software\Foxit Reader\plugins\
+# environment
+MAKELEVEL := 0
+# environment
+LANG = C
+# environment
+PROCESSOR_LEVEL = 6
+# environment
+VSCODE_PID = 18700
+# environment
+USERDOMAIN_ROAMINGPROFILE = DESKTOP-E4ADGSC
+# variable set hash-table stats:
+# Load=94/1024=9%, Rehash=0, Collisions=9/111=8%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# C:\Users\Ly Duc Hung\AppData\Local\Programs\Python\Python310\Scripts\ (key C:/Users/Ly Duc Hung/AppData/Local/Programs/Python/Python310/Scripts/, mtime 1655328326): 47 files, no impossibilities.
+# C:\Program Files\Docker\Docker\resources\bin (key C:/Program Files/Docker/Docker/resources/bin, mtime 1654687180): 13 files, no impossibilities.
+# C:\Users\Ly Duc Hung\AppData\Local\Programs\Microsoft VS Code\bin (key C:/Users/Ly Duc Hung/AppData/Local/Programs/Microsoft VS Code/bin, mtime 1654859420): 4 files, no impossibilities.
+# C:\Users\Ly Duc Hung\AppData\Roaming\npm (key C:/Users/Ly Duc Hung/AppData/Roaming/npm, mtime 1653813616): 6 files, no impossibilities.
+# C:\OpenSSH-Win64 (key C:/OpenSSH-Win64, mtime 1654703803): 27 files, no impossibilities.
+# . (key e:/HK 20212/Final Project/ROS-2/fuzzy_logic, mtime 1655328711): 10 files, no impossibilities.
+# C:\Program Files\nodejs\ (key C:/Program Files/nodejs/, mtime 1653751419): 13 files, no impossibilities.
+# C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common (key C:/Program Files (x86)/NVIDIA Corporation/PhysX/Common, mtime 1643949520): 10 files, no impossibilities.
+# C:\Program Files\dotnet\ (key C:/Program Files/dotnet/, mtime 1653280973): 8 files, no impossibilities.
+# C:\Program Files (x86)\QuickTime\QTSystem\ (key C:/Program Files (x86)/QuickTime/QTSystem/, mtime 1635002765): 61 files, no impossibilities.
+# E:\FPT IoT\Java\IntelliJ IDEA Community Edition 2021.3.3\bin (key E:/FPT IoT/Java/IntelliJ IDEA Community Edition 2021.3.3/bin, mtime 1648927453): 32 files, no impossibilities.
+# C:\Program Files\PuTTY\ (key C:/Program Files/PuTTY/, mtime 1649536712): 12 files, no impossibilities.
+# C:\Program Files (x86)\Common Files\Oracle\Java\javapath (key C:/Program Files (x86)/Common Files/Oracle/Java/javapath, mtime 1654941185): 5 files, no impossibilities.
+# C:\MinGW64\bin (key C:/MinGW64/bin, mtime 1555581940): 58 files, no impossibilities.
+# C:\Users\Ly Duc Hung\AppData\Local\gitkraken\bin (key C:/Users/Ly Duc Hung/AppData/Local/gitkraken/bin, mtime 1650124753): 3 files, no impossibilities.
+# C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.32.31326\bin\Hostx64\x64 (key C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.32.31326/bin/Hostx64/x64, mtime 1655231420): 70 files, no impossibilities.
+# C:\Users\Ly Duc Hung\AppData\Local\Programs\Python\Python310\python.exe (key C:/Users/Ly Duc Hung/AppData/Local/Programs/Python/Python310/python.exe, mtime 1648052542): could not be opened.
+# C:\ProgramData\DockerDesktop\version-bin: could not be stat'd.
+# C:\Program Files\Git\cmd (key C:/Program Files/Git/cmd, mtime 1654429308): 8 files, no impossibilities.
+# C:\Windows\System32 (key C:/Windows/System32, mtime 1655275696): 3057 files, no impossibilities.
+# C:\Users\Ly Duc Hung\AppData\Local\Programs\Python\Python310\ (key C:/Users/Ly Duc Hung/AppData/Local/Programs/Python/Python310/, mtime 1655328313): 19 files, no impossibilities.
+# C:\Program Files (x86)\GnuWin32\bin (key C:/Program Files (x86)/GnuWin32/bin, mtime 1655210448): 5 files, no impossibilities.
+
+# 3468 files, no impossibilities in 22 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+# Not a target:
+all:
+#  Command-line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+makefile:
+#  A default, MAKEFILES, or -include/sinclude makefile.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+GNUmakefile:
+#  A default, MAKEFILES, or -include/sinclude makefile.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be upda 
+make.exe: *** No rule to make target `all'.  Stop.
+
+ted.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+# files hash-table stats:
+# Load=5/1024=0%, Rehash=0, Collisions=0/16=0%
+# VPATH Search Paths
+
+# No `vpath' search paths.
+
+# No general (`VPATH' variable) search path.
+
+# # of strings in strcache: 0
+# # of strcache buffers: 0
+# strcache size: total = 0 / max = 0 / min = 4096 / avg = 0
+# strcache free: total = 0 / max = 0 / min = 4096 / avg = 0
+
+# Finished Make data base on Thu Jun 16 04:32:47 2022
+
+ 
