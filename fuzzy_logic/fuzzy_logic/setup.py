@@ -8,4 +8,4 @@ except ImportError:
 
 from Cython.Build import cythonize
 
-setup(ext_modules=cythonize(["mf.py", "terms.py"]))
+setup(ext_modules=cythonize(["mf.py", "terms.py", "variables.py"]))

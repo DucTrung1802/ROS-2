@@ -6,6 +6,7 @@ Fuzzy Variable
     - Sugeno
 """
 
+import cython
 from abc import ABC, abstractmethod
 from typing import List, Dict
 from .terms import Term
@@ -13,7 +14,7 @@ from .terms import Term
 
 class FuzzyVariable:
 
-    def __init__(self, name: str, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):
+    def __init__(self, name: cython.char, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):
         if min_value >= max_value:
             raise ValueError(f'{min_value} <= {max_value} is not True')
         self.name: str = name
@@ -21,7 +22,7 @@ class FuzzyVariable:
         self.max_value: float = max_value
         self.terms: List[Term] = list(terms)
 
-    def term_by_name(self, name: str) -> Term or None:
+    def term_by_name(self, name: str) -> Term:
         """
         Find term by name
         :param name: name of term
