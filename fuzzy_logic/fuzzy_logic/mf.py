@@ -3,12 +3,11 @@ Luferov Victor <lyferov@yandex.ru>
 
 Membership functions
 """
-
+import cython
 from typing import List, Tuple
 from abc import ABC, abstractmethod
 import numpy as np
 from .types import MfCompositionType
-
 
 class MembershipFunction(ABC):
     """
@@ -23,17 +22,16 @@ class MembershipFunction(ABC):
     def get_value(self, x: float) -> float:
         ...
 
-
 class NormalMF(MembershipFunction):
-    def __init__(self, b: float, sigma: float):
-        self.b: float = b
-        self.sigma: float = sigma
+    def __init__(self, b: cython.double, sigma: cython.double):
+        self.b: cython.double = b
+        self.sigma: cython.double = sigma
 
-    def get_value(self, x: float) -> float:
+    def get_value(self, x: cython.double) -> cython.double:
         return np.exp(-(x - self.b) ** 2 / (2 * self.sigma ** 2))
 
     @property
-    def sup(self) -> float:
+    def sup(self) -> cython.double:
         return 1.0
 
 
@@ -42,16 +40,16 @@ class ConstantMF(MembershipFunction):
     Singletone MF
     """
 
-    def __init__(self, value: float):
+    def __init__(self, value: cython.double):
         if not 0.0 <= value <= 1:
             raise ValueError(f'0.0 <= {value} <= 1.0 is not True')
-        self.value: float = value
+        self.value: cython.double = value
 
-    def get_value(self, x: float) -> float:
+    def get_value(self, x: cython.double) -> cython.double:
         return self.value
 
     @property
-    def sup(self) -> float:
+    def sup(self) -> cython.double:
         return 1.0
 
 
@@ -59,10 +57,10 @@ class PointsMF(MembershipFunction):
     """
     Points MF
     """
-    def __init__(self, points: List[Tuple[float, float]]):
-        self.points: List[Tuple[float, float]] = points
+    def __init__(self, points: List[Tuple[cython.double, cython.double]]):
+        self.points: List[Tuple[cython.double, cython.double]] = points
 
-    def get_value(self, x: float) -> float:
+    def get_value(self, x: cython.double) -> cython.double:
         pass
 
 
@@ -71,14 +69,14 @@ class TriangularMF(MembershipFunction):
     Triangular MF
     """
 
-    def __init__(self, x1: float, x2: float, x3: float):
+    def __init__(self, x1: cython.double, x2: cython.double, x3: cython.double):
         if not (x1 <= x2 <= x3):
             raise ValueError(f'{x1} <= {x2} <= {x3} is not True')
-        self.x1: float = x1
-        self.x2: float = x2
-        self.x3: float = x3
+        self.x1: cython.double = x1
+        self.x2: cython.double = x2
+        self.x3: cython.double = x3
 
-    def get_value(self, x: float) -> float:
+    def get_value(self, x: cython.double) -> cython.double:
         """
         Get value of mf
         :param x: point of x
@@ -97,7 +95,7 @@ class TriangularMF(MembershipFunction):
         return NormalMF(self.x2, (self.x3 - self.x1) / 5.0)
 
     @property
-    def sup(self) -> float:
+    def sup(self) -> cython.double:
         return 1.0
 
 
@@ -106,15 +104,15 @@ class TrapezoidMF(MembershipFunction):
     Trapezoid MF
     """
 
-    def __init__(self, x1: float, x2: float, x3: float, x4: float):
+    def __init__(self, x1: cython.double, x2: cython.double, x3: cython.double, x4: cython.double):
         if not (x1 <= x2 <= x3 <= x4):
             raise ValueError(f'{x1} <= {x2} <= {x3} <= {x4} is not True')
-        self.x1: float = x1
-        self.x2: float = x2
-        self.x3: float = x3
-        self.x4: float = x4
+        self.x1: cython.double = x1
+        self.x2: cython.double = x2
+        self.x3: cython.double = x3
+        self.x4: cython.double = x4
 
-    def get_value(self, x: float) -> float:
+    def get_value(self, x: cython.double) -> cython.double:
         """
         Get value of mf
         :param x: point of x
@@ -130,7 +128,7 @@ class TrapezoidMF(MembershipFunction):
             return float(0)
 
     @property
-    def sup(self) -> float:
+    def sup(self) -> cython.double:
         return 1
 
 
@@ -143,7 +141,7 @@ class CompositeMF(MembershipFunction):
         self.composite_type: MfCompositionType = composite_type
         self.mfs = mfs
 
-    def __compose(self, x: List[float]) -> float:
+    def __compose(self, x: List[cython.double]) -> cython.double:
         if self.composite_type == MfCompositionType.MAX:
             return np.max(x)
         elif self.composite_type == MfCompositionType.MIN:
@@ -155,9 +153,9 @@ class CompositeMF(MembershipFunction):
         else:
             raise ValueError(f'Type of composition {self.composite_type} is not found!')
     
-    def get_value(self, x: float) -> float:
+    def get_value(self, x: cython.double) -> cython.double:
         return self.__compose([mf.get_value(x) for mf in self.mfs])
 
     @property
-    def sup(self) -> float:
+    def sup(self) -> cython.double:
         return 1.0
