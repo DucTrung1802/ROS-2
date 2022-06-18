@@ -3,6 +3,7 @@ Luferov Victor <lyferov@yandex.ru>
 
 Fuzzy Rules
 """
+import cython
 from typing import List
 from .terms import Term
 from .type import OperatorType, HedgeType
@@ -72,7 +73,10 @@ class FuzzyRule:
     """
 
     def __init__(
-        self, condition: Conditions, conclusion: SingleCondition, weight: float = 1.0
+        self,
+        condition: Conditions,
+        conclusion: SingleCondition,
+        weight: cython.double = 1.0,
     ):
         """
         Конструктоур нечеткого правила мамдани
@@ -82,4 +86,4 @@ class FuzzyRule:
         """
         self.condition: Conditions = condition
         self.conclusion: SingleCondition = conclusion
-        self.weight: float = weight
+        self.weight: cython.double = weight
