@@ -6,20 +6,20 @@ from .variables import FuzzyVariable, SugenoVariable, LinearSugenoFunction
 from .terms import Term
 from .mf import NormalMF
 from .clustering import SubtractClustering
-
+import cython
 
 class Anfis(SugenoFuzzySystem):
-    name_input: str = 'input'  # Имена входных переменных
-    name_output: str = 'output'  # Имя выходной переменной
-    name_mf: str = 'mf'  # Имена лингвистических термов
+    name_input: cython.char = 'input'  # Имена входных переменных
+    name_output: cython.char = 'output'  # Имя выходной переменной
+    name_mf: cython.char = 'mf'  # Имена лингвистических термов
 
     def __init__(self,
                  x: np.ndarray,  # Вектор входа
                  y: np.ndarray,  # Вектор выхода
-                 radii: float = .5,  # Радиус кластеров
-                 sf: float = 1.25,  # Коэффициент принятия
-                 ar: float = .5,  # Коэффициент принятия
-                 rr: float = .15):  # Коэффициент отторжения
+                 radii: cython.double = .5,  # Радиус кластеров
+                 sf: cython.double = 1.25,  # Коэффициент принятия
+                 ar: cython.double = .5,  # Коэффициент принятия
+                 rr: cython.double = .15):  # Коэффициент отторжения
         """
 
         :param x: Вектор входа [[], []]
@@ -34,24 +34,24 @@ class Anfis(SugenoFuzzySystem):
         self.x: np.ndarray = x
         self.y: np.ndarray = y
         # Переменные кластеризации
-        self.__radii: float = radii
-        self.__sqsh_factor: float = sf
-        self.__accept_ratio: float = ar
-        self.__reject_ratio: float = rr
+        self.__radii: cython.double = radii
+        self.__sqsh_factor: cython.double = sf
+        self.__accept_ratio: cython.double = ar
+        self.__reject_ratio: cython.double = rr
         # Переменные обучения
         self.__error = .0  # Желательная ошибка при обучении
         self.__epochs = 10  # Количество эпох обучения
-        self.__errors_train: List[float] = []  # Ошибки при обучении на каждой эпохе
-        self.__nu: float = .1  # Коэффициент обучения
-        self.__nu_step: float = .9  # Изменение nu на каждом шаге
-        self.__rules_text: List[str] = []  # Текстовое представление правил
+        self.__errors_train: List[cython.double] = []  # Ошибки при обучении на каждой эпохе
+        self.__nu: cython.double = .1  # Коэффициент обучения
+        self.__nu_step: cython.double = .9  # Изменение nu на каждом шаге
+        self.__rules_text: List[cython.char] = []  # Текстовое представление правил
 
     @property
-    def rules_text(self) -> List[str]:
+    def rules_text(self) -> List[cython.char]:
         return self.__rules_text
 
     @property
-    def radii(self) -> float:
+    def radii(self) -> cython.double:
         """
         :return: Радиус кластеров
         """
@@ -64,7 +64,7 @@ class Anfis(SugenoFuzzySystem):
         self.__radii = value
 
     @property
-    def sqsh_factor(self) -> float:
+    def sqsh_factor(self) -> cython.double:
         """
         :return: Коэффициент подавления
         """
@@ -77,7 +77,7 @@ class Anfis(SugenoFuzzySystem):
         self.__sqsh_factor = value
 
     @property
-    def accept_ratio(self) -> float:
+    def accept_ratio(self) -> cython.double:
         return self.__accept_ratio
 
     @accept_ratio.setter
@@ -85,7 +85,7 @@ class Anfis(SugenoFuzzySystem):
         self.__accept_ratio = value
 
     @property
-    def reject_ratio(self) -> float:
+    def reject_ratio(self) -> cython.double:
         """
         :return: Коэффициент принятия
         """
@@ -102,7 +102,7 @@ class Anfis(SugenoFuzzySystem):
         self.__reject_ratio = value
 
     @property
-    def nu(self) -> float:
+    def nu(self) -> cython.double:
         """
         :return: получение коэффициента обучения
         """
@@ -119,7 +119,7 @@ class Anfis(SugenoFuzzySystem):
         self.__nu = value
 
     @property
-    def epochs(self) -> float:
+    def epochs(self) -> cython.double:
         """
         :return: получение эпох для получения
         """
@@ -132,27 +132,27 @@ class Anfis(SugenoFuzzySystem):
         self.__epochs = value
 
     @property
-    def errors_train(self) -> List[float]:
+    def errors_train(self) -> List[cython.double]:
         """
         :return: Ошибка при обучении Anfis
         """
         return self.__errors_train
 
     @property
-    def count_input(self) -> int:
+    def count_input(self) -> cython.int:
         """
         :return: Количество входных временных рядов
         """
         return self.x.shape[0]
 
     @property
-    def count_output(self) -> int:
+    def count_output(self) -> cython.int:
         """
         :return: Количество выходных точек
         """
         return self.y.shape[0]
 
-    def calculate(self, x: List[float]) -> float:
+    def calculate(self, x: List[cython.double]) -> cython.double:
         """
         Рассчитываем значение anfis
         :param x: вектор входных значений
@@ -173,8 +173,8 @@ class Anfis(SugenoFuzzySystem):
         self.generate()
         if len(self.rules) == 0:
             raise Exception('Должно быть хотя бы одно нечеткое правило.')
-        k: int = len(self.y)  # Количество параметров обучающей выборки
-        l: int = (len(self.x) + 1) * len(self.rules)  # (m + 1) * n - количество входных переменных
+        k: cython.int = len(self.y)  # Количество параметров обучающей выборки
+        l: cython.int = (len(self.x) + 1) * len(self.rules)  # (m + 1) * n - количество входных переменных
         c: np.ndarray = np.array((l, 1))
         y: np.ndarray = np.array(self.y)  # Вектор столбец выходных данных
         self.__errors_train = []  # Обнуляем ошибку обучения
@@ -184,10 +184,10 @@ class Anfis(SugenoFuzzySystem):
             ew: np.ndarray = np.zeros((k, len(self.rules)))
             for i in range(k):
                 # Агрегирование подусловий
-                rules_weight: Dict[FuzzyRule, float] = self.evaluate_conditions(
+                rules_weight: Dict[FuzzyRule, cython.double] = self.evaluate_conditions(
                     self.fuzzify({variable: self.x[j][i] for j, variable in enumerate(self.inp)})
                 )
-                ew[i, :] = np.array([*rules_weight.values()], float)
+                ew[i, :] = np.array([*rules_weight.values()], cython.double)
                 beta: np.ndarray = ew[i, :] / sum(rules_weight.values())
                 # Формируем входные переменные
                 x: np.ndarray = np.ones(self.count_input + 1)  # +1, тк x0 = 1
@@ -209,19 +209,19 @@ class Anfis(SugenoFuzzySystem):
                     mf: NormalMF = term.mf
                     # Перебираем все переменные, k - количество входных переменных
                     for g in range(k):
-                        xa: float = self.x[i][g] - mf.b
+                        xa: cython.double = self.x[i][g] - mf.b
                         yy_hatch = y_hatch[g] - self.y[g]  # y' - y
-                        p: float = ew[g, j]
-                        sp: float = sum(ew[g, :])
-                        pb: float = p / (sp / mf.sigma ** 2)
+                        p: cython.double = ew[g, j]
+                        sp: cython.double = sum(ew[g, :])
+                        pb: cython.double = p / (sp / mf.sigma ** 2)
                         # Инициализирум матрицы для нахождения C
                         x: np.ndarray = np.ones((self.count_input + 1))
                         x[1:] = self.x[:, g]
                         c_hatch: np.ndarray = np.ones((self.count_input + 1))
                         # Заполняем коэффициенты
-                        start: int = j * (self.count_input + 1)
+                        start: cython.int = j * (self.count_input + 1)
                         c_hatch[:] = c[start:start + (self.count_input + 1)]
-                        cy: float = np.dot(x, c_hatch[:, np.newaxis])[0] - y_hatch[g]
+                        cy: cython.double = np.dot(x, c_hatch[:, np.newaxis])[0] - y_hatch[g]
                         mf.b -= 2 * self.nu * xa * yy_hatch * cy * pb  # Корректируем b
                         mf.sigma -= 2 * self.nu * (xa ** 2) * yy_hatch * cy * pb  # Корректируем sigma
             # Находим ошибку обучения на этапе
