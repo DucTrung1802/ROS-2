@@ -8,7 +8,7 @@ from typing import List, Dict
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from .terms import Term
-from .types import OperatorType, HedgeType
+from .type import OperatorType, HedgeType
 from .rules import FuzzyCondition, Conditions, SingleCondition, FuzzyRule
 from .variables import FuzzyVariable, SugenoVariable, SugenoFunction
 
