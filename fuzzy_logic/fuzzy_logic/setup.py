@@ -8,4 +8,21 @@ except ImportError:
 
 from Cython.Build import cythonize
 
-setup(ext_modules=cythonize(["anfis.py", "mf.py", "terms.py", "variables.py", "mamdani_fs.py"]))
+setup(
+    ext_modules=cythonize(
+        [
+            "anfis.py",
+            "clustering.py",
+            "generic_fs.py",
+            "mamdani_fs.py",
+            "mf.py",
+            # "rule_parser.py",
+            "rules.py",
+            "sugeno_fs.py",
+            "terms.py",
+            "transform.py",
+            "type.py",
+            "variables.py",
+        ]
+    )
+)
