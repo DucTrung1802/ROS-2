@@ -3,6 +3,7 @@ Luferov Victor <lyferov@yandex.ru>
 
 Sugeno Fuzzy System
 """
+import cython
 from typing import Dict, List
 from collections import defaultdict
 from .generic_fs import GenericFuzzySystem
@@ -10,16 +11,17 @@ from .rules import FuzzyRule
 from .rule_parser import RuleParser
 from .variables import FuzzyVariable, SugenoVariable, SugenoFunction
 from .terms import Term
-from .types import AndMethod, OrMethod
+from .type import AndMethod, OrMethod
 
 
 class SugenoFuzzySystem(GenericFuzzySystem):
-
-    def __init__(self,
-                 inp: List[FuzzyVariable] = List[FuzzyVariable],
-                 out: List[SugenoVariable] = List[SugenoVariable],
-                 am: AndMethod = AndMethod.PROD,
-                 om: OrMethod = OrMethod.MAX):
+    def __init__(
+        self,
+        inp: List[FuzzyVariable] = List[FuzzyVariable],
+        out: List[SugenoVariable] = List[SugenoVariable],
+        am: AndMethod = AndMethod.PROD,
+        om: OrMethod = OrMethod.MAX,
+    ):
         """
         Конструктор создания нечеткой переменной сугено
         :param inp: входящие переменные
@@ -30,7 +32,7 @@ class SugenoFuzzySystem(GenericFuzzySystem):
         self.out: List[SugenoVariable] = out
         super().__init__(inp, am, om)
 
-    def output_by_name(self, name: str) -> SugenoVariable:
+    def output_by_name(self, name: cython.char) -> SugenoVariable:
         """
         Ищем выходную переменную по имени
         :param name: имя переменной
@@ -41,7 +43,7 @@ class SugenoFuzzySystem(GenericFuzzySystem):
                 return out
         raise Exception(f'Выходной переменной с именем "{name}" не найдено')
 
-    def parse_rule(self, rule: str) -> FuzzyRule:
+    def parse_rule(self, rule: cython.char) -> FuzzyRule:
         """
         Парсим правило из текста
         :param rule: правило в текстовом представлении
@@ -49,37 +51,55 @@ class SugenoFuzzySystem(GenericFuzzySystem):
         """
         return RuleParser.parse(rule, self.inp, self.out)
 
-    def evaluate_functions(self, iv: Dict[FuzzyVariable, float]) -> Dict[SugenoVariable, Dict[SugenoFunction, float]]:
-        return {variable: {sf: sf.evaluate(iv) for sf in variable.functions} for variable in self.out}
+    def evaluate_functions(
+        self, iv: Dict[FuzzyVariable, cython.double]
+    ) -> Dict[SugenoVariable, Dict[SugenoFunction, cython.double]]:
+        return {
+            variable: {sf: sf.evaluate(iv) for sf in variable.functions}
+            for variable in self.out
+        }
 
-    def combine_result(self,
-                       rw: Dict[FuzzyRule, float],
-                       fr: Dict[SugenoVariable, Dict[SugenoFunction, float]]) -> Dict[SugenoVariable, float]:
+    def combine_result(
+        self,
+        rw: Dict[FuzzyRule, cython.double],
+        fr: Dict[SugenoVariable, Dict[SugenoFunction, cython.double]],
+    ) -> Dict[SugenoVariable, cython.double]:
         """
         Объединяем результаты функцию и правил
         :param rw: ruleWeights - весовые правила, результаты вычислений
         :param fr: function result - результат вычисления функций
         :return: значения выходных функций
         """
-        numerator: Dict[SugenoVariable, float] = defaultdict(float)
-        denominator: Dict[SugenoVariable, float] = defaultdict(float)
+        numerator: Dict[SugenoVariable, cython.double] = defaultdict(cython.double)
+        denominator: Dict[SugenoVariable, cython.double] = defaultdict(cython.double)
         for out in self.out:
-            numerator[out] = .0
-            denominator[out] = .0
+            numerator[out] = 0.0
+            denominator[out] = 0.0
 
         for rule, weight in rw.items():
             variable: SugenoVariable = rule.conclusion.variable
-            z: float = fr[variable][rule.conclusion.term]
+            z: cython.double = fr[variable][rule.conclusion.term]
             numerator[variable] += z * weight
             denominator[variable] += weight
 
-        return {out: .0 if denominator[out] == .0 else numerator[out] / denominator[out] for out in self.out}
+        return {
+            out: 0.0 if denominator[out] == 0.0 else numerator[out] / denominator[out]
+            for out in self.out
+        }
 
-    def calculate(self, input_values: Dict[FuzzyVariable, float]) -> Dict[SugenoVariable, float]:
+    def calculate(
+        self, input_values: Dict[FuzzyVariable, cython.double]
+    ) -> Dict[SugenoVariable, cython.double]:
         if len(self.rules) == 0:
-            raise Exception('Должно быть как минимум одно правило')
-        fi: Dict[FuzzyVariable, Dict[Term, float]] = self.fuzzify(input_values)     # Шаг фаззификации
-        rw: Dict[FuzzyRule, float] = self.evaluate_conditions(fi)                   # Агрегация подусловий
-        fr: Dict[SugenoVariable, Dict[SugenoFunction, float]] = self.evaluate_functions(input_values)
-        result: Dict[SugenoVariable, float] = self.combine_result(rw, fr)
+            raise Exception("Должно быть как минимум одно правило")
+        fi: Dict[FuzzyVariable, Dict[Term, cython.double]] = self.fuzzify(
+            input_values
+        )  # Шаг фаззификации
+        rw: Dict[FuzzyRule, cython.double] = self.evaluate_conditions(
+            fi
+        )  # Агрегация подусловий
+        fr: Dict[
+            SugenoVariable, Dict[SugenoFunction, cython.double]
+        ] = self.evaluate_functions(input_values)
+        result: Dict[SugenoVariable, cython.double] = self.combine_result(rw, fr)
         return result
