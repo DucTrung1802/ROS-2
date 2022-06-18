@@ -3,7 +3,7 @@ Luferov Victor <lyferov@yandex.ru>
 
 Mamdani Fuzzy System
 """
-
+import cython
 from typing import List, Dict
 from .generic_fs import GenericFuzzySystem
 from .rules import FuzzyRule
@@ -48,7 +48,7 @@ class MamdaniFuzzySystem(GenericFuzzySystem):
         self.def_method: DefazzificationMethod = dm
         super().__init__(inp if inp is not None else [], am, om)
 
-    def output_by_name(self, name: str) -> FuzzyVariable:
+    def output_by_name(self, name: cython.char) -> FuzzyVariable:
         """
         Ищем выходную переменную по имени
         :param name: имя переменной
@@ -59,7 +59,7 @@ class MamdaniFuzzySystem(GenericFuzzySystem):
                 return out
         raise Exception(f'Выходной переменной с именем "{name}" не найдено')
 
-    def parse_rule(self, rule: str) -> FuzzyRule:
+    def parse_rule(self, rule: cython.char) -> FuzzyRule:
         """
         Парсим правило из текста
         :param rule: правило в текстовом представлении
@@ -67,17 +67,17 @@ class MamdaniFuzzySystem(GenericFuzzySystem):
         """
         return RuleParser.parse(rule, self.inp, self.out)
 
-    def calculate(self, input_values: Dict[FuzzyVariable, float]) -> Dict[FuzzyVariable, float]:
+    def calculate(self, input_values: Dict[FuzzyVariable, cython.double]) -> Dict[FuzzyVariable, cython.double]:
         if len(self.rules) == 0:
             raise Exception('Должно быть как минимум одно правило')
-        fi: Dict[FuzzyVariable, Dict[Term, float]] = self.fuzzify(input_values)                 # Шаг фаззификации
-        conditions: Dict[FuzzyRule, float] = self.evaluate_conditions(fi)                       # Вычисляем состояния
+        fi: Dict[FuzzyVariable, Dict[Term, cython.double]] = self.fuzzify(input_values)                 # Шаг фаззификации
+        conditions: Dict[FuzzyRule, cython.double] = self.evaluate_conditions(fi)                       # Вычисляем состояния
         conclusions: Dict[FuzzyRule, MembershipFunction] = self.implicate(conditions)           # Вычисляем последствия
         fuzzy_result: Dict[FuzzyVariable, MembershipFunction] = self.aggregate(conclusions)     # Агрегация результатов
-        result: Dict[FuzzyVariable, float] = self.defuzzify(fuzzy_result)                       # Дефаззафикация
+        result: Dict[FuzzyVariable, cython.double] = self.defuzzify(fuzzy_result)                       # Дефаззафикация
         return result
 
-    def implicate(self, conditions: Dict[FuzzyRule, float]) -> Dict[FuzzyRule, MembershipFunction]:
+    def implicate(self, conditions: Dict[FuzzyRule, cython.double]) -> Dict[FuzzyRule, MembershipFunction]:
         """
         Функция импликации
         :param conditions: заключения
@@ -115,7 +115,7 @@ class MamdaniFuzzySystem(GenericFuzzySystem):
             ) for variable in self.out
         }
 
-    def defuzzify(self, fr: Dict[FuzzyVariable, MembershipFunction]) -> Dict[FuzzyVariable, float]:
+    def defuzzify(self, fr: Dict[FuzzyVariable, MembershipFunction]) -> Dict[FuzzyVariable, cython.double]:
         """
         Дефаззификация нечеткой переменной
         :param fr: fuzzyResult - результат нечеткой входной переменной
@@ -123,7 +123,7 @@ class MamdaniFuzzySystem(GenericFuzzySystem):
         """
         return {variable: self.__defuzzify(mf, variable.min_value, variable.max_value) for variable, mf in fr.items()}
 
-    def __defuzzify(self, mf: MembershipFunction, min_value: float, max_value: float) -> float:
+    def __defuzzify(self, mf: MembershipFunction, min_value: cython.double, max_value: cython.double) -> cython.double:
         """
         Дефаззификация значения
         :param mf: лингвистический терм
@@ -132,14 +132,15 @@ class MamdaniFuzzySystem(GenericFuzzySystem):
         :return:
         """
         if self.def_method == DefazzificationMethod.CENTROID:
-            k: int = 101   # Шаг дефаззицикации
+            i: cython.int
+            k: cython.int = 101   # Шаг дефаззицикации
             step = (max_value - min_value) / k
-            numerator: float = 0
-            denominator: float = 0
+            numerator: cython.double = 0
+            denominator: cython.double = 0
             for i in range(k):
-                pt_center = min_value + step * float(i)
-                val_center = mf.get_value(pt_center)
-                val2_center = pt_center * val_center
+                pt_center:cython.double = min_value + step * i
+                val_center:cython.double = mf.get_value(pt_center)
+                val2_center:cython.double = pt_center * val_center
                 numerator += val2_center
                 denominator += val_center
             return round(numerator / denominator, 8) if denominator != 0 else 0.0

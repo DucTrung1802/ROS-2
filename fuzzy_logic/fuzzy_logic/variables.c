@@ -1141,19 +1141,6 @@ static CYTHON_INLINE int __Pyx_PyObject_SetAttrStr(PyObject* obj, PyObject* attr
         __Pyx__ArgTypeTest(obj, type, name, exact))
 static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
 
-/* BytesEquals.proto */
-static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals);
-
-/* UnicodeEquals.proto */
-static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals);
-
-/* StrEquals.proto */
-#if PY_MAJOR_VERSION >= 3
-#define __Pyx_PyString_Equals __Pyx_PyUnicode_Equals
-#else
-#define __Pyx_PyString_Equals __Pyx_PyBytes_Equals
-#endif
-
 /* PyObjectCallNoArg.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallNoArg(PyObject *func);
@@ -1452,10 +1439,11 @@ static const char __pyx_k_self[] = "self";
 static const char __pyx_k_term[] = "term";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_const[] = "const";
-static const char __pyx_k_float[] = "float";
 static const char __pyx_k_items[] = "items";
 static const char __pyx_k_terms[] = "terms";
 static const char __pyx_k_value[] = "value";
+static const char __pyx_k_cython[] = "cython";
+static const char __pyx_k_double[] = "double";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_inputs[] = "inputs";
 static const char __pyx_k_module[] = "__module__";
@@ -1531,9 +1519,11 @@ static PyObject *__pyx_n_u_char;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_coefficients;
 static PyObject *__pyx_n_s_const;
+static PyObject *__pyx_n_s_cython;
 static PyObject *__pyx_n_s_doc;
+static PyObject *__pyx_n_s_double;
+static PyObject *__pyx_n_u_double;
 static PyObject *__pyx_n_s_evaluate;
-static PyObject *__pyx_n_u_float;
 static PyObject *__pyx_n_s_function;
 static PyObject *__pyx_n_s_function_by_name;
 static PyObject *__pyx_n_s_functions;
@@ -1567,15 +1557,15 @@ static PyObject *__pyx_n_s_values;
 static PyObject *__pyx_n_s_variable;
 static PyObject *__pyx_kp_s_variables_py;
 static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, char __pyx_v_name, double __pyx_v_min_value, double __pyx_v_max_value, PyObject *__pyx_v_terms); /* proto */
-static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name); /* proto */
+static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, char __pyx_v_name); /* proto */
 static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_4values(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoFunction_name(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED PyObject *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoFunction_2evaluate(CYTHON_UNUSED PyObject *__pyx_self, CYTHON_UNUSED PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_inputs); /* proto */
 static PyObject *__pyx_pf_11fuzzy_logic_9variables_20LinearSugenoFunction___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name, PyObject *__pyx_v_coefficients, double __pyx_v_const); /* proto */
 static PyObject *__pyx_pf_11fuzzy_logic_9variables_20LinearSugenoFunction_2name(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_11fuzzy_logic_9variables_20LinearSugenoFunction_4evaluate(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_inputs); /* proto */
-static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name, PyObject *__pyx_v_functions); /* proto */
-static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by_name(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name); /* proto */
+static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, char __pyx_v_name, PyObject *__pyx_v_functions); /* proto */
+static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by_name(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, char __pyx_v_name); /* proto */
 static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_4values(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self); /* proto */
 static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_tuple__4;
@@ -1604,7 +1594,7 @@ static PyObject *__pyx_codeobj__23;
 /* "fuzzy_logic/variables.py":17
  * class FuzzyVariable:
  * 
- *     def __init__(self, name: cython.char, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):             # <<<<<<<<<<<<<<
+ *     def __init__(self, name: cython.char, min_value: cython.double = 0.0, max_value: cython.double = 1.0, *terms: Term):             # <<<<<<<<<<<<<<
  *         if min_value >= max_value:
  *             raise ValueError(f'{min_value} <= {max_value} is not True')
  */
@@ -1741,20 +1731,20 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable___init__(CYTH
 
   /* "fuzzy_logic/variables.py":18
  * 
- *     def __init__(self, name: cython.char, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):
+ *     def __init__(self, name: cython.char, min_value: cython.double = 0.0, max_value: cython.double = 1.0, *terms: Term):
  *         if min_value >= max_value:             # <<<<<<<<<<<<<<
  *             raise ValueError(f'{min_value} <= {max_value} is not True')
- *         self.name: str = name
+ *         self.name: cython.char = name
  */
   __pyx_t_1 = ((__pyx_v_min_value >= __pyx_v_max_value) != 0);
   if (unlikely(__pyx_t_1)) {
 
     /* "fuzzy_logic/variables.py":19
- *     def __init__(self, name: cython.char, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):
+ *     def __init__(self, name: cython.char, min_value: cython.double = 0.0, max_value: cython.double = 1.0, *terms: Term):
  *         if min_value >= max_value:
  *             raise ValueError(f'{min_value} <= {max_value} is not True')             # <<<<<<<<<<<<<<
- *         self.name: str = name
- *         self.min_value: float = min_value
+ *         self.name: cython.char = name
+ *         self.min_value: cython.double = min_value
  */
     __pyx_t_2 = PyTuple_New(4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 19, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -1800,19 +1790,19 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable___init__(CYTH
 
     /* "fuzzy_logic/variables.py":18
  * 
- *     def __init__(self, name: cython.char, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):
+ *     def __init__(self, name: cython.char, min_value: cython.double = 0.0, max_value: cython.double = 1.0, *terms: Term):
  *         if min_value >= max_value:             # <<<<<<<<<<<<<<
  *             raise ValueError(f'{min_value} <= {max_value} is not True')
- *         self.name: str = name
+ *         self.name: cython.char = name
  */
   }
 
   /* "fuzzy_logic/variables.py":20
  *         if min_value >= max_value:
  *             raise ValueError(f'{min_value} <= {max_value} is not True')
- *         self.name: str = name             # <<<<<<<<<<<<<<
- *         self.min_value: float = min_value
- *         self.max_value: float = max_value
+ *         self.name: cython.char = name             # <<<<<<<<<<<<<<
+ *         self.min_value: cython.double = min_value
+ *         self.max_value: cython.double = max_value
  */
   __pyx_t_2 = __Pyx_PyInt_From_char(__pyx_v_name); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -1821,9 +1811,9 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable___init__(CYTH
 
   /* "fuzzy_logic/variables.py":21
  *             raise ValueError(f'{min_value} <= {max_value} is not True')
- *         self.name: str = name
- *         self.min_value: float = min_value             # <<<<<<<<<<<<<<
- *         self.max_value: float = max_value
+ *         self.name: cython.char = name
+ *         self.min_value: cython.double = min_value             # <<<<<<<<<<<<<<
+ *         self.max_value: cython.double = max_value
  *         self.terms: List[Term] = list(terms)
  */
   __pyx_t_2 = PyFloat_FromDouble(__pyx_v_min_value); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 21, __pyx_L1_error)
@@ -1832,9 +1822,9 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable___init__(CYTH
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "fuzzy_logic/variables.py":22
- *         self.name: str = name
- *         self.min_value: float = min_value
- *         self.max_value: float = max_value             # <<<<<<<<<<<<<<
+ *         self.name: cython.char = name
+ *         self.min_value: cython.double = min_value
+ *         self.max_value: cython.double = max_value             # <<<<<<<<<<<<<<
  *         self.terms: List[Term] = list(terms)
  * 
  */
@@ -1844,11 +1834,11 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable___init__(CYTH
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "fuzzy_logic/variables.py":23
- *         self.min_value: float = min_value
- *         self.max_value: float = max_value
+ *         self.min_value: cython.double = min_value
+ *         self.max_value: cython.double = max_value
  *         self.terms: List[Term] = list(terms)             # <<<<<<<<<<<<<<
  * 
- *     def term_by_name(self, name: str) -> Term:
+ *     def term_by_name(self, name: cython.char) -> Term:
  */
   __pyx_t_2 = PySequence_List(__pyx_v_terms); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 23, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -1858,7 +1848,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable___init__(CYTH
   /* "fuzzy_logic/variables.py":17
  * class FuzzyVariable:
  * 
- *     def __init__(self, name: cython.char, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):             # <<<<<<<<<<<<<<
+ *     def __init__(self, name: cython.char, min_value: cython.double = 0.0, max_value: cython.double = 1.0, *terms: Term):             # <<<<<<<<<<<<<<
  *         if min_value >= max_value:
  *             raise ValueError(f'{min_value} <= {max_value} is not True')
  */
@@ -1881,7 +1871,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable___init__(CYTH
 /* "fuzzy_logic/variables.py":25
  *         self.terms: List[Term] = list(terms)
  * 
- *     def term_by_name(self, name: str) -> Term:             # <<<<<<<<<<<<<<
+ *     def term_by_name(self, name: cython.char) -> Term:             # <<<<<<<<<<<<<<
  *         """
  *         Find term by name
  */
@@ -1892,7 +1882,7 @@ static char __pyx_doc_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name[] =
 static PyMethodDef __pyx_mdef_11fuzzy_logic_9variables_13FuzzyVariable_3term_by_name = {"term_by_name", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_11fuzzy_logic_9variables_13FuzzyVariable_3term_by_name, METH_VARARGS|METH_KEYWORDS, __pyx_doc_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name};
 static PyObject *__pyx_pw_11fuzzy_logic_9variables_13FuzzyVariable_3term_by_name(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_self = 0;
-  PyObject *__pyx_v_name = 0;
+  char __pyx_v_name;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -1935,7 +1925,7 @@ static PyObject *__pyx_pw_11fuzzy_logic_9variables_13FuzzyVariable_3term_by_name
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_self = values[0];
-    __pyx_v_name = ((PyObject*)values[1]);
+    __pyx_v_name = __Pyx_PyInt_As_char(values[1]); if (unlikely((__pyx_v_name == (char)-1) && PyErr_Occurred())) __PYX_ERR(0, 25, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
@@ -1945,19 +1935,14 @@ static PyObject *__pyx_pw_11fuzzy_logic_9variables_13FuzzyVariable_3term_by_name
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_name), (&PyString_Type), 1, "name", 1))) __PYX_ERR(0, 25, __pyx_L1_error)
   __pyx_r = __pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name(__pyx_self, __pyx_v_self, __pyx_v_name);
 
   /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __pyx_r = NULL;
-  __pyx_L0:;
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name) {
+static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, char __pyx_v_name) {
   PyObject *__pyx_v_term = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -1965,7 +1950,9 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name
   PyObject *__pyx_t_2 = NULL;
   Py_ssize_t __pyx_t_3;
   PyObject *(*__pyx_t_4)(PyObject *);
-  int __pyx_t_5;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *__pyx_t_6 = NULL;
+  int __pyx_t_7;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -2032,9 +2019,14 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name
  */
     __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_term, __pyx_n_s_name); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_5 = (__Pyx_PyString_Equals(__pyx_t_1, __pyx_v_name, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 32, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_From_char(__pyx_v_name); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 32, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_1, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_5) {
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 32, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    if (__pyx_t_7) {
 
       /* "fuzzy_logic/variables.py":33
  *         for term in self.terms:
@@ -2071,7 +2063,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name
   /* "fuzzy_logic/variables.py":25
  *         self.terms: List[Term] = list(terms)
  * 
- *     def term_by_name(self, name: str) -> Term:             # <<<<<<<<<<<<<<
+ *     def term_by_name(self, name: cython.char) -> Term:             # <<<<<<<<<<<<<<
  *         """
  *         Find term by name
  */
@@ -2082,6 +2074,8 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_2term_by_name
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_6);
   __Pyx_AddTraceback("fuzzy_logic.variables.FuzzyVariable.term_by_name", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -2158,7 +2152,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_13FuzzyVariable_4values(CYTHO
 /* "fuzzy_logic/variables.py":46
  *     @property
  *     @abstractmethod
- *     def name(self) -> str:             # <<<<<<<<<<<<<<
+ *     def name(self) -> cython.char:             # <<<<<<<<<<<<<<
  *         ...
  * 
  */
@@ -2183,7 +2177,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoFunction_name(CYTHON_
   __Pyx_RefNannySetupContext("name", 0);
 
   /* function exit code */
-  __pyx_r = ((PyObject*)Py_None); __Pyx_INCREF(Py_None);
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -2192,7 +2186,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoFunction_name(CYTHON_
 /* "fuzzy_logic/variables.py":50
  * 
  *     @abstractmethod
- *     def evaluate(self, inputs: Dict[FuzzyVariable, float]) -> float:             # <<<<<<<<<<<<<<
+ *     def evaluate(self, inputs: Dict[FuzzyVariable, cython.double]) -> cython.double:             # <<<<<<<<<<<<<<
  *         ...
  * 
  */
@@ -2277,8 +2271,8 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoFunction_2evaluate(CY
 /* "fuzzy_logic/variables.py":56
  * class LinearSugenoFunction(SugenoFunction):
  * 
- *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, float], const: float = .0):             # <<<<<<<<<<<<<<
- *         self.__name: str = name
+ *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, cython.double], const: cython.double = .0):             # <<<<<<<<<<<<<<
+ *         self.__name: cython.char = name
  *         self.coefficients: Dict[FuzzyVariable, float] = coefficients
  */
 
@@ -2392,26 +2386,26 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_20LinearSugenoFunction___init
 
   /* "fuzzy_logic/variables.py":57
  * 
- *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, float], const: float = .0):
- *         self.__name: str = name             # <<<<<<<<<<<<<<
+ *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, cython.double], const: cython.double = .0):
+ *         self.__name: cython.char = name             # <<<<<<<<<<<<<<
  *         self.coefficients: Dict[FuzzyVariable, float] = coefficients
- *         self.const: float = const
+ *         self.const: cython.double = const
  */
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_LinearSugenoFunction__name, __pyx_v_name) < 0) __PYX_ERR(0, 57, __pyx_L1_error)
 
   /* "fuzzy_logic/variables.py":58
- *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, float], const: float = .0):
- *         self.__name: str = name
+ *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, cython.double], const: cython.double = .0):
+ *         self.__name: cython.char = name
  *         self.coefficients: Dict[FuzzyVariable, float] = coefficients             # <<<<<<<<<<<<<<
- *         self.const: float = const
+ *         self.const: cython.double = const
  * 
  */
   if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_coefficients, __pyx_v_coefficients) < 0) __PYX_ERR(0, 58, __pyx_L1_error)
 
   /* "fuzzy_logic/variables.py":59
- *         self.__name: str = name
+ *         self.__name: cython.char = name
  *         self.coefficients: Dict[FuzzyVariable, float] = coefficients
- *         self.const: float = const             # <<<<<<<<<<<<<<
+ *         self.const: cython.double = const             # <<<<<<<<<<<<<<
  * 
  *     @property
  */
@@ -2423,8 +2417,8 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_20LinearSugenoFunction___init
   /* "fuzzy_logic/variables.py":56
  * class LinearSugenoFunction(SugenoFunction):
  * 
- *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, float], const: float = .0):             # <<<<<<<<<<<<<<
- *         self.__name: str = name
+ *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, cython.double], const: cython.double = .0):             # <<<<<<<<<<<<<<
+ *         self.__name: cython.char = name
  *         self.coefficients: Dict[FuzzyVariable, float] = coefficients
  */
 
@@ -2444,7 +2438,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_20LinearSugenoFunction___init
 /* "fuzzy_logic/variables.py":62
  * 
  *     @property
- *     def name(self) -> str:             # <<<<<<<<<<<<<<
+ *     def name(self) -> cython.char:             # <<<<<<<<<<<<<<
  *         return self.__name
  * 
  */
@@ -2474,23 +2468,22 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_20LinearSugenoFunction_2name(
 
   /* "fuzzy_logic/variables.py":63
  *     @property
- *     def name(self) -> str:
+ *     def name(self) -> cython.char:
  *         return self.__name             # <<<<<<<<<<<<<<
  * 
- *     def evaluate(self, inputs: Dict[FuzzyVariable, float]) -> float:
+ *     def evaluate(self, inputs: Dict[FuzzyVariable, cython.double]) -> cython.double:
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_LinearSugenoFunction__name); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(PyString_CheckExact(__pyx_t_1))||((__pyx_t_1) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "str", Py_TYPE(__pyx_t_1)->tp_name), 0))) __PYX_ERR(0, 63, __pyx_L1_error)
-  __pyx_r = ((PyObject*)__pyx_t_1);
+  __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
   /* "fuzzy_logic/variables.py":62
  * 
  *     @property
- *     def name(self) -> str:             # <<<<<<<<<<<<<<
+ *     def name(self) -> cython.char:             # <<<<<<<<<<<<<<
  *         return self.__name
  * 
  */
@@ -2509,7 +2502,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_20LinearSugenoFunction_2name(
 /* "fuzzy_logic/variables.py":65
  *         return self.__name
  * 
- *     def evaluate(self, inputs: Dict[FuzzyVariable, float]) -> float:             # <<<<<<<<<<<<<<
+ *     def evaluate(self, inputs: Dict[FuzzyVariable, cython.double]) -> cython.double:             # <<<<<<<<<<<<<<
  *         """
  *         Calculate linear function
  */
@@ -2745,7 +2738,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_20LinearSugenoFunction_4evalu
   /* "fuzzy_logic/variables.py":65
  *         return self.__name
  * 
- *     def evaluate(self, inputs: Dict[FuzzyVariable, float]) -> float:             # <<<<<<<<<<<<<<
+ *     def evaluate(self, inputs: Dict[FuzzyVariable, cython.double]) -> cython.double:             # <<<<<<<<<<<<<<
  *         """
  *         Calculate linear function
  */
@@ -2772,8 +2765,8 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_20LinearSugenoFunction_4evalu
 /* "fuzzy_logic/variables.py":79
  *     """
  * 
- *     def __init__(self, name: str, *functions: SugenoFunction):             # <<<<<<<<<<<<<<
- *         self.name: str = name
+ *     def __init__(self, name: cython.char, *functions: SugenoFunction):             # <<<<<<<<<<<<<<
+ *         self.name: cython.char = name
  *         self.functions: List[SugenoFunction] = list(functions)
  */
 
@@ -2782,7 +2775,7 @@ static PyObject *__pyx_pw_11fuzzy_logic_9variables_14SugenoVariable_1__init__(Py
 static PyMethodDef __pyx_mdef_11fuzzy_logic_9variables_14SugenoVariable_1__init__ = {"__init__", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_11fuzzy_logic_9variables_14SugenoVariable_1__init__, METH_VARARGS|METH_KEYWORDS, 0};
 static PyObject *__pyx_pw_11fuzzy_logic_9variables_14SugenoVariable_1__init__(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_self = 0;
-  PyObject *__pyx_v_name = 0;
+  char __pyx_v_name;
   PyObject *__pyx_v_functions = 0;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -2837,7 +2830,7 @@ static PyObject *__pyx_pw_11fuzzy_logic_9variables_14SugenoVariable_1__init__(Py
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_self = values[0];
-    __pyx_v_name = ((PyObject*)values[1]);
+    __pyx_v_name = __Pyx_PyInt_As_char(values[1]); if (unlikely((__pyx_v_name == (char)-1) && PyErr_Occurred())) __PYX_ERR(0, 79, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
@@ -2848,20 +2841,15 @@ static PyObject *__pyx_pw_11fuzzy_logic_9variables_14SugenoVariable_1__init__(Py
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_name), (&PyString_Type), 1, "name", 1))) __PYX_ERR(0, 79, __pyx_L1_error)
   __pyx_r = __pyx_pf_11fuzzy_logic_9variables_14SugenoVariable___init__(__pyx_self, __pyx_v_self, __pyx_v_name, __pyx_v_functions);
 
   /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __pyx_r = NULL;
-  __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_functions);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name, PyObject *__pyx_v_functions) {
+static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, char __pyx_v_name, PyObject *__pyx_v_functions) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -2872,19 +2860,22 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable___init__(CYT
 
   /* "fuzzy_logic/variables.py":80
  * 
- *     def __init__(self, name: str, *functions: SugenoFunction):
- *         self.name: str = name             # <<<<<<<<<<<<<<
+ *     def __init__(self, name: cython.char, *functions: SugenoFunction):
+ *         self.name: cython.char = name             # <<<<<<<<<<<<<<
  *         self.functions: List[SugenoFunction] = list(functions)
  * 
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_name, __pyx_v_name) < 0) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_char(__pyx_v_name); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_name, __pyx_t_1) < 0) __PYX_ERR(0, 80, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "fuzzy_logic/variables.py":81
- *     def __init__(self, name: str, *functions: SugenoFunction):
- *         self.name: str = name
+ *     def __init__(self, name: cython.char, *functions: SugenoFunction):
+ *         self.name: cython.char = name
  *         self.functions: List[SugenoFunction] = list(functions)             # <<<<<<<<<<<<<<
  * 
- *     def function_by_name(self, name: str) -> SugenoFunction:
+ *     def function_by_name(self, name: cython.char) -> SugenoFunction:
  */
   __pyx_t_1 = PySequence_List(__pyx_v_functions); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -2894,8 +2885,8 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable___init__(CYT
   /* "fuzzy_logic/variables.py":79
  *     """
  * 
- *     def __init__(self, name: str, *functions: SugenoFunction):             # <<<<<<<<<<<<<<
- *         self.name: str = name
+ *     def __init__(self, name: cython.char, *functions: SugenoFunction):             # <<<<<<<<<<<<<<
+ *         self.name: cython.char = name
  *         self.functions: List[SugenoFunction] = list(functions)
  */
 
@@ -2915,7 +2906,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable___init__(CYT
 /* "fuzzy_logic/variables.py":83
  *         self.functions: List[SugenoFunction] = list(functions)
  * 
- *     def function_by_name(self, name: str) -> SugenoFunction:             # <<<<<<<<<<<<<<
+ *     def function_by_name(self, name: cython.char) -> SugenoFunction:             # <<<<<<<<<<<<<<
  *         for function in self.functions:
  *             if function.name == name:
  */
@@ -2925,7 +2916,7 @@ static PyObject *__pyx_pw_11fuzzy_logic_9variables_14SugenoVariable_3function_by
 static PyMethodDef __pyx_mdef_11fuzzy_logic_9variables_14SugenoVariable_3function_by_name = {"function_by_name", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_11fuzzy_logic_9variables_14SugenoVariable_3function_by_name, METH_VARARGS|METH_KEYWORDS, 0};
 static PyObject *__pyx_pw_11fuzzy_logic_9variables_14SugenoVariable_3function_by_name(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_self = 0;
-  PyObject *__pyx_v_name = 0;
+  char __pyx_v_name;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -2968,7 +2959,7 @@ static PyObject *__pyx_pw_11fuzzy_logic_9variables_14SugenoVariable_3function_by
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_self = values[0];
-    __pyx_v_name = ((PyObject*)values[1]);
+    __pyx_v_name = __Pyx_PyInt_As_char(values[1]); if (unlikely((__pyx_v_name == (char)-1) && PyErr_Occurred())) __PYX_ERR(0, 83, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
@@ -2978,19 +2969,14 @@ static PyObject *__pyx_pw_11fuzzy_logic_9variables_14SugenoVariable_3function_by
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_name), (&PyString_Type), 1, "name", 1))) __PYX_ERR(0, 83, __pyx_L1_error)
   __pyx_r = __pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by_name(__pyx_self, __pyx_v_self, __pyx_v_name);
 
   /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __pyx_r = NULL;
-  __pyx_L0:;
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by_name(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_name) {
+static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by_name(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, char __pyx_v_name) {
   PyObject *__pyx_v_function = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -2998,7 +2984,9 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by
   PyObject *__pyx_t_2 = NULL;
   Py_ssize_t __pyx_t_3;
   PyObject *(*__pyx_t_4)(PyObject *);
-  int __pyx_t_5;
+  PyObject *__pyx_t_5 = NULL;
+  PyObject *__pyx_t_6 = NULL;
+  int __pyx_t_7;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -3006,7 +2994,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by
 
   /* "fuzzy_logic/variables.py":84
  * 
- *     def function_by_name(self, name: str) -> SugenoFunction:
+ *     def function_by_name(self, name: cython.char) -> SugenoFunction:
  *         for function in self.functions:             # <<<<<<<<<<<<<<
  *             if function.name == name:
  *                 return function
@@ -3057,7 +3045,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by
     __pyx_t_1 = 0;
 
     /* "fuzzy_logic/variables.py":85
- *     def function_by_name(self, name: str) -> SugenoFunction:
+ *     def function_by_name(self, name: cython.char) -> SugenoFunction:
  *         for function in self.functions:
  *             if function.name == name:             # <<<<<<<<<<<<<<
  *                 return function
@@ -3065,9 +3053,14 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by
  */
     __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_function, __pyx_n_s_name); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_5 = (__Pyx_PyString_Equals(__pyx_t_1, __pyx_v_name, Py_EQ)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_From_char(__pyx_v_name); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 85, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __pyx_t_6 = PyObject_RichCompare(__pyx_t_1, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 85, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    if (__pyx_t_5) {
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    if (__pyx_t_7) {
 
       /* "fuzzy_logic/variables.py":86
  *         for function in self.functions:
@@ -3083,7 +3076,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by
       goto __pyx_L0;
 
       /* "fuzzy_logic/variables.py":85
- *     def function_by_name(self, name: str) -> SugenoFunction:
+ *     def function_by_name(self, name: cython.char) -> SugenoFunction:
  *         for function in self.functions:
  *             if function.name == name:             # <<<<<<<<<<<<<<
  *                 return function
@@ -3093,7 +3086,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by
 
     /* "fuzzy_logic/variables.py":84
  * 
- *     def function_by_name(self, name: str) -> SugenoFunction:
+ *     def function_by_name(self, name: cython.char) -> SugenoFunction:
  *         for function in self.functions:             # <<<<<<<<<<<<<<
  *             if function.name == name:
  *                 return function
@@ -3104,7 +3097,7 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by
   /* "fuzzy_logic/variables.py":83
  *         self.functions: List[SugenoFunction] = list(functions)
  * 
- *     def function_by_name(self, name: str) -> SugenoFunction:             # <<<<<<<<<<<<<<
+ *     def function_by_name(self, name: cython.char) -> SugenoFunction:             # <<<<<<<<<<<<<<
  *         for function in self.functions:
  *             if function.name == name:
  */
@@ -3115,6 +3108,8 @@ static PyObject *__pyx_pf_11fuzzy_logic_9variables_14SugenoVariable_2function_by
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_5);
+  __Pyx_XDECREF(__pyx_t_6);
   __Pyx_AddTraceback("fuzzy_logic.variables.SugenoVariable.function_by_name", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -3260,9 +3255,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_coefficients, __pyx_k_coefficients, sizeof(__pyx_k_coefficients), 0, 0, 1, 1},
   {&__pyx_n_s_const, __pyx_k_const, sizeof(__pyx_k_const), 0, 0, 1, 1},
+  {&__pyx_n_s_cython, __pyx_k_cython, sizeof(__pyx_k_cython), 0, 0, 1, 1},
   {&__pyx_n_s_doc, __pyx_k_doc, sizeof(__pyx_k_doc), 0, 0, 1, 1},
+  {&__pyx_n_s_double, __pyx_k_double, sizeof(__pyx_k_double), 0, 0, 1, 1},
+  {&__pyx_n_u_double, __pyx_k_double, sizeof(__pyx_k_double), 0, 1, 0, 1},
   {&__pyx_n_s_evaluate, __pyx_k_evaluate, sizeof(__pyx_k_evaluate), 0, 0, 1, 1},
-  {&__pyx_n_u_float, __pyx_k_float, sizeof(__pyx_k_float), 0, 1, 0, 1},
   {&__pyx_n_s_function, __pyx_k_function, sizeof(__pyx_k_function), 0, 0, 1, 1},
   {&__pyx_n_s_function_by_name, __pyx_k_function_by_name, sizeof(__pyx_k_function_by_name), 0, 0, 1, 1},
   {&__pyx_n_s_functions, __pyx_k_functions, sizeof(__pyx_k_functions), 0, 0, 1, 1},
@@ -3313,7 +3310,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "fuzzy_logic/variables.py":17
  * class FuzzyVariable:
  * 
- *     def __init__(self, name: cython.char, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):             # <<<<<<<<<<<<<<
+ *     def __init__(self, name: cython.char, min_value: cython.double = 0.0, max_value: cython.double = 1.0, *terms: Term):             # <<<<<<<<<<<<<<
  *         if min_value >= max_value:
  *             raise ValueError(f'{min_value} <= {max_value} is not True')
  */
@@ -3325,7 +3322,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "fuzzy_logic/variables.py":25
  *         self.terms: List[Term] = list(terms)
  * 
- *     def term_by_name(self, name: str) -> Term:             # <<<<<<<<<<<<<<
+ *     def term_by_name(self, name: cython.char) -> Term:             # <<<<<<<<<<<<<<
  *         """
  *         Find term by name
  */
@@ -3349,7 +3346,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "fuzzy_logic/variables.py":46
  *     @property
  *     @abstractmethod
- *     def name(self) -> str:             # <<<<<<<<<<<<<<
+ *     def name(self) -> cython.char:             # <<<<<<<<<<<<<<
  *         ...
  * 
  */
@@ -3361,7 +3358,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "fuzzy_logic/variables.py":50
  * 
  *     @abstractmethod
- *     def evaluate(self, inputs: Dict[FuzzyVariable, float]) -> float:             # <<<<<<<<<<<<<<
+ *     def evaluate(self, inputs: Dict[FuzzyVariable, cython.double]) -> cython.double:             # <<<<<<<<<<<<<<
  *         ...
  * 
  */
@@ -3373,8 +3370,8 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "fuzzy_logic/variables.py":56
  * class LinearSugenoFunction(SugenoFunction):
  * 
- *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, float], const: float = .0):             # <<<<<<<<<<<<<<
- *         self.__name: str = name
+ *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, cython.double], const: cython.double = .0):             # <<<<<<<<<<<<<<
+ *         self.__name: cython.char = name
  *         self.coefficients: Dict[FuzzyVariable, float] = coefficients
  */
   __pyx_tuple__12 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_name, __pyx_n_s_coefficients, __pyx_n_s_const); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 56, __pyx_L1_error)
@@ -3385,7 +3382,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "fuzzy_logic/variables.py":62
  * 
  *     @property
- *     def name(self) -> str:             # <<<<<<<<<<<<<<
+ *     def name(self) -> cython.char:             # <<<<<<<<<<<<<<
  *         return self.__name
  * 
  */
@@ -3397,7 +3394,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "fuzzy_logic/variables.py":65
  *         return self.__name
  * 
- *     def evaluate(self, inputs: Dict[FuzzyVariable, float]) -> float:             # <<<<<<<<<<<<<<
+ *     def evaluate(self, inputs: Dict[FuzzyVariable, cython.double]) -> cython.double:             # <<<<<<<<<<<<<<
  *         """
  *         Calculate linear function
  */
@@ -3409,8 +3406,8 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "fuzzy_logic/variables.py":79
  *     """
  * 
- *     def __init__(self, name: str, *functions: SugenoFunction):             # <<<<<<<<<<<<<<
- *         self.name: str = name
+ *     def __init__(self, name: cython.char, *functions: SugenoFunction):             # <<<<<<<<<<<<<<
+ *         self.name: cython.char = name
  *         self.functions: List[SugenoFunction] = list(functions)
  */
   __pyx_tuple__18 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_name, __pyx_n_s_functions); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 79, __pyx_L1_error)
@@ -3421,7 +3418,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "fuzzy_logic/variables.py":83
  *         self.functions: List[SugenoFunction] = list(functions)
  * 
- *     def function_by_name(self, name: str) -> SugenoFunction:             # <<<<<<<<<<<<<<
+ *     def function_by_name(self, name: cython.char) -> SugenoFunction:             # <<<<<<<<<<<<<<
  *         for function in self.functions:
  *             if function.name == name:
  */
@@ -3621,6 +3618,7 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_variables(PyObject *__pyx_pyinit_m
   PyObject *__pyx_t_7 = NULL;
   PyObject *__pyx_t_8 = NULL;
   PyObject *__pyx_t_9 = NULL;
+  PyObject *__pyx_t_10 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -3808,7 +3806,7 @@ if (!__Pyx_RefNanny) {
  * 
  * class FuzzyVariable:             # <<<<<<<<<<<<<<
  * 
- *     def __init__(self, name: cython.char, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):
+ *     def __init__(self, name: cython.char, min_value: cython.double = 0.0, max_value: cython.double = 1.0, *terms: Term):
  */
   __pyx_t_2 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_FuzzyVariable, __pyx_n_s_FuzzyVariable, (PyObject *) NULL, __pyx_n_s_fuzzy_logic_variables, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -3816,7 +3814,7 @@ if (!__Pyx_RefNanny) {
   /* "fuzzy_logic/variables.py":17
  * class FuzzyVariable:
  * 
- *     def __init__(self, name: cython.char, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):             # <<<<<<<<<<<<<<
+ *     def __init__(self, name: cython.char, min_value: cython.double = 0.0, max_value: cython.double = 1.0, *terms: Term):             # <<<<<<<<<<<<<<
  *         if min_value >= max_value:
  *             raise ValueError(f'{min_value} <= {max_value} is not True')
  */
@@ -3835,8 +3833,8 @@ if (!__Pyx_RefNanny) {
   __pyx_t_3 = __Pyx_PyDict_NewPresized(4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_name, __pyx_n_u_char) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_min_value, __pyx_n_u_float) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_max_value, __pyx_n_u_float) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_min_value, __pyx_n_u_double) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_max_value, __pyx_n_u_double) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_Term); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_terms, __pyx_t_1) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
@@ -3853,13 +3851,13 @@ if (!__Pyx_RefNanny) {
   /* "fuzzy_logic/variables.py":25
  *         self.terms: List[Term] = list(terms)
  * 
- *     def term_by_name(self, name: str) -> Term:             # <<<<<<<<<<<<<<
+ *     def term_by_name(self, name: cython.char) -> Term:             # <<<<<<<<<<<<<<
  *         """
  *         Find term by name
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_name, __pyx_n_u_str) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_name, __pyx_n_u_char) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_Term); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_return, __pyx_t_3) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
@@ -3899,7 +3897,7 @@ if (!__Pyx_RefNanny) {
  * 
  * class FuzzyVariable:             # <<<<<<<<<<<<<<
  * 
- *     def __init__(self, name: cython.char, min_value: float = 0.0, max_value: float = 1.0, *terms: Term):
+ *     def __init__(self, name: cython.char, min_value: cython.double = 0.0, max_value: cython.double = 1.0, *terms: Term):
  */
   __pyx_t_1 = __Pyx_Py3ClassCreate(((PyObject*)&__Pyx_DefaultClassType), __pyx_n_s_FuzzyVariable, __pyx_empty_tuple, __pyx_t_2, NULL, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -3930,7 +3928,7 @@ if (!__Pyx_RefNanny) {
  *     """
  *     @property
  *     @abstractmethod             # <<<<<<<<<<<<<<
- *     def name(self) -> str:
+ *     def name(self) -> cython.char:
  *         ...
  */
   __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_abstractmethod); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 45, __pyx_L1_error)
@@ -3939,13 +3937,13 @@ if (!__Pyx_RefNanny) {
   /* "fuzzy_logic/variables.py":46
  *     @property
  *     @abstractmethod
- *     def name(self) -> str:             # <<<<<<<<<<<<<<
+ *     def name(self) -> cython.char:             # <<<<<<<<<<<<<<
  *         ...
  * 
  */
   __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_return, __pyx_n_u_str) < 0) __PYX_ERR(0, 46, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_return, __pyx_n_u_char) < 0) __PYX_ERR(0, 46, __pyx_L1_error)
   __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_11fuzzy_logic_9variables_14SugenoFunction_1name, 0, __pyx_n_s_SugenoFunction_name, NULL, __pyx_n_s_fuzzy_logic_variables, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_7, __pyx_t_6);
@@ -3972,7 +3970,7 @@ if (!__Pyx_RefNanny) {
  *     """
  *     @property             # <<<<<<<<<<<<<<
  *     @abstractmethod
- *     def name(self) -> str:
+ *     def name(self) -> cython.char:
  */
   __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
@@ -3984,7 +3982,7 @@ if (!__Pyx_RefNanny) {
  *         ...
  * 
  *     @abstractmethod             # <<<<<<<<<<<<<<
- *     def evaluate(self, inputs: Dict[FuzzyVariable, float]) -> float:
+ *     def evaluate(self, inputs: Dict[FuzzyVariable, cython.double]) -> cython.double:
  *         ...
  */
   __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_abstractmethod); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
@@ -3993,7 +3991,7 @@ if (!__Pyx_RefNanny) {
   /* "fuzzy_logic/variables.py":50
  * 
  *     @abstractmethod
- *     def evaluate(self, inputs: Dict[FuzzyVariable, float]) -> float:             # <<<<<<<<<<<<<<
+ *     def evaluate(self, inputs: Dict[FuzzyVariable, cython.double]) -> cython.double:             # <<<<<<<<<<<<<<
  *         ...
  * 
  */
@@ -4003,24 +4001,29 @@ if (!__Pyx_RefNanny) {
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_n_s_FuzzyVariable); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
+  __Pyx_GetModuleGlobalName(__pyx_t_9, __pyx_n_s_cython); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
+  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_double); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_GIVEREF(__pyx_t_8);
   PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_8);
-  __Pyx_INCREF(((PyObject *)(&PyFloat_Type)));
-  __Pyx_GIVEREF(((PyObject *)(&PyFloat_Type)));
-  PyTuple_SET_ITEM(__pyx_t_9, 1, ((PyObject *)(&PyFloat_Type)));
+  __Pyx_GIVEREF(__pyx_t_10);
+  PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_t_10);
   __pyx_t_8 = 0;
-  __pyx_t_8 = __Pyx_PyObject_GetItem(__pyx_t_6, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 50, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
+  __pyx_t_10 = 0;
+  __pyx_t_10 = __Pyx_PyObject_GetItem(__pyx_t_6, __pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_inputs, __pyx_t_8) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_return, __pyx_n_u_float) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
-  __pyx_t_8 = __Pyx_CyFunction_New(&__pyx_mdef_11fuzzy_logic_9variables_14SugenoFunction_3evaluate, 0, __pyx_n_s_SugenoFunction_evaluate, NULL, __pyx_n_s_fuzzy_logic_variables, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 50, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
-  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_8, __pyx_t_7);
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_inputs, __pyx_t_10) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_return, __pyx_n_u_double) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_CyFunction_New(&__pyx_mdef_11fuzzy_logic_9variables_14SugenoFunction_3evaluate, 0, __pyx_n_s_SugenoFunction_evaluate, NULL, __pyx_n_s_fuzzy_logic_variables, __pyx_d, ((PyObject *)__pyx_codeobj__11)); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_10, __pyx_t_7);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_t_7 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
@@ -4032,9 +4035,9 @@ if (!__Pyx_RefNanny) {
       __Pyx_DECREF_SET(__pyx_t_4, function);
     }
   }
-  __pyx_t_5 = (__pyx_t_7) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_7, __pyx_t_8) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_8);
+  __pyx_t_5 = (__pyx_t_7) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_7, __pyx_t_10) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_10);
   __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -4061,7 +4064,7 @@ if (!__Pyx_RefNanny) {
  * 
  * class LinearSugenoFunction(SugenoFunction):             # <<<<<<<<<<<<<<
  * 
- *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, float], const: float = .0):
+ *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, cython.double], const: cython.double = .0):
  */
   __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_SugenoFunction); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -4078,8 +4081,8 @@ if (!__Pyx_RefNanny) {
   /* "fuzzy_logic/variables.py":56
  * class LinearSugenoFunction(SugenoFunction):
  * 
- *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, float], const: float = .0):             # <<<<<<<<<<<<<<
- *         self.__name: str = name
+ *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, cython.double], const: cython.double = .0):             # <<<<<<<<<<<<<<
+ *         self.__name: cython.char = name
  *         self.coefficients: Dict[FuzzyVariable, float] = coefficients
  */
   __pyx_t_5 = PyFloat_FromDouble(((double).0)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 56, __pyx_L1_error)
@@ -4092,108 +4095,118 @@ if (!__Pyx_RefNanny) {
   __pyx_t_5 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_name, __pyx_n_u_str) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
-  __Pyx_GetModuleGlobalName(__pyx_t_8, __pyx_n_s_Dict); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 56, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_8);
+  __Pyx_GetModuleGlobalName(__pyx_t_10, __pyx_n_s_Dict); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
   __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_FuzzyVariable); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
+  __Pyx_GetModuleGlobalName(__pyx_t_9, __pyx_n_s_cython); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_double); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_7);
-  __Pyx_INCREF(((PyObject *)(&PyFloat_Type)));
-  __Pyx_GIVEREF(((PyObject *)(&PyFloat_Type)));
-  PyTuple_SET_ITEM(__pyx_t_9, 1, ((PyObject *)(&PyFloat_Type)));
+  __Pyx_GIVEREF(__pyx_t_6);
+  PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_t_6);
   __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_GetItem(__pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 56, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  __pyx_t_6 = 0;
+  __pyx_t_6 = __Pyx_PyObject_GetItem(__pyx_t_10, __pyx_t_9); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_coefficients, __pyx_t_7) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_const, __pyx_n_u_float) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_11fuzzy_logic_9variables_20LinearSugenoFunction_1__init__, 0, __pyx_n_s_LinearSugenoFunction___init, NULL, __pyx_n_s_fuzzy_logic_variables, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 56, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_7, __pyx_t_4);
-  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_7, __pyx_t_5);
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_coefficients, __pyx_t_6) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_const, __pyx_n_u_double) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_CyFunction_New(&__pyx_mdef_11fuzzy_logic_9variables_20LinearSugenoFunction_1__init__, 0, __pyx_n_s_LinearSugenoFunction___init, NULL, __pyx_n_s_fuzzy_logic_variables, __pyx_d, ((PyObject *)__pyx_codeobj__13)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_6, __pyx_t_4);
+  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_6, __pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_init, __pyx_t_7) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_init, __pyx_t_6) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
   /* "fuzzy_logic/variables.py":62
  * 
  *     @property
- *     def name(self) -> str:             # <<<<<<<<<<<<<<
+ *     def name(self) -> cython.char:             # <<<<<<<<<<<<<<
  *         return self.__name
  * 
  */
-  __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 62, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_return, __pyx_n_u_str) < 0) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_return, __pyx_n_u_char) < 0) __PYX_ERR(0, 62, __pyx_L1_error)
   __pyx_t_5 = __Pyx_CyFunction_New(&__pyx_mdef_11fuzzy_logic_9variables_20LinearSugenoFunction_3name, 0, __pyx_n_s_LinearSugenoFunction_name, NULL, __pyx_n_s_fuzzy_logic_variables, __pyx_d, ((PyObject *)__pyx_codeobj__15)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_5, __pyx_t_7);
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_5, __pyx_t_6);
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
   /* "fuzzy_logic/variables.py":61
- *         self.const: float = const
+ *         self.const: cython.double = const
  * 
  *     @property             # <<<<<<<<<<<<<<
- *     def name(self) -> str:
+ *     def name(self) -> cython.char:
  *         return self.__name
  */
-  __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 61, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_builtin_property, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_name, __pyx_t_7) < 0) __PYX_ERR(0, 62, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_name, __pyx_t_6) < 0) __PYX_ERR(0, 62, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
   /* "fuzzy_logic/variables.py":65
  *         return self.__name
  * 
- *     def evaluate(self, inputs: Dict[FuzzyVariable, float]) -> float:             # <<<<<<<<<<<<<<
+ *     def evaluate(self, inputs: Dict[FuzzyVariable, cython.double]) -> cython.double:             # <<<<<<<<<<<<<<
  *         """
  *         Calculate linear function
  */
-  __pyx_t_7 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 65, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_t_6 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_Dict); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_FuzzyVariable); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_GetModuleGlobalName(__pyx_t_9, __pyx_n_s_cython); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_9);
+  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_double); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __pyx_t_9 = PyTuple_New(2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_4);
-  __Pyx_INCREF(((PyObject *)(&PyFloat_Type)));
-  __Pyx_GIVEREF(((PyObject *)(&PyFloat_Type)));
-  PyTuple_SET_ITEM(__pyx_t_9, 1, ((PyObject *)(&PyFloat_Type)));
+  __Pyx_GIVEREF(__pyx_t_10);
+  PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_t_10);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_GetItem(__pyx_t_5, __pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 65, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_10 = 0;
+  __pyx_t_10 = __Pyx_PyObject_GetItem(__pyx_t_5, __pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_inputs, __pyx_t_4) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_return, __pyx_n_u_float) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_CyFunction_New(&__pyx_mdef_11fuzzy_logic_9variables_20LinearSugenoFunction_5evaluate, 0, __pyx_n_s_LinearSugenoFunction_evaluate, NULL, __pyx_n_s_fuzzy_logic_variables, __pyx_d, ((PyObject *)__pyx_codeobj__17)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 65, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_4, __pyx_t_7);
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_evaluate, __pyx_t_4) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_inputs, __pyx_t_10) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_return, __pyx_n_u_double) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_CyFunction_New(&__pyx_mdef_11fuzzy_logic_9variables_20LinearSugenoFunction_5evaluate, 0, __pyx_n_s_LinearSugenoFunction_evaluate, NULL, __pyx_n_s_fuzzy_logic_variables, __pyx_d, ((PyObject *)__pyx_codeobj__17)); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __Pyx_CyFunction_SetAnnotationsDict(__pyx_t_10, __pyx_t_6);
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  if (__Pyx_SetNameInClass(__pyx_t_3, __pyx_n_s_evaluate, __pyx_t_10) < 0) __PYX_ERR(0, 65, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
   /* "fuzzy_logic/variables.py":54
  * 
  * 
  * class LinearSugenoFunction(SugenoFunction):             # <<<<<<<<<<<<<<
  * 
- *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, float], const: float = .0):
+ *     def __init__(self, name: str, coefficients: Dict[FuzzyVariable, cython.double], const: cython.double = .0):
  */
-  __pyx_t_4 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_LinearSugenoFunction, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 54, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_LinearSugenoFunction, __pyx_t_4) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_10 = __Pyx_Py3ClassCreate(__pyx_t_1, __pyx_n_s_LinearSugenoFunction, __pyx_t_2, __pyx_t_3, NULL, 0, 1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_LinearSugenoFunction, __pyx_t_10) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -4211,13 +4224,13 @@ if (!__Pyx_RefNanny) {
   /* "fuzzy_logic/variables.py":79
  *     """
  * 
- *     def __init__(self, name: str, *functions: SugenoFunction):             # <<<<<<<<<<<<<<
- *         self.name: str = name
+ *     def __init__(self, name: cython.char, *functions: SugenoFunction):             # <<<<<<<<<<<<<<
+ *         self.name: cython.char = name
  *         self.functions: List[SugenoFunction] = list(functions)
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_name, __pyx_n_u_str) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_name, __pyx_n_u_char) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_SugenoFunction); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_functions, __pyx_t_3) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
@@ -4232,13 +4245,13 @@ if (!__Pyx_RefNanny) {
   /* "fuzzy_logic/variables.py":83
  *         self.functions: List[SugenoFunction] = list(functions)
  * 
- *     def function_by_name(self, name: str) -> SugenoFunction:             # <<<<<<<<<<<<<<
+ *     def function_by_name(self, name: cython.char) -> SugenoFunction:             # <<<<<<<<<<<<<<
  *         for function in self.functions:
  *             if function.name == name:
  */
   __pyx_t_3 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_name, __pyx_n_u_str) < 0) __PYX_ERR(0, 83, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_name, __pyx_n_u_char) < 0) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_SugenoFunction); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_return, __pyx_t_1) < 0) __PYX_ERR(0, 83, __pyx_L1_error)
@@ -4308,6 +4321,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_XDECREF(__pyx_t_9);
+  __Pyx_XDECREF(__pyx_t_10);
   if (__pyx_m) {
     if (__pyx_d) {
       __Pyx_AddTraceback("init fuzzy_logic.variables", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -5015,155 +5029,6 @@ static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *nam
         "Argument '%.200s' has incorrect type (expected %.200s, got %.200s)",
         name, type->tp_name, Py_TYPE(obj)->tp_name);
     return 0;
-}
-
-/* BytesEquals */
-static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals) {
-#if CYTHON_COMPILING_IN_PYPY
-    return PyObject_RichCompareBool(s1, s2, equals);
-#else
-    if (s1 == s2) {
-        return (equals == Py_EQ);
-    } else if (PyBytes_CheckExact(s1) & PyBytes_CheckExact(s2)) {
-        const char *ps1, *ps2;
-        Py_ssize_t length = PyBytes_GET_SIZE(s1);
-        if (length != PyBytes_GET_SIZE(s2))
-            return (equals == Py_NE);
-        ps1 = PyBytes_AS_STRING(s1);
-        ps2 = PyBytes_AS_STRING(s2);
-        if (ps1[0] != ps2[0]) {
-            return (equals == Py_NE);
-        } else if (length == 1) {
-            return (equals == Py_EQ);
-        } else {
-            int result;
-#if CYTHON_USE_UNICODE_INTERNALS && (PY_VERSION_HEX < 0x030B0000)
-            Py_hash_t hash1, hash2;
-            hash1 = ((PyBytesObject*)s1)->ob_shash;
-            hash2 = ((PyBytesObject*)s2)->ob_shash;
-            if (hash1 != hash2 && hash1 != -1 && hash2 != -1) {
-                return (equals == Py_NE);
-            }
-#endif
-            result = memcmp(ps1, ps2, (size_t)length);
-            return (equals == Py_EQ) ? (result == 0) : (result != 0);
-        }
-    } else if ((s1 == Py_None) & PyBytes_CheckExact(s2)) {
-        return (equals == Py_NE);
-    } else if ((s2 == Py_None) & PyBytes_CheckExact(s1)) {
-        return (equals == Py_NE);
-    } else {
-        int result;
-        PyObject* py_result = PyObject_RichCompare(s1, s2, equals);
-        if (!py_result)
-            return -1;
-        result = __Pyx_PyObject_IsTrue(py_result);
-        Py_DECREF(py_result);
-        return result;
-    }
-#endif
-}
-
-/* UnicodeEquals */
-static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals) {
-#if CYTHON_COMPILING_IN_PYPY
-    return PyObject_RichCompareBool(s1, s2, equals);
-#else
-#if PY_MAJOR_VERSION < 3
-    PyObject* owned_ref = NULL;
-#endif
-    int s1_is_unicode, s2_is_unicode;
-    if (s1 == s2) {
-        goto return_eq;
-    }
-    s1_is_unicode = PyUnicode_CheckExact(s1);
-    s2_is_unicode = PyUnicode_CheckExact(s2);
-#if PY_MAJOR_VERSION < 3
-    if ((s1_is_unicode & (!s2_is_unicode)) && PyString_CheckExact(s2)) {
-        owned_ref = PyUnicode_FromObject(s2);
-        if (unlikely(!owned_ref))
-            return -1;
-        s2 = owned_ref;
-        s2_is_unicode = 1;
-    } else if ((s2_is_unicode & (!s1_is_unicode)) && PyString_CheckExact(s1)) {
-        owned_ref = PyUnicode_FromObject(s1);
-        if (unlikely(!owned_ref))
-            return -1;
-        s1 = owned_ref;
-        s1_is_unicode = 1;
-    } else if (((!s2_is_unicode) & (!s1_is_unicode))) {
-        return __Pyx_PyBytes_Equals(s1, s2, equals);
-    }
-#endif
-    if (s1_is_unicode & s2_is_unicode) {
-        Py_ssize_t length;
-        int kind;
-        void *data1, *data2;
-        if (unlikely(__Pyx_PyUnicode_READY(s1) < 0) || unlikely(__Pyx_PyUnicode_READY(s2) < 0))
-            return -1;
-        length = __Pyx_PyUnicode_GET_LENGTH(s1);
-        if (length != __Pyx_PyUnicode_GET_LENGTH(s2)) {
-            goto return_ne;
-        }
-#if CYTHON_USE_UNICODE_INTERNALS
-        {
-            Py_hash_t hash1, hash2;
-        #if CYTHON_PEP393_ENABLED
-            hash1 = ((PyASCIIObject*)s1)->hash;
-            hash2 = ((PyASCIIObject*)s2)->hash;
-        #else
-            hash1 = ((PyUnicodeObject*)s1)->hash;
-            hash2 = ((PyUnicodeObject*)s2)->hash;
-        #endif
-            if (hash1 != hash2 && hash1 != -1 && hash2 != -1) {
-                goto return_ne;
-            }
-        }
-#endif
-        kind = __Pyx_PyUnicode_KIND(s1);
-        if (kind != __Pyx_PyUnicode_KIND(s2)) {
-            goto return_ne;
-        }
-        data1 = __Pyx_PyUnicode_DATA(s1);
-        data2 = __Pyx_PyUnicode_DATA(s2);
-        if (__Pyx_PyUnicode_READ(kind, data1, 0) != __Pyx_PyUnicode_READ(kind, data2, 0)) {
-            goto return_ne;
-        } else if (length == 1) {
-            goto return_eq;
-        } else {
-            int result = memcmp(data1, data2, (size_t)(length * kind));
-            #if PY_MAJOR_VERSION < 3
-            Py_XDECREF(owned_ref);
-            #endif
-            return (equals == Py_EQ) ? (result == 0) : (result != 0);
-        }
-    } else if ((s1 == Py_None) & s2_is_unicode) {
-        goto return_ne;
-    } else if ((s2 == Py_None) & s1_is_unicode) {
-        goto return_ne;
-    } else {
-        int result;
-        PyObject* py_result = PyObject_RichCompare(s1, s2, equals);
-        #if PY_MAJOR_VERSION < 3
-        Py_XDECREF(owned_ref);
-        #endif
-        if (!py_result)
-            return -1;
-        result = __Pyx_PyObject_IsTrue(py_result);
-        Py_DECREF(py_result);
-        return result;
-    }
-return_eq:
-    #if PY_MAJOR_VERSION < 3
-    Py_XDECREF(owned_ref);
-    #endif
-    return (equals == Py_EQ);
-return_ne:
-    #if PY_MAJOR_VERSION < 3
-    Py_XDECREF(owned_ref);
-    #endif
-    return (equals == Py_NE);
-#endif
 }
 
 /* PyObjectCallNoArg */
