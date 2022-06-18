@@ -13,10 +13,15 @@ from .terms import Term
 
 
 class FuzzyVariable:
-
-    def __init__(self, name: cython.char, min_value: cython.double = 0.0, max_value: cython.double = 1.0, *terms: Term):
+    def __init__(
+        self,
+        name: cython.char,
+        min_value: cython.double = 0.0,
+        max_value: cython.double = 1.0,
+        *terms: Term,
+    ):
         if min_value >= max_value:
-            raise ValueError(f'{min_value} <= {max_value} is not True')
+            raise ValueError(f"{min_value} <= {max_value} is not True")
         self.name: cython.char = name
         self.min_value: cython.double = min_value
         self.max_value: cython.double = max_value
@@ -41,6 +46,7 @@ class SugenoFunction(ABC):
     """
     Sugeno function interfaces
     """
+
     @property
     @abstractmethod
     def name(self) -> cython.char:
@@ -52,8 +58,12 @@ class SugenoFunction(ABC):
 
 
 class LinearSugenoFunction(SugenoFunction):
-
-    def __init__(self, name: str, coefficients: Dict[FuzzyVariable, cython.double], const: cython.double = .0):
+    def __init__(
+        self,
+        name: str,
+        coefficients: Dict[FuzzyVariable, cython.double],
+        const: cython.double = 0.0,
+    ):
         self.__name: cython.char = name
         self.coefficients: Dict[FuzzyVariable, float] = coefficients
         self.const: cython.double = const
@@ -68,7 +78,9 @@ class LinearSugenoFunction(SugenoFunction):
         :param inputs: Values
         :return: result of calculation
         """
-        return self.const + sum([self.coefficients[variable] * value for variable, value in inputs.items()])
+        return self.const + sum(
+            [self.coefficients[variable] * value for variable, value in inputs.items()]
+        )
 
 
 class SugenoVariable:
