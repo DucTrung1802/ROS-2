@@ -4,6 +4,7 @@ Luferov Victor <lyferov@yandex.ru>
 Generic fuzzy system
 """
 
+import cython
 from typing import List, Dict
 from collections import defaultdict
 from .variables import FuzzyVariable
@@ -29,7 +30,7 @@ class GenericFuzzySystem:
         self.and_method: AndMethod = am
         self.or_method: OrMethod = om
 
-    def input_by_name(self, name: str) -> FuzzyVariable:
+    def input_by_name(self, name: cython.char) -> FuzzyVariable:
         """
         Ищем переменную по имени
         :param name: имя переменной
@@ -41,8 +42,8 @@ class GenericFuzzySystem:
         raise Exception(f'Выходной переменной с именем "{name}" не найдено')
 
     def evaluate_conditions(
-        self, fi: Dict[FuzzyVariable, Dict[Term, float]]
-    ) -> Dict[FuzzyRule, float]:
+        self, fi: Dict[FuzzyVariable, Dict[Term, cython.double]]
+    ) -> Dict[FuzzyRule, cython.double]:
         """
         Расчитываем заключения по нечетким правилам
         :param fi: фаззицицированные входные переменные
@@ -53,17 +54,19 @@ class GenericFuzzySystem:
         }
 
     def fuzzify(
-        self, inp: Dict[FuzzyVariable, float]
-    ) -> Dict[FuzzyVariable, Dict[Term, float]]:
+        self, inp: Dict[FuzzyVariable, cython.double]
+    ) -> Dict[FuzzyVariable, Dict[Term, cython.double]]:
         """
         Фаззификация значений
         :param inp:
         :return:
         """
         self.validate_input_values(inp)
-        result: Dict[FuzzyVariable, Dict[Term, float]] = defaultdict(Dict[Term, float])
+        result: Dict[FuzzyVariable, Dict[Term, cython.double]] = defaultdict(
+            Dict[Term, cython.double]
+        )
         for variable in self.inp:
-            result[variable] = defaultdict(float)
+            result[variable] = defaultdict(cython.double)
             for term in variable.terms:
                 result[variable][term] = term.mf.get_value(inp[variable])
         return result
@@ -71,8 +74,8 @@ class GenericFuzzySystem:
     def evaluate_condition(
         self,
         condition: [Conditions, FuzzyCondition],
-        fi: Dict[FuzzyVariable, Dict[Term, float]],
-    ) -> float:
+        fi: Dict[FuzzyVariable, Dict[Term, cython.double]],
+    ) -> cython.double:
         """
         Вычисляем условие
         :param condition: условиие
@@ -83,9 +86,13 @@ class GenericFuzzySystem:
             if len(condition.conditions) == 0:
                 raise Exception("Сотояний нет")
             elif len(condition.conditions) == 1:
-                result: float = self.evaluate_condition(condition.conditions[0], fi)
+                result: cython.double = self.evaluate_condition(
+                    condition.conditions[0], fi
+                )
             else:
-                result: float = self.evaluate_condition(condition.conditions[0], fi)
+                result: cython.double = self.evaluate_condition(
+                    condition.conditions[0], fi
+                )
                 for i in range(1, len(condition.conditions)):
                     result = self.evaluate_condition_pair(
                         result,
@@ -94,7 +101,7 @@ class GenericFuzzySystem:
                     )
             return 1.0 - result if condition.not_ else result
         elif isinstance(condition, FuzzyCondition):
-            result: float = fi[condition.variable][condition.term.term]
+            result: cython.double = fi[condition.variable][condition.term.term]
             # Навешиваем модификатор
             if condition.hedge == HedgeType.SLIGHTLY:
                 result = result ** (1.0 / 3.0)
@@ -109,8 +116,8 @@ class GenericFuzzySystem:
             raise Exception("Не найдено условие в нечетком правиле")
 
     def evaluate_condition_pair(
-        self, condition1: float, condition2: float, op: OperatorType
-    ) -> float:
+        self, condition1: cython.double, condition2: cython.double, op: OperatorType
+    ) -> cython.double:
         if op == OperatorType.AND:
             if self.and_method == AndMethod.MIN:
                 return min(condition1, condition2)
@@ -128,7 +135,7 @@ class GenericFuzzySystem:
         else:
             raise Exception("Оператор композиции не найден")
 
-    def validate_input_values(self, inp: Dict[FuzzyVariable, float]):
+    def validate_input_values(self, inp: Dict[FuzzyVariable, cython.double]):
         """
         Проверка валидности входных переменных
         :param inp: проверяем входящие значения
@@ -138,7 +145,7 @@ class GenericFuzzySystem:
             raise Exception("Количество входных значений не верно")
         for variable in self.inp:
             if variable in inp:
-                value: float = inp[variable]
+                value: cython.double = inp[variable]
                 if not variable.min_value <= value <= variable.max_value:
                     raise Exception("Значние переменной выходит за диапазон")
             else:
