@@ -85,7 +85,7 @@ RIGHT_MOTOR_MAX = 12
 # Test data
 TEST_ONLY_ON_LAPTOP = False
 MANUALLY_TUNE_PID = False
-DATA_RECORDING = True
+DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
@@ -219,7 +219,6 @@ odom_dictionary = {
     },
 }
 
-
 # Data recorder
 WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
 
@@ -249,6 +248,8 @@ class MotorDriverNode(Node):
             Twist, "cmd_vel", self.subscriberCallback, 1
         )
         self.controller_sub  # prevent unused variable warning
+
+        self.covariance_index = 0.0
 
     def publisherCallback(self):
 
@@ -283,11 +284,14 @@ class MotorDriverNode(Node):
         msg.twist.twist.angular.y = odom_dictionary["twist"]["twist"]["angular"]["y"]
         msg.twist.twist.angular.z = odom_dictionary["twist"]["twist"]["angular"]["z"]
 
+        self.covariance_index += 0.1
+
         for i in range(36):
             if i == 0 or i == 7 or i == 14:
                 msg.pose.covariance[i] = 0.01
             elif i == 21 or i == 28 or i == 35:
-                msg.pose.covariance[i] += 0.1
+                msg.pose.covariance[i] = self.covariance_index
+                print(msg.pose.covariance[i])
             else:
                 msg.pose.covariance[i] = 0.0
 
