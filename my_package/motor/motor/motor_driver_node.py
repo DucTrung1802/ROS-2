@@ -283,6 +283,14 @@ class MotorDriverNode(Node):
         msg.twist.twist.angular.y = odom_dictionary["twist"]["twist"]["angular"]["y"]
         msg.twist.twist.angular.z = odom_dictionary["twist"]["twist"]["angular"]["z"]
 
+        for i in range(36):
+            if i == 0 or i == 7 or i == 14:
+                msg.pose.covariance[i] = 0.01
+            elif i == 21 or i == 28 or i == 35:
+                msg.pose.covariance[i] += 0.1
+            else:
+                msg.pose.covariance[i] = 0.0
+
         self.odom_pub.publish(msg)
 
         # left_RPM = Float32()
