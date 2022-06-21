@@ -1,0 +1,358 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 4.2.1
+# Built for x86_64-pc-linux-gnu
+# Copyright (C) 1988-2016 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Sat Jun 18 10:24:17 2022
+
+# Variables
+
+# 'override' directive
+GNUMAKEFLAGS := 
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# environment
+PAPERSIZE = a4
+# environment
+DESKTOP_SESSION = ubuntu
+# default
+.SHELLFLAGS := -c
+# environment
+XDG_SESSION_CLASS = user
+# environment
+XDG_SESSION_TYPE = x11
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+IM_CONFIG_PHASE = 1
+# environment
+OGRE_RESOURCE_PATH = /usr/lib/x86_64-linux-gnu/OGRE-1.9.0
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+XAUTHORITY = /run/user/1000/gdm/Xauthority
+# environment
+GDMSESSION = ubuntu
+# environment
+XMODIFIERS = @im=ibus
+# makefile
+CURDIR := /home/ductrung1802/GIT/ROS 2/fuzzy_logic/dynamic_shared_library_linux
+# makefile
+SHELL = /bin/sh
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en-gb","availableLanguages":{},"_languagePackSupport":true}
+# environment
+_ = /usr/share/code/code
+# environment
+_colcon_cd_root = /home/ductrung1802/dev_ws
+# environment
+JOURNAL_STREAM = 8:48236
+# environment
+XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
+# makefile (from 'makefile', line 1)
+MAKEFILE_LIST :=  makefile
+# environment
+JAVA_HOME = /usr/lib/jvm/java-11-openjdk-amd64
+# automatic
+@F = $(notdir $@)
+# environment
+GIO_LAUNCHED_DESKTOP_FILE = /usr/share/applications/code.desktop
+# environment
+GAZEBO_PLUGIN_PATH = /usr/lib/x86_64-linux-gnu/gazebo-11/plugins:
+# environment
+USERNAME = ductrung1802
+# environment
+MAKELEVEL := 0
+# environment
+MANDATORY_PATH = /usr/share/gconf/ubuntu.mandatory.path
+# environment
+XDG_DATA_DIRS = /usr/share/ubuntu:/usr/local/share/:/usr/share/
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+MANAGERPID = 1443
+# environment
+TURTLEBOT3_MODEL = waffle
+# environment
+ROS_PYTHON_VERSION = 3
+# environment
+LESSOPEN = | /usr/bin/lesspipe %s
+# environment
+LS_COLORS = 
+# environment
+LC_NAME = vi_VN
+# environment
+VSCODE_CWD = /home/ductrung1802
+# environment
+GAZEBO_MODEL_DATABASE_URI = http://models.gazebosim.org
+# default
+MAKE_HOST := x86_64-pc-linux-gnu
+# environment
+PATH = /home/ductrung1802/.local/bin:/opt/ros/galactic/bin:/home/ductrung1802/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+# environment
+XDG_SESSION_DESKTOP = ubuntu
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+GJS_DEBUG_OUTPUT = stderr
+# environment
+SESSION_MANAGER = local/ductrung1802-UX430UAR:@/tmp/.ICE-unix/1694,unix/ductrung1802-UX430UAR:/tmp/.ICE-unix/1694
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+XDG_MENU_PREFIX = gnome-
+# environment
+VSCODE_LOG_STACK = false
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+INVOCATION_ID = 0afb2e25790f4a81989b87f535acd570
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
+# environment
+CMAKE_PREFIX_PATH = /home/ductrung1802/nav2_ws/install/nav2_system_tests:/home/ductrung1802/nav2_ws/install/nav2_bringup:/home/ductrung1802/nav2_ws/install/navigation2:/home/ductrung1802/nav2_ws/install/nav2_dwb_controller:/home/ductrung1802/nav2_ws/install/nav2_controller:/home/ductrung1802/nav2_ws/install/dwb_plugins:/home/ductrung1802/nav2_ws/install/dwb_critics:/home/ductrung1802/nav2_ws/install/dwb_core:/home/ductrung1802/nav2_ws/install/nav_2d_utils:/home/ductrung1802/nav2_ws/install/dwb_msgs:/home/ductrung1802/nav2_ws/install/nav_2d_msgs:/home/ductrung1802/nav2_ws/install/nav2_waypoint_follower:/home/ductrung1802/nav2_ws/install/nav2_theta_star_planner:/home/ductrung1802/nav2_ws/install/nav2_smac_planner:/home/ductrung1802/nav2_ws/install/nav2_rotation_shim_controller:/home/ductrung1802/nav2_ws/install/nav2_regulated_pure_pursuit_controller:/home/ductrung1802/nav2_ws/install/nav2_recoveries:/home/ductrung1802/nav2_ws/install/nav2_planner:/home/ductrung1802/nav2_ws/install/nav2_navfn_planner:/home/ductrung1802/nav2_ws/install/nav2_bt_navigator:/home/ductrung1802/nav2_ws/install/nav2_core:/home/ductrung1802/nav2_ws/install/costmap_queue:/home/ductrung1802/nav2_ws/install/nav2_costmap_2d:/home/ductrung1802/nav2_ws/install/nav2_voxel_grid:/home/ductrung1802/nav2_ws/install/nav2_rviz_plugins:/home/ductrung1802/nav2_ws/install/nav2_map_server:/home/ductrung1802/nav2_ws/install/nav2_lifecycle_manager:/home/ductrung1802/nav2_ws/install/nav2_behavior_tree:/home/ductrung1802/nav2_ws/install/nav2_amcl:/home/ductrung1802/nav2_ws/install/nav2_util:/home/ductrung1802/nav2_ws/install/nav2_msgs:/home/ductrung1802/nav2_ws/install/nav2_common:/home/ductrung1802/dev_ws/install/turtlesim:/home/ductrung1802/dev_ws/install/basic_mobile_robot:/home/ductrung1802/dev_ws/install/robot_localization:/home/ductrung1802/dev_ws/install/my_package
+# environment
+ROS_LOCALHOST_ONLY = 0
+# environment
+ROS_DISTRO = galactic
+# environment
+SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
+# environment
+GIO_LAUNCHED_DESKTOP_FILE_PID = 3036
+# automatic
+%F = $(notdir $%)
+# environment
+DISPLAY = :0
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+PWD = /home/ductrung1802/GIT/ROS 2/fuzzy_logic/dynamic_shared_library_linux
+# default
+.LOADED := 
+# environment
+GAZEBO_MASTER_URI = http://localhost:11345
+# environment
+SSH_AGENT_PID = 1643
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
+# environment
+COLCON_PREFIX_PATH = /home/ductrung1802/dev_ws/install:/home/ductrung1802/nav2_ws/install
+# environment
+GTK_MODULES = gail:atk-bridge
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/ductrung1802
+# environment
+LD_LIBRARY_PATH = /home/ductrung1802/nav2_ws/install/nav2_controller/lib:/home/ductrung1802/nav2_ws/install/dwb_plugins/lib:/home/ductrung1802/nav2_ws/install/dwb_critics/lib:/home/ductrung1802/nav2_ws/install/dwb_core/lib:/home/ductrung1802/nav2_ws/install/nav_2d_utils/lib:/home/ductrung1802/nav2_ws/install/dwb_msgs/lib:/home/ductrung1802/nav2_ws/install/nav_2d_msgs/lib:/home/ductrung1802/nav2_ws/install/nav2_waypoint_follower/lib:/home/ductrung1802/nav2_ws/install/nav2_theta_star_planner/lib:/home/ductrung1802/nav2_ws/install/nav2_smac_planner/lib:/home/ductrung1802/nav2_ws/install/nav2_rotation_shim_controller/lib:/home/ductrung1802/nav2_ws/install/nav2_regulated_pure_pursuit_controller/lib:/home/ductrung1802/nav2_ws/install/nav2_recoveries/lib:/home/ductrung1802/nav2_ws/install/nav2_planner/lib:/home/ductrung1802/nav2_ws/install/nav2_navfn_planner/lib:/home/ductrung1802/nav2_ws/install/nav2_bt_navigator/lib:/home/ductrung1802/nav2_ws/install/costmap_queue/lib:/home/ductrung1802/nav2_ws/install/nav2_costmap_2d/lib:/home/ductrung1802/nav2_ws/install/nav2_voxel_grid/lib:/home/ductrung1802/nav2_ws/install/nav2_rviz_plugins/lib:/home/ductrung1802/nav2_ws/install/nav2_map_server/lib:/home/ductrung1802/nav2_ws/install/nav2_lifecycle_manager/lib:/home/ductrung1802/nav2_ws/install/nav2_behavior_tree/lib:/home/ductrung1802/nav2_ws/install/nav2_amcl/lib:/home/ductrung1802/nav2_ws/install/nav2_util/lib:/home/ductrung1802/nav2_ws/install/nav2_msgs/lib:/home/ductrung1802/dev_ws/install/turtlesim/lib:/home/ductrung1802/dev_ws/install/robot_localization/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/galactic/opt/yaml_cpp_vendor/lib:/opt/ros/galactic/opt/rviz_ogre_vendor/lib:/opt/ros/galactic/lib/x86_64-linux-gnu:/opt/ros/galactic/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:
+# environment
+LESSCLOSE = /usr/bin/lesspipe %s %s
+# environment
+AMENT_PREFIX_PATH = /home/ductrung1802/nav2_ws/install/nav2_system_tests:/home/ductrung1802/nav2_ws/install/nav2_bringup:/home/ductrung1802/nav2_ws/install/navigation2:/home/ductrung1802/nav2_ws/install/nav2_dwb_controller:/home/ductrung1802/nav2_ws/install/nav2_controller:/home/ductrung1802/nav2_ws/install/dwb_plugins:/home/ductrung1802/nav2_ws/install/dwb_critics:/home/ductrung1802/nav2_ws/install/dwb_core:/home/ductrung1802/nav2_ws/install/nav_2d_utils:/home/ductrung1802/nav2_ws/install/dwb_msgs:/home/ductrung1802/nav2_ws/install/nav_2d_msgs:/home/ductrung1802/nav2_ws/install/nav2_waypoint_follower:/home/ductrung1802/nav2_ws/install/nav2_theta_star_planner:/home/ductrung1802/nav2_ws/install/nav2_smac_planner:/home/ductrung1802/nav2_ws/install/nav2_rotation_shim_controller:/home/ductrung1802/nav2_ws/install/nav2_regulated_pure_pursuit_controller:/home/ductrung1802/nav2_ws/install/nav2_recoveries:/home/ductrung1802/nav2_ws/install/nav2_planner:/home/ductrung1802/nav2_ws/install/nav2_navfn_planner:/home/ductrung1802/nav2_ws/install/nav2_bt_navigator:/home/ductrung1802/nav2_ws/install/nav2_core:/home/ductrung1802/nav2_ws/install/costmap_queue:/home/ductrung1802/nav2_ws/install/nav2_costmap_2d:/home/ductrung1802/nav2_ws/install/nav2_voxel_grid:/home/ductrung1802/nav2_ws/install/nav2_rviz_plugins:/home/ductrung1802/nav2_ws/install/nav2_map_server:/home/ductrung1802/nav2_ws/install/nav2_lifecycle_manager:/home/ductrung1802/nav2_ws/install/nav2_behavior_tree:/home/ductrung1802/nav2_ws/install/nav2_amcl:/home/ductrung1802/nav2_ws/install/nav2_util:/home/ductrung1802/nav2_ws/install/nav2_simple_commander:/home/ductrung1802/nav2_ws/install/nav2_msgs:/home/ductrung1802/nav2_ws/install/nav2_gazebo_spawner:/home/ductrung1802/nav2_ws/install/nav2_common:/home/ductrung1802/dev_ws/install/turtlesim:/home/ductrung1802/dev_ws/install/sonar:/home/ductrung1802/dev_ws/install/basic_mobile_robot:/home/ductrung1802/dev_ws/install/robot_localization:/home/ductrung1802/dev_ws/install/pypubsub_goal:/home/ductrung1802/dev_ws/install/py_pubsub:/home/ductrung1802/dev_ws/install/my_package:/home/ductrung1802/dev_ws/install/motor:/home/ductrung1802/dev_ws/install/imu:/opt/ros/galactic
+# environment
+VSCODE_CODE_CACHE_PATH = /home/ductrung1802/.config/Code/CachedData/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5
+# environment
+LOGNAME = ductrung1802
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# automatic
++F = $(notdir $+)
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# environment
+GNOME_DESKTOP_SESSION_ID = this-is-deprecated
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+LC_TIME = vi_VN
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+GAZEBO_RESOURCE_PATH = /usr/share/gazebo-11:
+# default
+MAKECMDGOALS := all
+# environment
+QT_IM_MODULE = ibus
+# environment
+SHLVL = 0
+# environment
+GNOME_SHELL_SESSION_MODE = ubuntu
+# environment
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-12085a91-bd71-49e8-8cc2-ec5ba7410f86.sock
+# default
+MAKE_VERSION := 4.2.1
+# environment
+USER = ductrung1802
+# environment
+LC_MONETARY = vi_VN
+# makefile
+.DEFAULT_GOAL := all
+# environment
+XDG_CURRENT_DESKTOP = Unity
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+LC_TELEPHONE = vi_VN
+# default
+MAKE_COMMAND := make
+# default
+.VARIABLES := 
+# automatic
+*F = $(notdir $*)
+# environment
+LANGUAGE = en_GB:en
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-1dca3430-1.67.2-main.sock
+# environment
+PYTHONPATH = /home/ductrung1802/nav2_ws/install/dwb_msgs/lib/python3.8/site-packages:/home/ductrung1802/nav2_ws/install/nav_2d_msgs/lib/python3.8/site-packages:/home/ductrung1802/nav2_ws/build/nav2_simple_commander:/home/ductrung1802/nav2_ws/install/nav2_simple_commander/lib/python3.8/site-packages:/home/ductrung1802/nav2_ws/install/nav2_msgs/lib/python3.8/site-packages:/home/ductrung1802/nav2_ws/build/nav2_gazebo_spawner:/home/ductrung1802/nav2_ws/install/nav2_gazebo_spawner/lib/python3.8/site-packages:/home/ductrung1802/nav2_ws/install/nav2_common/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/turtlesim/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/build/sonar:/home/ductrung1802/dev_ws/install/sonar/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/basic_mobile_robot/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/robot_localization/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/build/pypubsub_goal:/home/ductrung1802/dev_ws/install/pypubsub_goal/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/py_pubsub/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/motor/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/joint_state_publisher/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/imu/lib/python3.8/site-packages:/opt/ros/galactic/lib/python3.8/site-packages
+# makefile
+MAKEFLAGS = pqrR
+# environment
+MFLAGS = -pqrR
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+ROS_VERSION = 2
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+GDK_BACKEND = x11
+# environment
+LC_PAPER = vi_VN
+# environment
+QT_ACCESSIBILITY = 1
+# environment
+DEFAULTS_PATH = /usr/share/gconf/ubuntu.default.path
+# default
+MAKEFILES := 
+# environment
+LC_NUMERIC = vi_VN
+# automatic
+<F = $(notdir $<)
+# environment
+LC_MEASUREMENT = vi_VN
+# environment
+ROS_MASTER_URI = http://localhost:11311
+# environment
+LC_ALL = C
+# environment
+GJS_DEBUG_TOPICS = JS ERROR;JS LOG
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# environment
+ROS_HOSTNAME = localhost
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+GAZEBO_MODEL_PATH = /usr/share/gazebo-11/models::/home/ductrung1802/dev_ws/src/basic_mobile_robot/models/
+# environment
+WINDOWPATH = 2
+# default
+.INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
+# environment
+LC_IDENTIFICATION = vi_VN
+ 
+# default
+.RECIPEPREFIX := 
+# environment
+LC_ADDRESS = vi_VN
+# environment
+LANG = C
+# environment
+VSCODE_PID = 3036
+# variable set hash-table stats:
+# Load=130/1024=13%, Rehash=0, Collisions=21/158=13%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 2057, inode 565981): 10 files, no impossibilities.
+
+# 10 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+all:
+#  Command line target.
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := all
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := 
+# automatic
+# | := 
+# automatic
+# < := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=1/11=9%
+#  recipe to execute (from 'makefile', line 2):
+	g++ -fPIC -shared myclass.cc -o myclass.so
+	g++ class_user.cc -ldl -o class_user.out
+	./class_user.out
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-06-15 15:14:09.989367133
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# files hash-table stats:
+# Load=4/1024=0%, Rehash=0, Collisions=0/16=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 15 / storage = 149 B / avg = 9 B
+# current buf: size = 8162 B / used = 149 B / count = 15 / avg = 9 B
+
+# strcache performance: lookups = 22 / hit rate = 31%
+# hash-table stats:
+# Load=15/8192=0%, Rehash=0, Collisions=1/22=5%
+# Finished Make data base on Sat Jun 18 10:24:17 2022
+
+ 
