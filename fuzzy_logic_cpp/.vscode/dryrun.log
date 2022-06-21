@@ -1,0 +1,8 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ductrung1802/GIT/ROS 2/fuzzy_logic_cpp'
+g++ -c main.cpp -o main.o
+g++ -c my_math.cpp -o my_math.o
+g++ main.o my_math.o -o a.exe
+./a.exe
+make: Leaving directory '/home/ductrung1802/GIT/ROS 2/fuzzy_logic_cpp'
+ 
