@@ -1,0 +1,7 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ductrung1802/GIT/ROS 2/fuzzy_logic/dynamic_shared_library_linux'
+g++ -fPIC -shared myclass.cc -o myclass.so
+g++ class_user.cc -ldl -o class_user.out
+./class_user.out
+make: Leaving directory '/home/ductrung1802/GIT/ROS 2/fuzzy_logic/dynamic_shared_library_linux'
+ 
