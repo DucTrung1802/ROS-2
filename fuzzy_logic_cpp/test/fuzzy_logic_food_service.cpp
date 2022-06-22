@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     tip->setName("tip");
     tip->setDescription("");
     tip->setEnabled(true);
-    tip->setRange(0.000, 1.000);
+    tip->setRange(0.000, 30.000);
     tip->setLockValueInRange(false);
     tip->setAggregation(new Maximum);
     tip->setDefuzzifier(new Centroid(100));
@@ -57,11 +57,11 @@ int main(int argc, char *argv[])
     mamdani->setName("mamdani");
     mamdani->setDescription("");
     mamdani->setEnabled(true);
-    mamdani->setConjunction(fl::null);
-    mamdani->setDisjunction(fl::null);
+    mamdani->setConjunction(new Minimum);
+    mamdani->setDisjunction(new Maximum);
     mamdani->setImplication(new AlgebraicProduct);
     mamdani->setActivation(new General);
-    mamdani->addRule(Rule::parse("if service is poor of food is rancid then tip is low", engine));
+    mamdani->addRule(Rule::parse("if service is poor or food is rancid then tip is low", engine));
     mamdani->addRule(Rule::parse("if service is good then tip is average", engine));
     mamdani->addRule(Rule::parse("if service is excellent or food is delicious then tip is high", engine));
     engine->addRuleBlock(mamdani);
