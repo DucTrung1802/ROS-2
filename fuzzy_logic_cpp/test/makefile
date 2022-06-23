@@ -1,6 +1,10 @@
-obstacle:
-	g++ ObstacleAvoidance.cpp -o ObstacleAvoidance.out -I"/home/ductrung1802/GIT/ROS 2/fuzzy_logic_cpp/fuzzylite/fuzzylite" -L"/home/ductrung1802/GIT/ROS 2/fuzzy_logic_cpp/fuzzylite/fuzzylite/release/bin" -lfuzzylite-static --std=c++11
+DEFAULT = default
 
-	./ObstacleAvoidance.out
+GXX = g++
 
-	rm ./ObstacleAvoidance.out
+SUB
+
+$(DEFAULT):
+	$(GXX) eFLL_test.cpp $(wildcard /home/ductrung1802/GIT/ROS 2/fuzzy_logic_cpp/eFLL/*.o) -o eFLL_test.out -fPIC -O2 -g -Wall
+
+	./eFLL_test.out
