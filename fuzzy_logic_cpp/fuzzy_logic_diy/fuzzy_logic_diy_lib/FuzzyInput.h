@@ -8,14 +8,12 @@ namespace FLD
     class FuzzyInput
     {
     private:
-        // string name;
-        // MembershipFunction mf;
-        float a;
-        float b;
+        string name;
+        TriangularMF mf;
 
     public:
         // FuzzyInput(string name, MembershipFunction mf);
-        FuzzyInput(float a, float b);
+        FuzzyInput(string name, TriangularMF mf);
         float compute();
     };
 }

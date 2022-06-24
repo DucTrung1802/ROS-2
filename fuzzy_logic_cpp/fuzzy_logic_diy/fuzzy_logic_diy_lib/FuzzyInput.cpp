@@ -3,7 +3,7 @@
 using namespace FLD;
 using namespace std;
 
-FuzzyInput::FuzzyInput(float a, float b)
+FuzzyInput::FuzzyInput()
 {
     this->a = a;
     this->b = b;
