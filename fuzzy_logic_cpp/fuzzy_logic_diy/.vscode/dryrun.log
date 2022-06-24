@@ -1,0 +1,5 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory '/home/ductrung1802/GIT/ROS 2/fuzzy_logic_cpp/fuzzy_logic_diy'
+gcc -
+make: Leaving directory '/home/ductrung1802/GIT/ROS 2/fuzzy_logic_cpp/fuzzy_logic_diy'
+ 
