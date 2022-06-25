@@ -1,5 +1,0 @@
-/home/ductrung1802/GIT/ROS 2/python_call_cpp/build/CMakeFiles/rebuild_cache.dir
-/home/ductrung1802/GIT/ROS 2/python_call_cpp/build/CMakeFiles/edit_cache.dir
-/home/ductrung1802/GIT/ROS 2/python_call_cpp/build/CMakeFiles/module_name.dir
-/home/ductrung1802/GIT/ROS 2/python_call_cpp/build/pybind11/CMakeFiles/rebuild_cache.dir
-/home/ductrung1802/GIT/ROS 2/python_call_cpp/build/pybind11/CMakeFiles/edit_cache.dir

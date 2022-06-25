@@ -3,7 +3,7 @@
 
 # Relative path conversion top directories.
 set(CMAKE_RELATIVE_PATH_TOP_SOURCE "/home/ductrung1802/GIT/ROS 2/python_call_cpp")
-set(CMAKE_RELATIVE_PATH_TOP_BINARY "/home/ductrung1802/GIT/ROS 2/python_call_cpp/build")
+set(CMAKE_RELATIVE_PATH_TOP_BINARY "/home/ductrung1802/GIT/ROS 2/python_call_cpp")
 
 # Force unix paths in dependencies.
 set(CMAKE_FORCE_UNIX_PATHS 1)

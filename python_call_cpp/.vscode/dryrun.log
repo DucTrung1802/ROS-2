@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ductrung1802/GIT/ROS 2/python_call_cpp'
+make: Leaving directory '/home/ductrung1802/GIT/ROS 2/python_call_cpp'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+
