@@ -1,15 +1,14 @@
 #include "FuzzyInput.h"
 
 using namespace FLD;
-using namespace std;
 
-FuzzyInput::FuzzyInput()
+FuzzyInput::FuzzyInput(std::string name, MF *mf)
 {
-    this->a = a;
-    this->b = b;
+    this->name = name;
+    this->mf = mf;
 }
 
-float FuzzyInput::compute()
+float FuzzyInput::compute(float x)
 {
-    return this->a + this->b;
+    return this->mf->getValue(x);
 }

@@ -2,19 +2,19 @@
 #define FUZZYINPUT_H
 
 #include <string>
+#include "MembershipFunction.h"
 
 namespace FLD
 {
     class FuzzyInput
     {
-    private:
-        string name;
-        TriangularMF mf;
-
     public:
+        std::string name;
+        MF *mf;
+
         // FuzzyInput(string name, MembershipFunction mf);
-        FuzzyInput(string name, TriangularMF mf);
-        float compute();
+        FuzzyInput(std::string name, MF *mf);
+        float compute(float x);
     };
 }
 

@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat Jun 25 00:24:41 2022
+# Make data base, printed on Sun Jun 26 16:11:08 2022
 
 # Variables
 
@@ -55,11 +55,11 @@ _ = /usr/share/code/code
 # environment
 _colcon_cd_root = /home/ductrung1802/dev_ws
 # environment
-JOURNAL_STREAM = 8:49262
+JOURNAL_STREAM = 8:48255
 # environment
 XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
-# makefile (from 'makefile', line 1)
-MAKEFILE_LIST :=  makefile
+# makefile
+MAKEFILE_LIST := 
 # environment
 JAVA_HOME = /usr/lib/jvm/java-11-openjdk-amd64
 # automatic
@@ -81,7 +81,7 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-MANAGERPID = 1426
+MANAGERPID = 1474
 # environment
 TURTLEBOT3_MODEL = waffle
 # environment
@@ -107,7 +107,7 @@ GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
 GJS_DEBUG_OUTPUT = stderr
 # environment
-SESSION_MANAGER = local/ductrung1802-UX430UAR:@/tmp/.ICE-unix/1684,unix/ductrung1802-UX430UAR:/tmp/.ICE-unix/1684
+SESSION_MANAGER = local/ductrung1802-UX430UAR:@/tmp/.ICE-unix/1725,unix/ductrung1802-UX430UAR:/tmp/.ICE-unix/1725
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -117,7 +117,7 @@ VSCODE_LOG_STACK = false
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-INVOCATION_ID = 49b92d2923334c149832c0ab64d384ed
+INVOCATION_ID = 312f9c3b4e98405da2a598856040fd62
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -129,7 +129,7 @@ ROS_DISTRO = galactic
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 2350
+GIO_LAUNCHED_DESKTOP_FILE_PID = 26645
 # automatic
 %F = $(notdir $%)
 # environment
@@ -143,7 +143,7 @@ PWD = /home/ductrung1802/GIT/ROS 2/fuzzy_logic_cpp/fuzzy_logic_diy
 # environment
 GAZEBO_MASTER_URI = http://localhost:11345
 # environment
-SSH_AGENT_PID = 1636
+SSH_AGENT_PID = 1680
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
 # environment
@@ -161,7 +161,7 @@ LESSCLOSE = /usr/bin/lesspipe %s %s
 # environment
 AMENT_PREFIX_PATH = /home/ductrung1802/nav2_ws/install/nav2_system_tests:/home/ductrung1802/nav2_ws/install/nav2_bringup:/home/ductrung1802/nav2_ws/install/navigation2:/home/ductrung1802/nav2_ws/install/nav2_dwb_controller:/home/ductrung1802/nav2_ws/install/nav2_controller:/home/ductrung1802/nav2_ws/install/dwb_plugins:/home/ductrung1802/nav2_ws/install/dwb_critics:/home/ductrung1802/nav2_ws/install/dwb_core:/home/ductrung1802/nav2_ws/install/nav_2d_utils:/home/ductrung1802/nav2_ws/install/dwb_msgs:/home/ductrung1802/nav2_ws/install/nav_2d_msgs:/home/ductrung1802/nav2_ws/install/nav2_waypoint_follower:/home/ductrung1802/nav2_ws/install/nav2_theta_star_planner:/home/ductrung1802/nav2_ws/install/nav2_smac_planner:/home/ductrung1802/nav2_ws/install/nav2_rotation_shim_controller:/home/ductrung1802/nav2_ws/install/nav2_regulated_pure_pursuit_controller:/home/ductrung1802/nav2_ws/install/nav2_recoveries:/home/ductrung1802/nav2_ws/install/nav2_planner:/home/ductrung1802/nav2_ws/install/nav2_navfn_planner:/home/ductrung1802/nav2_ws/install/nav2_bt_navigator:/home/ductrung1802/nav2_ws/install/nav2_core:/home/ductrung1802/nav2_ws/install/costmap_queue:/home/ductrung1802/nav2_ws/install/nav2_costmap_2d:/home/ductrung1802/nav2_ws/install/nav2_voxel_grid:/home/ductrung1802/nav2_ws/install/nav2_rviz_plugins:/home/ductrung1802/nav2_ws/install/nav2_map_server:/home/ductrung1802/nav2_ws/install/nav2_lifecycle_manager:/home/ductrung1802/nav2_ws/install/nav2_behavior_tree:/home/ductrung1802/nav2_ws/install/nav2_amcl:/home/ductrung1802/nav2_ws/install/nav2_util:/home/ductrung1802/nav2_ws/install/nav2_simple_commander:/home/ductrung1802/nav2_ws/install/nav2_msgs:/home/ductrung1802/nav2_ws/install/nav2_gazebo_spawner:/home/ductrung1802/nav2_ws/install/nav2_common:/home/ductrung1802/dev_ws/install/turtlesim:/home/ductrung1802/dev_ws/install/sonar:/home/ductrung1802/dev_ws/install/basic_mobile_robot:/home/ductrung1802/dev_ws/install/robot_localization:/home/ductrung1802/dev_ws/install/pypubsub_goal:/home/ductrung1802/dev_ws/install/py_pubsub:/home/ductrung1802/dev_ws/install/my_package:/home/ductrung1802/dev_ws/install/motor:/home/ductrung1802/dev_ws/install/imu:/opt/ros/galactic
 # environment
-VSCODE_CODE_CACHE_PATH = /home/ductrung1802/.config/Code/CachedData/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5
+VSCODE_CODE_CACHE_PATH = /home/ductrung1802/.config/Code/CachedData/30d9c6cd9483b2cc586687151bcbcd635f373630
 # environment
 LOGNAME = ductrung1802
 # environment
@@ -189,7 +189,7 @@ SHLVL = 0
 # environment
 GNOME_SHELL_SESSION_MODE = ubuntu
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-8ce758c6-0576-4cf8-b936-79a9f53ed969.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-08a4c123-23d3-41ce-b81c-bf75d53a1c98.sock
 # default
 MAKE_VERSION := 4.2.1
 # environment
@@ -197,7 +197,7 @@ USER = ductrung1802
 # environment
 LC_MONETARY = vi_VN
 # makefile
-.DEFAULT_GOAL := default
+.DEFAULT_GOAL := 
 # environment
 XDG_CURRENT_DESKTOP = Unity
 # automatic
@@ -213,7 +213,7 @@ MAKE_COMMAND := make
 # environment
 LANGUAGE = en_GB:en
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-1dca3430-1.67.2-main.sock
+VSCODE_IPC_HOOK = /run/user/1000/vscode-1dca3430-1.68.1-main.sock
 # environment
 PYTHONPATH = /home/ductrung1802/nav2_ws/install/dwb_msgs/lib/python3.8/site-packages:/home/ductrung1802/nav2_ws/install/nav_2d_msgs/lib/python3.8/site-packages:/home/ductrung1802/nav2_ws/build/nav2_simple_commander:/home/ductrung1802/nav2_ws/install/nav2_simple_commander/lib/python3.8/site-packages:/home/ductrung1802/nav2_ws/install/nav2_msgs/lib/python3.8/site-packages:/home/ductrung1802/nav2_ws/build/nav2_gazebo_spawner:/home/ductrung1802/nav2_ws/install/nav2_gazebo_spawner/lib/python3.8/site-packages:/home/ductrung1802/nav2_ws/install/nav2_common/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/turtlesim/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/build/sonar:/home/ductrung1802/dev_ws/install/sonar/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/basic_mobile_robot/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/robot_localization/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/build/pypubsub_goal:/home/ductrung1802/dev_ws/install/pypubsub_goal/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/py_pubsub/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/motor/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/joint_state_publisher/lib/python3.8/site-packages:/home/ductrung1802/dev_ws/install/imu/lib/python3.8/site-packages:/opt/ros/galactic/lib/python3.8/site-packages
 # makefile
@@ -271,10 +271,9 @@ LC_ADDRESS = vi_VN
 # environment
 LANG = C
 # environment
- 
-VSCODE_PID = 2350
+VSCODE_PID = 26645
 # variable set hash-table stats:
-# Load=130/1024=13%, Rehash=0, Collisions=21/155=14%
+# Load=130/1024=13%, Rehash=0, Collisions=21/152=14%
 
 # Pattern-specific Variable Values
 
@@ -283,6 +282,7 @@ VSCODE_PID = 2350
 # Directories
 
 # . (device 2057, inode 565993): 8 files, no impossibilities.
+ 
 
 # 8 files, no impossibilities in 1 directories.
 
@@ -300,18 +300,18 @@ all:
 #  File has not been updated.
 
 # Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-25 00:23:53.290562576
+#  File does not exist.
 #  File has been updated.
-#  Successfully updated.
-
-default:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-#  recipe to execute (from 'makefile', line 2):
-	gcc -
+#  Failed to be updated.
 
 # Not a target:
 .DEFAULT:
@@ -319,20 +319,27 @@ default:
 #  Modification time never checked.
 #  File has not been updated.
 
+# Not a target:
+GNUmakefile:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
 # files hash-table stats:
-# Load=5/1024=0%, Rehash=0, Collisions=0/15=0%
+# Load=6/1024=1%, Rehash=0, Collisions=0/15=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 14 / storage = 130 B / avg = 9 B
-# current buf: size = 8162 B / used = 130 B / count = 14 / avg = 9 B
+# strcache buffers: 1 (0) / strings = 16 / storage = 150 B / avg = 9 B
+# current buf: size = 8162 B / used = 150 B / count = 16 / avg = 9 B
 
-# strcache performance: lookups = 19 / hit rate = 26%
+# strcache performance: lookups = 19 / hit rate = 15%
 # hash-table stats:
-# Load=14/8192=0%, Rehash=0, Collisions=1/19=5%
-# Finished Make data base on Sat Jun 25 00:24:41 2022
+# Load=16/8192=0%, Rehash=0, Collisions=1/19=5%
+# Finished Make data base on Sun Jun 26 16:11:08 2022
 
  
