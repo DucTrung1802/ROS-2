@@ -1,19 +1,19 @@
-#ifndef FUZZYINPUT_H
-#define FUZZYINPUT_H
+#ifndef Term_H
+#define Term_H
 
 #include <string>
 #include "MembershipFunction.h"
 
 namespace FLD
 {
-    class FuzzyInput
+    class Term
     {
     public:
         std::string name;
         MF *mf;
 
-        // FuzzyInput(string name, MembershipFunction mf);
-        FuzzyInput(std::string name, MF *mf);
+        // Term(string name, MembershipFunction mf);
+        Term(std::string name, MF *mf);
         float compute(float x);
     };
 }

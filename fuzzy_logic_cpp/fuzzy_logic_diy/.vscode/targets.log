@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Jun 26 16:11:08 2022
+# Make data base, printed on Sun Jun 26 17:03:36 2022
 
 # Variables
 
@@ -55,7 +55,7 @@ _ = /usr/share/code/code
 # environment
 _colcon_cd_root = /home/ductrung1802/dev_ws
 # environment
-JOURNAL_STREAM = 8:48255
+JOURNAL_STREAM = 8:39830
 # environment
 XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
 # makefile
@@ -81,7 +81,7 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-MANAGERPID = 1474
+MANAGERPID = 1401
 # environment
 TURTLEBOT3_MODEL = waffle
 # environment
@@ -107,7 +107,7 @@ GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
 # environment
 GJS_DEBUG_OUTPUT = stderr
 # environment
-SESSION_MANAGER = local/ductrung1802-UX430UAR:@/tmp/.ICE-unix/1725,unix/ductrung1802-UX430UAR:/tmp/.ICE-unix/1725
+SESSION_MANAGER = local/ductrung1802-UX430UAR:@/tmp/.ICE-unix/1654,unix/ductrung1802-UX430UAR:/tmp/.ICE-unix/1654
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
@@ -117,7 +117,7 @@ VSCODE_LOG_STACK = false
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-INVOCATION_ID = 312f9c3b4e98405da2a598856040fd62
+INVOCATION_ID = 40d0550535a243959c8ffad92c58d9d9
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # environment
@@ -129,7 +129,7 @@ ROS_DISTRO = galactic
 # environment
 SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 26645
+GIO_LAUNCHED_DESKTOP_FILE_PID = 2073
 # automatic
 %F = $(notdir $%)
 # environment
@@ -143,7 +143,7 @@ PWD = /home/ductrung1802/GIT/ROS 2/fuzzy_logic_cpp/fuzzy_logic_diy
 # environment
 GAZEBO_MASTER_URI = http://localhost:11345
 # environment
-SSH_AGENT_PID = 1680
+SSH_AGENT_PID = 1603
 # environment
 ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
 # environment
@@ -189,7 +189,7 @@ SHLVL = 0
 # environment
 GNOME_SHELL_SESSION_MODE = ubuntu
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-08a4c123-23d3-41ce-b81c-bf75d53a1c98.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-10ed98dd-be29-4e0f-b053-00069c4cf49a.sock
 # default
 MAKE_VERSION := 4.2.1
 # environment
@@ -264,6 +264,7 @@ WINDOWPATH = 2
 .INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
 # environment
 LC_IDENTIFICATION = vi_VN
+ 
 # default
 .RECIPEPREFIX := 
 # environment
@@ -271,7 +272,7 @@ LC_ADDRESS = vi_VN
 # environment
 LANG = C
 # environment
-VSCODE_PID = 26645
+VSCODE_PID = 2073
 # variable set hash-table stats:
 # Load=130/1024=13%, Rehash=0, Collisions=21/152=14%
 
@@ -282,7 +283,6 @@ VSCODE_PID = 26645
 # Directories
 
 # . (device 2057, inode 565993): 8 files, no impossibilities.
- 
 
 # 8 files, no impossibilities in 1 directories.
 
@@ -340,6 +340,6 @@ GNUmakefile:
 # strcache performance: lookups = 19 / hit rate = 15%
 # hash-table stats:
 # Load=16/8192=0%, Rehash=0, Collisions=1/19=5%
-# Finished Make data base on Sun Jun 26 16:11:08 2022
+# Finished Make data base on Sun Jun 26 17:03:36 2022
 
  
