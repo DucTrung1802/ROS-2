@@ -12,7 +12,6 @@ namespace FLD
         std::string name;
         MF *mf;
 
-        // Term(string name, MembershipFunction mf);
         Term(std::string name, MF *mf);
         float compute(float x);
     };
