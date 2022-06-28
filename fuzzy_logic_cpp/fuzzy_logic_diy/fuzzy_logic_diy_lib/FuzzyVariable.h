@@ -3,8 +3,9 @@
 
 #include <string>
 #include <list>
-#include "Term.h"
+#include <map>
 #include <iostream>
+#include "Term.h"
 
 namespace FLD
 {
@@ -24,7 +25,7 @@ namespace FLD
         float value;
         std::list<Term> list_of_term;
         std::string name;
-        std::list<float> fuzzificated_set;
+        std::map<std::string, float> fuzzificated_set;
         variable_type type = NONE;
 
         FuzzyVariable(std::string name, float min_value, float max_value);

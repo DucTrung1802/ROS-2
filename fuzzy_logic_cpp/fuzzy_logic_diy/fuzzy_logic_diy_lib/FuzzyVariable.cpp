@@ -22,7 +22,7 @@ void FuzzyVariable::calculateFuzzificatedSet(float value)
     // std::cout << this->list_of_term.begin() << std::endl;
     for (int i = 0; i < number_of_term; i++)
     {
-        this->fuzzificated_set.push_back(output_value->compute(value));
+        this->fuzzificated_set.insert(std::pair<std::string, float>(output_value->getName(), output_value->compute(value)));
         std::advance(output_value, 1);
     }
 }
@@ -31,6 +31,7 @@ void FuzzyVariable::printFuzzificatedSet()
 {
     for (auto output = this->fuzzificated_set.begin(); output != this->fuzzificated_set.end(); ++output)
     {
-        std::cout << *output << std::endl;
+        std::cout << "key: " << output->first << ", "
+                  << "value: " << output->second << std::endl;
     }
 }
