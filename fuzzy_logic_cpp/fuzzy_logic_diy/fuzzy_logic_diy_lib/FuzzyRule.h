@@ -12,6 +12,7 @@ namespace FLD
         std::list<std::list<std::string>> antecedent_list;
 
         void addAntecedentList(std::list<std::list<std::string>> antecedent_list);
+        std::list<std::list<std::string>> getAntecedentList();
     };
 }
 
