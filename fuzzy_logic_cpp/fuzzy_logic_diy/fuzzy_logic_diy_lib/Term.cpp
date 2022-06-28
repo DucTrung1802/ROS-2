@@ -12,3 +12,8 @@ float Term::compute(float x)
 {
     return this->mf->getValue(x);
 }
+
+std::string Term::getName()
+{
+    return this->name;
+}

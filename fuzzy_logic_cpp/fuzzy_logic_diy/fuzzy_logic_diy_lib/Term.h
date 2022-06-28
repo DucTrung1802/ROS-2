@@ -13,6 +13,7 @@ namespace FLD
         MF *mf;
 
         Term(std::string name, MF *mf);
+        std::string getName();
         float compute(float x);
     };
 }
