@@ -6,20 +6,20 @@
 
 namespace FLD
 {
-    class ParsedRule
+    class FuzzyRule
     {
     };
 
-    class RulecHandler
+    class RuleHandler
     {
     public:
         std::list<std::string> keywords = {"if", "then", "and", "or", "is"};
 
-        std::list<ParsedRule>
-            list_of_parsed_rules;
+        std::list<FuzzyRule> list_of_fuzzy_rules;
 
-        RulecHandler();
-        ParsedRule parseRule(std::string rule);
+        void parseRule(std::string rule);
+        void addRule(FuzzyRule parsed_rule);
+        bool checkKeyword(std::string word);
     };
 }
 
