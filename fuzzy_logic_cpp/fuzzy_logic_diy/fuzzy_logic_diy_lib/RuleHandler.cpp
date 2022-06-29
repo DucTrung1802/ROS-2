@@ -22,7 +22,7 @@ void printListStr(std::list<std::string> const &list)
     std::cout << "]" << std::endl;
 }
 
-void printNestedList(std::list<std::list<std::string>> const &list)
+void printNestedListStr(std::list<std::list<std::string>> const &list)
 {
     std::cout << "1-layer nested list string: [";
 
@@ -68,13 +68,13 @@ void sliceString(std::string str, std::string delimiter)
     std::cout << str << std::endl;
 }
 
-void RuleHandler::printAntecedentList()
+void RuleHandler::printNestedList(std::list<std::list<std::string>> const &list)
 {
-    printNestedList(this->_antecedent_list);
+    printNestedListStr(list);
 }
 
 // support AND only
-std::list<std::list<std::string>> RuleHandler::antecedentHandler(std::string antecedent)
+std::list<std::list<std::string>> RuleHandler::antecedentParser(std::string antecedent)
 {
     // std::cout << antecedent << std::endl;
 
@@ -127,14 +127,83 @@ std::list<std::list<std::string>> RuleHandler::antecedentHandler(std::string ant
         _antecedent_list.push_back(temp_list);
     }
 
-    // printNestedListStr(antecedent_list);
+    // printNestedList(_antecedent_list);
 
     return _antecedent_list;
 }
 
+// support AND only
+void RuleHandler::consequentParser(std::string consequent)
+{
+    std::cout << consequent << std::endl;
+
+    // std::cout << consequent << std::endl;
+
+    // LIST_OF_STATEMENT_BETWEEN_AND
+    std::list<std::string> list_of_statement_between_AND = {};
+
+    // ====== slice ======
+
+    std::string delimiter = " and ";
+    size_t pos = 0;
+    std::string token;
+    while ((pos = consequent.find(delimiter)) != std::string::npos)
+    {
+        token = consequent.substr(0, pos);
+        // each statement except the last statement
+        list_of_statement_between_AND.push_back(token);
+        // std::cout << token << std::endl;
+        consequent.erase(0, pos + delimiter.length());
+    }
+    // the last statement
+    list_of_statement_between_AND.push_back(consequent);
+
+    // ====== slice ======#
+
+    // std::cout << str << std::endl;
+    // printList(list_of_statement_between_AND);
+
+    // consequent_LIST
+
+    for (auto &statement : list_of_statement_between_AND)
+    {
+        // std::cout << statement << std::endl;
+
+        std::list<std::string> temp_list = {};
+        std::string delimiter = " is ";
+        size_t pos = 0;
+        std::string token;
+        while ((pos = statement.find(delimiter)) != std::string::npos)
+        {
+            token = statement.substr(0, pos);
+            // each statement except the last statement
+            temp_list.push_back(token);
+            // std::cout << token << std::endl;
+            statement.erase(0, pos + delimiter.length());
+        }
+        // the last statement
+        statement = removeSpaces(statement);
+        temp_list.push_back(statement);
+        // printListStr(temp_list);
+        _consequent_list.push_back(temp_list);
+    }
+
+    printNestedList(_consequent_list);
+
+    // return _consequent_list;
+}
+
+bool RuleHandler::antecedentCheck(std::list<FuzzyVariable> input_variables, std::list<std::list<std::string>> antecedent_list)
+{
+}
+
+bool RuleHandler::consequentCheck(std::list<FuzzyVariable> output_variables, std::list<std::list<std::string>> consequent_list)
+{
+}
+
 void RuleHandler::parseRule(std::string rule)
 {
-    rule = "if input1 is mf1 and input2 is mf2 then output1 is mf2";
+    rule = "if input1 is mf1 and input2 is mf2 then output1 is mf3";
 
     if (rule.find("if") == -1)
     {
@@ -161,7 +230,7 @@ void RuleHandler::parseRule(std::string rule)
 
     // std::cout << "rule: " << rule << std::endl;
 
-    temp_fuzzy_rule.addAntecedentList(antecedentHandler(antecedent));
-
+    temp_fuzzy_rule.addAntecedentList(antecedentParser(antecedent));
     // printNestedList(temp_fuzzy_rule.getAntecedentList());
+    consequentParser(consequent);
 }

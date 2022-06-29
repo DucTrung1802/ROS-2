@@ -4,6 +4,7 @@
 #include <string>
 #include <list>
 #include "FuzzyRule.h"
+#include "FuzzyVariable.h"
 
 namespace FLD
 {
@@ -13,14 +14,25 @@ namespace FLD
     public:
         std::list<std::string> keywords = {"if", "then", "and", "or", "is"};
         std::list<std::list<std::string>> _antecedent_list;
+        std::list<std::list<std::string>> _consequent_list;
+
         std::list<FuzzyRule> list_of_fuzzy_rules;
         FuzzyRule temp_fuzzy_rule;
 
         void parseRule(std::string rule);
+
         void addRule(FuzzyRule parsed_rule);
-        std::list<std::list<std::string>> antecedentHandler(std::string antecedent);
-        void printAntecedentList();
+
+        void printNestedList(std::list<std::list<std::string>> const &list);
         bool checkKeyword(std::string word);
+
+        bool antecedentCheck(std::list<FuzzyVariable> input_variables, std::list<std::list<std::string>> antecedent_list);
+
+        bool consequentCheck(std::list<FuzzyVariable> output_variables, std::list<std::list<std::string>> consequent_list);
+
+        std::list<std::list<std::string>> antecedentParser(std::string antecedent);
+
+        void consequentParser(std::string consequent);
     };
 }
 
