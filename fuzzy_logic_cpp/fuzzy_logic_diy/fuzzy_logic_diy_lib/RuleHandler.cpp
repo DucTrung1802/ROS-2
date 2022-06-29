@@ -193,17 +193,14 @@ std::list<std::list<std::string>> RuleHandler::consequentParser(std::string cons
     return _consequent_list;
 }
 
-bool RuleHandler::antecedentCheck(std::list<FuzzyVariable> input_variables, std::list<std::list<std::string>> antecedent_list)
-{
-}
-
-bool RuleHandler::consequentCheck(std::list<FuzzyVariable> output_variables, std::list<std::list<std::string>> consequent_list)
+bool RuleHandler::FuzzyRuleCheck(FuzzyRule rule)
 {
 }
 
 FuzzyRule RuleHandler::parseRule(std::string rule)
 {
-    rule = "if input1 is mf1 and input2 is mf2 then output1 is mf3";
+
+    temp_fuzzy_rule.setTextFormOfRule(rule);
 
     if (rule.find("if") == -1)
     {
@@ -248,5 +245,39 @@ size_t RuleHandler::getNumberOfFuzzyRule()
 
 void RuleHandler::addRule(FuzzyRule rule)
 {
-    this->list_of_fuzzy_rules.push_back(temp_fuzzy_rule);
+    if (FuzzyRuleCheck(rule))
+    {
+        this->list_of_fuzzy_rules.push_back(temp_fuzzy_rule);
+    }
+    else
+    {
+        throw std::invalid_argument("Invalid argument in rule: " + temp_fuzzy_rule.getTextFormOfRule());
+    }
+}
+
+void RuleHandler::addInputFuzzyVariableList(std::list<FuzzyVariable> input_variables)
+{
+    this->input_variables = input_variables;
+}
+
+void RuleHandler::addOutputFuzzyVariableList(std::list<FuzzyVariable> output_variables)
+{
+    this->output_variables = output_variables;
+}
+
+void RuleHandler::makeListInputVariableParameters()
+{
+    for (auto variable = this->input_variables.begin(); variable != this->input_variables.end(); variable++)
+    {
+        this->input_variable_names.insert(variable->getName());
+
+        for (auto term = variable->getListNameOfTerm().begin(); term != variable->getListNameOfTerm().end(); term++)
+        {
+        }
+    }
+
+    for (auto name = this->input_variable_names.begin(); name != this->input_variable_names.end(); name++)
+    {
+        std::cout << *name << std::endl;
+    }
 }

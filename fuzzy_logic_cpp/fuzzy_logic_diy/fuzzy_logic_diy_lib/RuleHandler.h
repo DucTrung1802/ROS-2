@@ -3,6 +3,7 @@
 
 #include <string>
 #include <list>
+#include <set>
 #include "FuzzyRule.h"
 #include "FuzzyVariable.h"
 
@@ -18,7 +19,19 @@ namespace FLD
         std::list<FuzzyRule> list_of_fuzzy_rules;
         FuzzyRule temp_fuzzy_rule;
 
-        FuzzyRule parseRule(std::string rule);
+        std::list<FuzzyVariable> input_variables;
+        std::list<FuzzyVariable> output_variables;
+
+        std::set<std::string> input_variable_names;
+        std::set<Term> input_variable_terms;
+        std::set<std::string> input_variable_term_names;
+
+        std::set<std::string> output_variable_names;
+        std::set<Term> output_variable_terms;
+        std::set<std::string> output_variable_term_names;
+
+        FuzzyRule
+        parseRule(std::string rule);
 
         void addRule(FuzzyRule parsed_rule);
 
@@ -26,9 +39,7 @@ namespace FLD
 
         bool checkKeyword(std::string word);
 
-        bool antecedentCheck(std::list<FuzzyVariable> input_variables, std::list<std::list<std::string>> antecedent_list);
-
-        bool consequentCheck(std::list<FuzzyVariable> output_variables, std::list<std::list<std::string>> consequent_list);
+        bool FuzzyRuleCheck(FuzzyRule rule);
 
         std::list<std::list<std::string>> antecedentParser(std::string antecedent);
 
@@ -37,6 +48,12 @@ namespace FLD
         std::list<std::string> getListKeyword();
 
         size_t getNumberOfFuzzyRule();
+
+        void addInputFuzzyVariableList(std::list<FuzzyVariable> input_variables);
+        void addOutputFuzzyVariableList(std::list<FuzzyVariable> output_variables);
+
+        void makeListInputVariableParameters();
+        void makeListOutputVariableParameters();
     };
 }
 

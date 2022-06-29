@@ -21,3 +21,13 @@ std::list<std::list<std::string>> FuzzyRule::getConsequentList()
 {
     return this->consequent_list;
 }
+
+void FuzzyRule::setTextFormOfRule(std::string rule)
+{
+    this->text_form_of_fuzzy_rule = rule;
+}
+
+std::string FuzzyRule::getTextFormOfRule()
+{
+    return this->text_form_of_fuzzy_rule;
+}

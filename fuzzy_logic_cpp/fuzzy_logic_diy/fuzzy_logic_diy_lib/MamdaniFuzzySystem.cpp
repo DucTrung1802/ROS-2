@@ -93,6 +93,11 @@ MamdaniFuzzySystem::MamdaniFuzzySystem(std::list<FuzzyVariable> input_variables,
             throw std::invalid_argument("There is at least 01 membership function of output fuzzy variable with the same name as keyword!");
         }
     }
+
+    this->rule_handler.addInputFuzzyVariableList(input_variables);
+    this->rule_handler.addOutputFuzzyVariableList(output_variables);
+    // this->rule_handler.makeListInputVariableParameters();
+    // this->rule_handler.makeListOutputVariableParameters();
 }
 
 size_t MamdaniFuzzySystem::getNumberOfFuzzyRule()
