@@ -94,3 +94,13 @@ MamdaniFuzzySystem::MamdaniFuzzySystem(std::list<FuzzyVariable> input_variables,
         }
     }
 }
+
+size_t MamdaniFuzzySystem::getNumberOfFuzzyRule()
+{
+    return this->rule_handler.getNumberOfFuzzyRule();
+}
+
+void MamdaniFuzzySystem::addRule(std::string rule)
+{
+    this->rule_handler.addRule(this->rule_handler.parseRule(rule));
+}

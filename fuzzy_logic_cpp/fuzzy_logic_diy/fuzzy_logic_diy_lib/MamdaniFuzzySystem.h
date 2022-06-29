@@ -20,6 +20,8 @@ namespace FLD
         int checkInputVariables(std::list<FuzzyVariable> input_variables);
         int checkOutputVariables(std::list<FuzzyVariable> output_variables);
         float calculate();
+        size_t getNumberOfFuzzyRule();
+        void addRule(std::string rule);
     };
 }
 
