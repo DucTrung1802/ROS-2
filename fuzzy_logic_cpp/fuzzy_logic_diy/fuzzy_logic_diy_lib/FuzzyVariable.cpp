@@ -13,6 +13,7 @@ FuzzyVariable::FuzzyVariable(std::string name, float min_value, float max_value)
 void FuzzyVariable::addTerm(Term new_term)
 {
     this->list_of_term.push_back(new_term);
+    this->list_name_of_term.push_back(new_term.getName());
     this->number_of_term = this->list_of_term.size();
 }
 
@@ -34,4 +35,14 @@ void FuzzyVariable::printFuzzificatedSet()
         std::cout << "key: " << output->first << ", "
                   << "value: " << output->second << std::endl;
     }
+}
+
+std::string FuzzyVariable::getName()
+{
+    return this->name;
+}
+
+std::list<std::string> FuzzyVariable::getListNameOfTerm()
+{
+    return this->list_name_of_term;
 }

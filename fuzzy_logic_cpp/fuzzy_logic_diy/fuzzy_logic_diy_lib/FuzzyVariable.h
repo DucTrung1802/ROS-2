@@ -9,13 +9,6 @@
 
 namespace FLD
 {
-    enum variable_type
-    {
-        INPUT,
-        OUTPUT,
-        NONE,
-    };
-
     class FuzzyVariable
     {
     public:
@@ -24,14 +17,16 @@ namespace FLD
         float max_value;
         float value;
         std::list<Term> list_of_term;
+        std::list<std::string> list_name_of_term;
         std::string name;
         std::map<std::string, float> fuzzificated_set;
-        variable_type type = NONE;
 
         FuzzyVariable(std::string name, float min_value, float max_value);
         void addTerm(Term new_term);
         void calculateFuzzificatedSet(float value);
         void printFuzzificatedSet();
+        std::string getName();
+        std::list<std::string> getListNameOfTerm();
     };
 }
 #endif
