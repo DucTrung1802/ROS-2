@@ -96,8 +96,8 @@ MamdaniFuzzySystem::MamdaniFuzzySystem(std::list<FuzzyVariable> input_variables,
 
     this->rule_handler.addInputFuzzyVariableList(input_variables);
     this->rule_handler.addOutputFuzzyVariableList(output_variables);
-    // this->rule_handler.makeListInputVariableParameters();
-    // this->rule_handler.makeListOutputVariableParameters();
+    this->rule_handler.makeListInputVariableParameters();
+    this->rule_handler.makeListOutputVariableParameters();
 }
 
 size_t MamdaniFuzzySystem::getNumberOfFuzzyRule()

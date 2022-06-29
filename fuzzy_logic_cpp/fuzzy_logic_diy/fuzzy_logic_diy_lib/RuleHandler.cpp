@@ -271,13 +271,19 @@ void RuleHandler::makeListInputVariableParameters()
     {
         this->input_variable_names.insert(variable->getName());
 
-        for (auto term = variable->getListNameOfTerm().begin(); term != variable->getListNameOfTerm().end(); term++)
+        std::list<Term> temp_list_of_term = variable->getListOfTerm();
+        for (auto term = temp_list_of_term.begin(); term != temp_list_of_term.end(); term++)
         {
+            this->input_variable_terms.insert(term);
         }
     }
 
-    for (auto name = this->input_variable_names.begin(); name != this->input_variable_names.end(); name++)
-    {
-        std::cout << *name << std::endl;
-    }
+    // for (auto name = this->input_variable_names.begin(); name != this->input_variable_names.end(); name++)
+    // {
+    //     std::cout << *name << std::endl;
+    // }
+}
+
+void RuleHandler::makeListOutputVariableParameters()
+{
 }

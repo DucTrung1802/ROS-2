@@ -46,3 +46,8 @@ std::list<std::string> FuzzyVariable::getListNameOfTerm()
 {
     return this->list_name_of_term;
 }
+
+std::list<Term> FuzzyVariable::getListOfTerm()
+{
+    return this->list_of_term;
+}

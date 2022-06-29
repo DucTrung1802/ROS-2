@@ -29,10 +29,10 @@ int main()
     input_2.addTerm(term_2);
     input_2.addTerm(term_3);
 
-    FuzzyVariable input_3 = FuzzyVariable("input2", 0.0, 1.0);
-    input_3.addTerm(term_1);
-    input_3.addTerm(term_2);
-    input_3.addTerm(term_3);
+    // FuzzyVariable input_3 = FuzzyVariable("input2", 0.0, 1.0);
+    // input_3.addTerm(term_1);
+    // input_3.addTerm(term_2);
+    // input_3.addTerm(term_3);
 
     // FuzzyVariable input_3 = FuzzyVariable("input3", 0.0, 1.0);
     // input_3.addTerm(term_1);
@@ -49,7 +49,7 @@ int main()
     output_1.addTerm(term_2);
     output_1.addTerm(term_3);
 
-    MamdaniFuzzySystem mamdani_fuzzy_system = MamdaniFuzzySystem({input_1, input_2, input_3}, {output_1});
+    MamdaniFuzzySystem mamdani_fuzzy_system = MamdaniFuzzySystem({input_1, input_2}, {output_1});
 
     auto t1 = high_resolution_clock::now();
 

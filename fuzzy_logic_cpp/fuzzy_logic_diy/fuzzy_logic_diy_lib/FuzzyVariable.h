@@ -27,6 +27,7 @@ namespace FLD
         void calculateFuzzificatedSet(float value);
         void printFuzzificatedSet();
         std::string getName();
+        std::list<Term> getListOfTerm();
         std::list<std::string> getListNameOfTerm();
     };
 }
