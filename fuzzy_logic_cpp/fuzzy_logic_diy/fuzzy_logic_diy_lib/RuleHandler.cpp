@@ -234,3 +234,8 @@ void RuleHandler::parseRule(std::string rule)
     // printNestedList(temp_fuzzy_rule.getAntecedentList());
     consequentParser(consequent);
 }
+
+std::list<std::string> RuleHandler::getListKeyword()
+{
+    return this->keywords;
+}

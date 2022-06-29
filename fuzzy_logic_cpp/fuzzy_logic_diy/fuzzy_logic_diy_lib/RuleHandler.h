@@ -33,6 +33,8 @@ namespace FLD
         std::list<std::list<std::string>> antecedentParser(std::string antecedent);
 
         void consequentParser(std::string consequent);
+
+        std::list<std::string> getListKeyword();
     };
 }
 
