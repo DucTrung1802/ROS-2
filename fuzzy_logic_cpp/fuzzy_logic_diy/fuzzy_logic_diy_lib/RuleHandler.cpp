@@ -133,9 +133,9 @@ std::list<std::list<std::string>> RuleHandler::antecedentParser(std::string ante
 }
 
 // support AND only
-void RuleHandler::consequentParser(std::string consequent)
+std::list<std::list<std::string>> RuleHandler::consequentParser(std::string consequent)
 {
-    std::cout << consequent << std::endl;
+    // std::cout << consequent << std::endl;
 
     // std::cout << consequent << std::endl;
 
@@ -188,9 +188,9 @@ void RuleHandler::consequentParser(std::string consequent)
         _consequent_list.push_back(temp_list);
     }
 
-    printNestedList(_consequent_list);
+    // printNestedList(_consequent_list);
 
-    // return _consequent_list;
+    return _consequent_list;
 }
 
 bool RuleHandler::antecedentCheck(std::list<FuzzyVariable> input_variables, std::list<std::list<std::string>> antecedent_list)
@@ -201,7 +201,7 @@ bool RuleHandler::consequentCheck(std::list<FuzzyVariable> output_variables, std
 {
 }
 
-void RuleHandler::parseRule(std::string rule)
+FuzzyRule RuleHandler::parseRule(std::string rule)
 {
     rule = "if input1 is mf1 and input2 is mf2 then output1 is mf3";
 
@@ -231,11 +231,22 @@ void RuleHandler::parseRule(std::string rule)
     // std::cout << "rule: " << rule << std::endl;
 
     temp_fuzzy_rule.addAntecedentList(antecedentParser(antecedent));
-    // printNestedList(temp_fuzzy_rule.getAntecedentList());
-    consequentParser(consequent);
+    temp_fuzzy_rule.addConsequentList(consequentParser(consequent));
+
+    return temp_fuzzy_rule;
 }
 
 std::list<std::string> RuleHandler::getListKeyword()
 {
     return this->keywords;
+}
+
+size_t RuleHandler::getNumberOfFuzzyRule()
+{
+    return this->list_of_fuzzy_rules.size();
+}
+
+void RuleHandler::addRule(FuzzyRule rule)
+{
+    this->list_of_fuzzy_rules.push_back(temp_fuzzy_rule);
 }

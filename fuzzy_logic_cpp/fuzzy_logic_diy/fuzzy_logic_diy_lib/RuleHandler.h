@@ -15,15 +15,15 @@ namespace FLD
         std::list<std::string> keywords = {"if", "then", "and", "or", "is"};
         std::list<std::list<std::string>> _antecedent_list;
         std::list<std::list<std::string>> _consequent_list;
-
         std::list<FuzzyRule> list_of_fuzzy_rules;
         FuzzyRule temp_fuzzy_rule;
 
-        void parseRule(std::string rule);
+        FuzzyRule parseRule(std::string rule);
 
         void addRule(FuzzyRule parsed_rule);
 
         void printNestedList(std::list<std::list<std::string>> const &list);
+
         bool checkKeyword(std::string word);
 
         bool antecedentCheck(std::list<FuzzyVariable> input_variables, std::list<std::list<std::string>> antecedent_list);
@@ -32,9 +32,11 @@ namespace FLD
 
         std::list<std::list<std::string>> antecedentParser(std::string antecedent);
 
-        void consequentParser(std::string consequent);
+        std::list<std::list<std::string>> consequentParser(std::string consequent);
 
         std::list<std::string> getListKeyword();
+
+        size_t getNumberOfFuzzyRule();
     };
 }
 
