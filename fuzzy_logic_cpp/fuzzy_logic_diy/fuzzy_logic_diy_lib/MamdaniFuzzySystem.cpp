@@ -41,6 +41,19 @@ int MamdaniFuzzySystem::checkInputVariables(std::list<FuzzyVariable> input_varia
     return 0;
 }
 
+void MamdaniFuzzySystem::initializeInferenceSet(std::list<FuzzyVariable> output_variables)
+{
+    for (auto output_var : output_variables)
+    {
+        std::map<std::string, float> temp_mf_set;
+        for (auto term : output_var.getListOfTerm())
+        {
+            temp_mf_set.insert({term.getName(), 0.0});
+        }
+        this->list_of_inference_set.push_back({output_var.getName(), temp_mf_set});
+    }
+}
+
 MamdaniFuzzySystem::MamdaniFuzzySystem(std::list<FuzzyVariable> input_variables, std::list<FuzzyVariable> output_variables)
 {
 
@@ -98,6 +111,7 @@ MamdaniFuzzySystem::MamdaniFuzzySystem(std::list<FuzzyVariable> input_variables,
     this->rule_handler.addOutputFuzzyVariableList(output_variables);
     this->rule_handler.makeListInputVariableParameters();
     this->rule_handler.makeListOutputVariableParameters();
+    this->initializeInferenceSet(output_variables);
 }
 
 size_t MamdaniFuzzySystem::getNumberOfFuzzyRule()

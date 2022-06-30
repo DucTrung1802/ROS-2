@@ -6,6 +6,7 @@
 #include <string>
 #include "FuzzyVariable.h"
 #include "RuleHandler.h"
+#include "InferenceSet.h"
 
 namespace FLD
 {
@@ -15,6 +16,7 @@ namespace FLD
         std::list<FuzzyVariable> input_variables;
         std::list<FuzzyVariable> output_variables;
         RuleHandler rule_handler;
+        std::list<InferenceSet> list_of_inference_set;
 
         MamdaniFuzzySystem(std::list<FuzzyVariable> input_variables, std::list<FuzzyVariable> output_variables);
         int checkInputVariables(std::list<FuzzyVariable> input_variables);
@@ -25,6 +27,7 @@ namespace FLD
         void addRule(std::string rule);
         void checkAllInputValues();
         void printAllRules();
+        void initializeInferenceSet(std::list<FuzzyVariable> output_variables);
     };
 }
 
