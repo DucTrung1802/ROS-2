@@ -28,6 +28,9 @@ namespace FLD
         void checkAllInputValues();
         void printAllRules();
         void initializeInferenceSet(std::list<FuzzyVariable> output_variables);
+        void calculateFuzzificatedSet();
+        std::list<FuzzyVariable> getInputVariables();
+        std::list<FuzzyVariable> getOutputVariables();
     };
 }
 

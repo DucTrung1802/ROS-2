@@ -17,14 +17,14 @@ void FuzzyVariable::addTerm(Term new_term)
     this->number_of_term = this->list_of_term.size();
 }
 
-void FuzzyVariable::calculateFuzzificatedSet(float value)
+void FuzzyVariable::calculateFuzzificatedSet()
 {
-    auto output_value = list_of_term.begin();
+    auto term = list_of_term.begin();
     // std::cout << this->list_of_term.begin() << std::endl;
     for (int i = 0; i < number_of_term; i++)
     {
-        this->fuzzificated_set.insert(std::pair<std::string, float>(output_value->getName(), output_value->compute(value)));
-        std::advance(output_value, 1);
+        this->fuzzificated_set.insert(std::pair<std::string, float>(term->getName(), term->compute(this->input_value)));
+        std::advance(term, 1);
     }
 }
 

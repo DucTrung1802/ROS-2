@@ -46,8 +46,8 @@ namespace FLD
 
         size_t getNumberOfFuzzyRule();
 
-        void addInputFuzzyVariableList(std::list<FuzzyVariable> input_variables);
-        void addOutputFuzzyVariableList(std::list<FuzzyVariable> output_variables);
+        void addInputFuzzyVariableList(std::list<FuzzyVariable> &input_variables);
+        void addOutputFuzzyVariableList(std::list<FuzzyVariable> &output_variables);
 
         void makeListInputVariableParameters();
         void makeListOutputVariableParameters();

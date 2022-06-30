@@ -61,6 +61,10 @@ MamdaniFuzzySystem::MamdaniFuzzySystem(std::list<FuzzyVariable> input_variables,
     {
         // std::cout << "not duplicate" << std::endl;
         this->input_variables = input_variables;
+        // for (auto input_var : this->input_variables)
+        // {
+        //     std::cout << input_var.getName() << std::endl;
+        // }
     }
     else
     {
@@ -133,15 +137,14 @@ void MamdaniFuzzySystem::printAllRules()
 void MamdaniFuzzySystem::addInputValue(std::string variable_name, float input_value)
 {
     bool found = false;
-    for (auto &variable : this->rule_handler.input_variables)
+    for (auto &variable : this->input_variables)
     {
         if (variable.getName() == variable_name)
         {
             variable.setInputValue(input_value);
+            // std::cout << variable.getInputValue() << std::endl;
             found = true;
         }
-
-        // std::cout << variable.getInputValue() << std::endl;
     }
 
     if (!found)
@@ -152,7 +155,7 @@ void MamdaniFuzzySystem::addInputValue(std::string variable_name, float input_va
 
 void MamdaniFuzzySystem::checkAllInputValues()
 {
-    for (auto input_var : this->rule_handler.input_variables)
+    for (auto input_var : this->input_variables)
     {
         if (isnan(input_var.getInputValue()))
         {
@@ -160,10 +163,29 @@ void MamdaniFuzzySystem::checkAllInputValues()
         }
     }
 }
+void MamdaniFuzzySystem::calculateFuzzificatedSet()
+{
+    for (auto &input_var : this->input_variables)
+    {
+        input_var.calculateFuzzificatedSet();
+        input_var.printFuzzificatedSet();
+    }
+}
 
 float MamdaniFuzzySystem::calculate()
 {
     checkAllInputValues();
 
+    calculateFuzzificatedSet();
     // std::cout << "hello" << std::endl;
+}
+
+std::list<FuzzyVariable> MamdaniFuzzySystem::getInputVariables()
+{
+    return this->input_variables;
+}
+
+std::list<FuzzyVariable> MamdaniFuzzySystem::getOutputVariables()
+{
+    return this->output_variables;
 }

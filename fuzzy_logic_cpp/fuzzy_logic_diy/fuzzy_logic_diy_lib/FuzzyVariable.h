@@ -27,7 +27,7 @@ namespace FLD
         void setInputValue(float input_value);
         float getInputValue();
         void addTerm(Term new_term);
-        void calculateFuzzificatedSet(float value);
+        void calculateFuzzificatedSet();
         void printFuzzificatedSet();
         std::string getName();
         std::list<Term> getListOfTerm();

@@ -310,12 +310,12 @@ void RuleHandler::addRule(FuzzyRule rule)
     this->list_of_fuzzy_rules.push_back(rule);
 }
 
-void RuleHandler::addInputFuzzyVariableList(std::list<FuzzyVariable> input_variables)
+void RuleHandler::addInputFuzzyVariableList(std::list<FuzzyVariable> &input_variables)
 {
     this->input_variables = input_variables;
 }
 
-void RuleHandler::addOutputFuzzyVariableList(std::list<FuzzyVariable> output_variables)
+void RuleHandler::addOutputFuzzyVariableList(std::list<FuzzyVariable> &output_variables)
 {
     this->output_variables = output_variables;
 }
@@ -347,15 +347,15 @@ void RuleHandler::makeListInputVariableParameters()
 
 void RuleHandler::makeListOutputVariableParameters()
 {
-    for (auto variable = this->output_variables.begin(); variable != this->output_variables.end(); variable++)
+    for (auto variable : this->output_variables)
     {
-        this->output_variable_names.insert(variable->getName());
+        this->output_variable_names.insert(variable.getName());
 
-        std::list<std::string> list_name = variable->getListNameOfTerm();
+        std::list<std::string> list_name = variable.getListNameOfTerm();
 
-        for (auto name = list_name.begin(); name != list_name.end(); name++)
+        for (auto name : list_name)
         {
-            this->output_variable_term_names.insert(*name);
+            this->output_variable_term_names.insert(name);
         }
     }
 

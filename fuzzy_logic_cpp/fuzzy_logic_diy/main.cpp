@@ -57,7 +57,12 @@ int main()
 
     mamdani_fuzzy_system.addRule("if input1 is mf2 and input2 is mf2 then output1 is mf3"); // output2 does not exist in system, write antecedentCheck() and consequentCheck()
 
-    // std::cout << mamdani_fuzzy_system.getNumberOfFuzzyRule() << std::endl;
+    // mamdani_fuzzy_system.printAllRules();
+
+    mamdani_fuzzy_system.addInputValue("input1", 0.5);
+    mamdani_fuzzy_system.addInputValue("input2", 0.75);
+
+    mamdani_fuzzy_system.calculate();
 
     auto t2 = high_resolution_clock::now();
 
