@@ -195,6 +195,15 @@ std::list<std::list<std::string>> RuleHandler::consequentParser(std::string cons
 
 bool RuleHandler::FuzzyRuleCheck(FuzzyRule rule)
 {
+    std::list<std::list<std::string>> temp_antecedent_list = rule.getAntecedentList();
+    for (auto list_str = temp_antecedent_list.begin(); list_str != temp_antecedent_list.end(); list_str++)
+    {
+        std::list<std::string> temp_list_str = *list_str;
+        for (auto name = temp_list_str.begin(); name != temp_list_str.end(); name++)
+        {
+            // std::cout << *name << std::endl;
+        }
+    }
 }
 
 FuzzyRule RuleHandler::parseRule(std::string rule)
@@ -229,6 +238,10 @@ FuzzyRule RuleHandler::parseRule(std::string rule)
 
     temp_fuzzy_rule.addAntecedentList(antecedentParser(antecedent));
     temp_fuzzy_rule.addConsequentList(consequentParser(consequent));
+
+    // PROBLEM HERE
+    printNestedListStr(temp_fuzzy_rule.getAntecedentList());
+    printNestedListStr(temp_fuzzy_rule.getConsequentList());
 
     return temp_fuzzy_rule;
 }
