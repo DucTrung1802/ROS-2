@@ -115,3 +115,41 @@ void MamdaniFuzzySystem::printAllRules()
 {
     this->rule_handler.printAllRules();
 }
+
+void MamdaniFuzzySystem::addInputValue(std::string variable_name, float input_value)
+{
+    bool found = false;
+    for (auto &variable : this->rule_handler.input_variables)
+    {
+        if (variable.getName() == variable_name)
+        {
+            variable.setInputValue(input_value);
+            found = true;
+        }
+
+        // std::cout << variable.getInputValue() << std::endl;
+    }
+
+    if (!found)
+    {
+        throw std::invalid_argument("\"" + variable_name + "\" is not a name of input variable!");
+    }
+}
+
+void MamdaniFuzzySystem::checkAllInputValues()
+{
+    for (auto input_var : this->rule_handler.input_variables)
+    {
+        if (isnan(input_var.getInputValue()))
+        {
+            throw std::invalid_argument("Input variable \"" + input_var.getName() + "\"'s input value has not been set!");
+        }
+    }
+}
+
+float MamdaniFuzzySystem::calculate()
+{
+    checkAllInputValues();
+
+    // std::cout << "hello" << std::endl;
+}

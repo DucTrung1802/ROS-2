@@ -6,6 +6,7 @@
 #include <set>
 #include <map>
 #include <iostream>
+#include <math.h>
 #include "Term.h"
 
 namespace FLD
@@ -16,13 +17,15 @@ namespace FLD
         int number_of_term;
         float min_value;
         float max_value;
-        float value;
+        float input_value = sqrt(-1);
         std::list<Term> list_of_term;
         std::list<std::string> list_name_of_term;
         std::string name;
         std::map<std::string, float> fuzzificated_set;
 
         FuzzyVariable(std::string name, float min_value, float max_value);
+        void setInputValue(float input_value);
+        float getInputValue();
         void addTerm(Term new_term);
         void calculateFuzzificatedSet(float value);
         void printFuzzificatedSet();

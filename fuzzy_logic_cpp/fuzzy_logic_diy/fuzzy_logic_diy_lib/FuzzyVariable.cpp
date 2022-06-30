@@ -51,3 +51,13 @@ std::list<Term> FuzzyVariable::getListOfTerm()
 {
     return this->list_of_term;
 }
+
+void FuzzyVariable::setInputValue(float input_value)
+{
+    this->input_value = float(input_value);
+}
+
+float FuzzyVariable::getInputValue()
+{
+    return this->input_value;
+}
