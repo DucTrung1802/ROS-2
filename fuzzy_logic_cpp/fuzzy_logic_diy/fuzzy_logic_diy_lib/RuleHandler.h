@@ -51,6 +51,8 @@ namespace FLD
 
         void makeListInputVariableParameters();
         void makeListOutputVariableParameters();
+
+        void printAllRules();
     };
 }
 

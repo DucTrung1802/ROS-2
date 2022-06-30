@@ -22,6 +22,7 @@ namespace FLD
         float calculate();
         size_t getNumberOfFuzzyRule();
         void addRule(std::string rule);
+        void printAllRules();
     };
 }
 

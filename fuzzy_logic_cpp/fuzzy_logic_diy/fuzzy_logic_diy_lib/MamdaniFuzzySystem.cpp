@@ -110,3 +110,8 @@ void MamdaniFuzzySystem::addRule(std::string rule)
 
     this->rule_handler.addRule(this->rule_handler.parseRule(rule));
 }
+
+void MamdaniFuzzySystem::printAllRules()
+{
+    this->rule_handler.printAllRules();
+}

@@ -359,7 +359,7 @@ void RuleHandler::makeListOutputVariableParameters()
         }
     }
 
-    // for (auto name = this->output_variable_names.begin(); name != this->output_variable_names.end(); name++)
+    // for (auto name = thi->output_variable_names.begin(); name != this->output_variable_names.end(); name++)
     // {
     //     std::cout << *name << std::endl;
     // }
@@ -368,4 +368,46 @@ void RuleHandler::makeListOutputVariableParameters()
     // {
     //     std::cout << *name << std::endl;
     // }
+}
+
+void RuleHandler::printAllRules()
+{
+    if (this->list_of_fuzzy_rules.size() == 0)
+    {
+        std::cout << "This system has no rule!" << std::endl;
+        return;
+    }
+
+    int i = 1;
+    for (auto rule : this->list_of_fuzzy_rules)
+    {
+        std::cout << "Rule " << i << ": " << std::endl;
+        std::cout << "[";
+        for (auto statement : rule.getAntecedentList())
+        {
+            std::cout << "[";
+            for (auto element : statement)
+            {
+                std::cout << " " << element << " ";
+            }
+            std::cout << "]";
+        }
+        std::cout << "]";
+        std::cout << " => ";
+
+        std::cout << "[";
+        for (auto statement : rule.getConsequentList())
+        {
+            std::cout << "[";
+            for (auto element : statement)
+            {
+                std::cout << " " << element << " ";
+            }
+            std::cout << "]";
+        }
+        std::cout << "]";
+
+        std::cout << std::endl;
+        i++;
+    }
 }
