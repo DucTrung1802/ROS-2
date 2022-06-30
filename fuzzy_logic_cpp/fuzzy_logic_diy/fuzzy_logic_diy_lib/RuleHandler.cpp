@@ -6,6 +6,16 @@
 
 using namespace FLD;
 
+template <typename T>
+bool contains(std::set<T> &listOfElements, const T &element)
+{
+    // Find the iterator if element in list
+    auto it = std::find(listOfElements.begin(), listOfElements.end(), element);
+    // return if iterator points to end or not. It points to end then it means element
+    //  does not exists in list
+    return it != listOfElements.end();
+}
+
 std::string removeSpaces(std::string str)
 {
     str.erase(remove(str.begin(), str.end(), ' '), str.end());
@@ -197,16 +207,54 @@ std::list<std::list<std::string>> RuleHandler::consequentParser(std::string cons
     return _consequent_list;
 }
 
-bool RuleHandler::FuzzyRuleCheck(FuzzyRule rule)
+void RuleHandler::FuzzyRuleCheck(FuzzyRule rule)
 {
-    std::list<std::list<std::string>> temp_antecedent_list = rule.getAntecedentList();
+    std::list<std::list<std::string>>
+        temp_antecedent_list = rule.getAntecedentList();
     for (auto list_str : temp_antecedent_list)
     {
         std::list<std::string> temp_list_str = list_str;
-        for (auto name : temp_list_str)
+        std::string temp_variable_name = temp_list_str.front();
+        std::string temp_term_name = temp_list_str.back();
+
+        if (!(contains(this->input_variable_names, temp_variable_name)))
         {
-            std::cout << name << std::endl;
+            throw std::invalid_argument("Error occured: \"" + temp_variable_name + "\" is not a name of an input variable!");
         }
+
+        if (!(contains(this->input_variable_term_names, temp_term_name)))
+        {
+            throw std::invalid_argument("Error occured: \"" + temp_term_name + "\" is not a name of a term of an input variable!");
+        }
+
+        // for (auto name : temp_list_str)
+        // {
+        //     std::cout << name << std::endl;
+        // }
+    }
+
+    std::list<std::list<std::string>>
+        temp_consequent_list = rule.getConsequentList();
+    for (auto list_str : temp_consequent_list)
+    {
+        std::list<std::string> temp_list_str = list_str;
+        std::string temp_variable_name = temp_list_str.front();
+        std::string temp_term_name = temp_list_str.back();
+
+        if (!(contains(this->output_variable_names, temp_variable_name)))
+        {
+            throw std::invalid_argument("Error occured: \"" + temp_variable_name + "\" is not a name of an output variable!");
+        }
+
+        if (!(contains(this->output_variable_term_names, temp_term_name)))
+        {
+            throw std::invalid_argument("Error occured: \"" + temp_term_name + "\" is not a name of a term of an output variable!");
+        }
+
+        // for (auto name : temp_list_str)
+        // {
+        //     std::cout << name << std::endl;
+        // }
     }
 }
 
@@ -258,14 +306,8 @@ size_t RuleHandler::getNumberOfFuzzyRule()
 
 void RuleHandler::addRule(FuzzyRule rule)
 {
-    if (FuzzyRuleCheck(rule))
-    {
-        this->list_of_fuzzy_rules.push_back(temp_fuzzy_rule);
-    }
-    else
-    {
-        throw std::invalid_argument("Invalid argument in rule: " + temp_fuzzy_rule.getTextFormOfRule());
-    }
+    FuzzyRuleCheck(rule);
+    this->list_of_fuzzy_rules.push_back(rule);
 }
 
 void RuleHandler::addInputFuzzyVariableList(std::list<FuzzyVariable> input_variables)

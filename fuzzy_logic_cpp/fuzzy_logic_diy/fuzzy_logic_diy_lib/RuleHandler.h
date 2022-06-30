@@ -36,7 +36,7 @@ namespace FLD
 
         bool checkKeyword(std::string word);
 
-        bool FuzzyRuleCheck(FuzzyRule rule);
+        void FuzzyRuleCheck(FuzzyRule rule);
 
         std::list<std::list<std::string>> antecedentParser(std::string antecedent);
 
