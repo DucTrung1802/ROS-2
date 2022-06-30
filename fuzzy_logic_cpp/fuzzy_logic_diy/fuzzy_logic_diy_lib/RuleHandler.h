@@ -23,11 +23,9 @@ namespace FLD
         std::list<FuzzyVariable> output_variables;
 
         std::set<std::string> input_variable_names;
-        std::set<Term> input_variable_terms;
         std::set<std::string> input_variable_term_names;
 
         std::set<std::string> output_variable_names;
-        std::set<Term> output_variable_terms;
         std::set<std::string> output_variable_term_names;
 
         FuzzyRule
