@@ -30,10 +30,10 @@ void FuzzyVariable::calculateFuzzificatedSet(float value)
 
 void FuzzyVariable::printFuzzificatedSet()
 {
-    for (auto output = this->fuzzificated_set.begin(); output != this->fuzzificated_set.end(); ++output)
+    for (auto output : this->fuzzificated_set)
     {
-        std::cout << "key: " << output->first << ", "
-                  << "value: " << output->second << std::endl;
+        std::cout << "key: " << output.first << ", "
+                  << "value: " << output.second << std::endl;
     }
 }
 

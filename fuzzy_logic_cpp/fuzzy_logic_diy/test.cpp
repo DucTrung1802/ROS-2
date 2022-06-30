@@ -56,79 +56,12 @@ std::string removeSpaces(std::string str)
 
 int main()
 {
-    // TestClass a_new_class = TestClass({100, 200});
-    // a_new_class.addNewValue(300);
-    // a_new_class.addNewValue(400);
-    // // a_new_class.printList();
+    std::list<int> test_list = {1, 2, 3, 4, 5, 6, 7};
 
-    // std::map<string, string> myMap = {
-    //     {"A", "1"},
-    //     {"B", "2"},
-    //     {"C", "3"}};
-
-    // for (auto it = myMap.cbegin(); it != myMap.cend(); ++it)
-    // {
-    //     if (it->first == "A")
-    //     {
-    //         std::cout << it->first << std::endl;
-    //     }
-    // }
-
-    // std::string s = "scott>=tiger";
-    // std::string delimiter = ">=";
-    // std::string token = s.substr(0, s.find(delimiter)); // token is "scott"
-
-    // std::string s = "scott>=tiger>=mushroom";
-    // std::string delimiter = ">=";
-
-    // size_t pos = 0;
-    // std::string token;
-    // while ((pos = s.find(delimiter)) != std::string::npos)
-    // {
-    //     token = s.substr(0, pos);
-    //     std::cout << token << std::endl;
-    //     s.erase(0, pos + delimiter.length());
-    // }
-    // std::cout << s << std::endl;
-
-    std::string rule = "if input1 is mf1 and input2 is mf2 then output1 is mf2";
-
-    std::string antecedent;
-
-    // if (rule.find("if") == -1)
-    // {
-    //     throw std::invalid_argument("No \"if\" in the rule!");
-    // }
-
-    // if (rule.find("then") == -1)
-    // {
-    //     throw std::invalid_argument("No \"then\" in the rule!");
-    // }
-
-    antecedent = rule;
-    eraseSubStr(antecedent, "if ");
-
-    // std::cout << antecedent << std::endl;
-
-    // std::string delimiter = "then";
-    // std::string token = rule.substr(0, rule.find(delimiter));
-
-    // std::cout << token << std::endl;
-    // rule.erase(rule.begin() + 0, rule.begin() + rule.find(delimiter));
-
-    std::string s = "input1 is mf1 and input2 is mf2";
-    // s = removeSpaces(s);
-    std::string delimiter = " and ";
-
-    size_t pos = 0;
-    std::string token;
-    while ((pos = s.find(delimiter)) != std::string::npos)
+    for (auto i : test_list)
     {
-        token = s.substr(0, pos);
-        std::cout << token << std::endl;
-        s.erase(0, pos + delimiter.length());
+        std::cout << typeid(i).name() << std::endl;
     }
-    std::cout << s << std::endl;
 
     return 0;
 }

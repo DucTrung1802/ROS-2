@@ -14,8 +14,7 @@ namespace FLD
     {
     public:
         std::list<std::string> keywords = {"if", "then", "and", "or", "is"};
-        std::list<std::list<std::string>> _antecedent_list;
-        std::list<std::list<std::string>> _consequent_list;
+
         std::list<FuzzyRule> list_of_fuzzy_rules;
         FuzzyRule temp_fuzzy_rule;
 

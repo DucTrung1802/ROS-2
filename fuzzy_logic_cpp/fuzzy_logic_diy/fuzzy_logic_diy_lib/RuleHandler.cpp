@@ -15,7 +15,7 @@ std::string removeSpaces(std::string str)
 void printListStr(std::list<std::string> const &list)
 {
     std::cout << "list string: [";
-    for (auto &i : list)
+    for (auto i : list)
     {
         std::cout << " " << i << " ";
     }
@@ -26,10 +26,10 @@ void printNestedListStr(std::list<std::list<std::string>> const &list)
 {
     std::cout << "1-layer nested list string: [";
 
-    for (auto &i : list)
+    for (auto i : list)
     {
         std::cout << "[";
-        for (auto &j : i)
+        for (auto j : i)
         {
             std::cout << " " << j << " ";
         }
@@ -104,7 +104,9 @@ std::list<std::list<std::string>> RuleHandler::antecedentParser(std::string ante
 
     // ANTECEDENT_LIST
 
-    for (auto &statement : list_of_statement_between_AND)
+    std::list<std::list<std::string>> _antecedent_list;
+
+    for (auto statement : list_of_statement_between_AND)
     {
         // std::cout << statement << std::endl;
 
@@ -165,7 +167,9 @@ std::list<std::list<std::string>> RuleHandler::consequentParser(std::string cons
 
     // consequent_LIST
 
-    for (auto &statement : list_of_statement_between_AND)
+    std::list<std::list<std::string>> _consequent_list;
+
+    for (auto statement : list_of_statement_between_AND)
     {
         // std::cout << statement << std::endl;
 
@@ -196,12 +200,12 @@ std::list<std::list<std::string>> RuleHandler::consequentParser(std::string cons
 bool RuleHandler::FuzzyRuleCheck(FuzzyRule rule)
 {
     std::list<std::list<std::string>> temp_antecedent_list = rule.getAntecedentList();
-    for (auto list_str = temp_antecedent_list.begin(); list_str != temp_antecedent_list.end(); list_str++)
+    for (auto list_str : temp_antecedent_list)
     {
-        std::list<std::string> temp_list_str = *list_str;
-        for (auto name = temp_list_str.begin(); name != temp_list_str.end(); name++)
+        std::list<std::string> temp_list_str = list_str;
+        for (auto name : temp_list_str)
         {
-            // std::cout << *name << std::endl;
+            std::cout << name << std::endl;
         }
     }
 }
@@ -238,10 +242,6 @@ FuzzyRule RuleHandler::parseRule(std::string rule)
 
     temp_fuzzy_rule.addAntecedentList(antecedentParser(antecedent));
     temp_fuzzy_rule.addConsequentList(consequentParser(consequent));
-
-    // PROBLEM HERE
-    printNestedListStr(temp_fuzzy_rule.getAntecedentList());
-    printNestedListStr(temp_fuzzy_rule.getConsequentList());
 
     return temp_fuzzy_rule;
 }
@@ -280,15 +280,15 @@ void RuleHandler::addOutputFuzzyVariableList(std::list<FuzzyVariable> output_var
 
 void RuleHandler::makeListInputVariableParameters()
 {
-    for (auto variable = this->input_variables.begin(); variable != this->input_variables.end(); variable++)
+    for (auto variable : this->input_variables)
     {
-        this->input_variable_names.insert(variable->getName());
+        this->input_variable_names.insert(variable.getName());
 
-        std::list<std::string> list_name = variable->getListNameOfTerm();
+        std::list<std::string> list_name = variable.getListNameOfTerm();
 
-        for (auto name = list_name.begin(); name != list_name.end(); name++)
+        for (auto name : list_name)
         {
-            this->input_variable_term_names.insert(*name);
+            this->input_variable_term_names.insert(name);
         }
     }
 

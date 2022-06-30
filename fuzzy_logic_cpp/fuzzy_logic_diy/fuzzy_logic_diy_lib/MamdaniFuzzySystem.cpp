@@ -16,21 +16,21 @@ int MamdaniFuzzySystem::checkInputVariables(std::list<FuzzyVariable> input_varia
 {
     bool duplicate_keyword = false;
     std::list<std::string> list_of_keyword = rule_handler.getListKeyword();
-    for (auto input_var = input_variables.begin(); input_var != input_variables.end(); input_var++)
+    for (auto input_var : input_variables)
     {
         // std::cout << input_var->getName() << std::endl;
         // std::cout << *rule_handler.getListKeyword().begin() << std::endl;
-        std::list<std::string> list_name = input_var->getListNameOfTerm();
+        std::list<std::string> list_name = input_var.getListNameOfTerm();
 
-        duplicate_keyword = contains(list_of_keyword, input_var->getName());
+        duplicate_keyword = contains(list_of_keyword, input_var.getName());
 
         if (duplicate_keyword)
             return 1;
 
-        for (auto name = list_name.begin(); name != list_name.end(); name++)
+        for (auto name : list_name)
         {
             // std::cout << *name << std::endl;
-            duplicate_keyword = contains(list_of_keyword, *name);
+            duplicate_keyword = contains(list_of_keyword, name);
             if (duplicate_keyword)
 
                 return 2;
@@ -53,9 +53,9 @@ MamdaniFuzzySystem::MamdaniFuzzySystem(std::list<FuzzyVariable> input_variables,
     {
         std::list<std::string> list_of_keyword = rule_handler.getListKeyword();
         std::cout << "List of keyword:";
-        for (auto keyword = list_of_keyword.begin(); keyword != list_of_keyword.end(); keyword++)
+        for (auto keyword : list_of_keyword)
         {
-            std::cout << " \"" << *keyword << "\"";
+            std::cout << " \"" << keyword << "\"";
         }
         std::cout << std::endl;
 
@@ -78,9 +78,9 @@ MamdaniFuzzySystem::MamdaniFuzzySystem(std::list<FuzzyVariable> input_variables,
     {
         std::list<std::string> list_of_keyword = rule_handler.getListKeyword();
         std::cout << "List of keyword:";
-        for (auto keyword = list_of_keyword.begin(); keyword != list_of_keyword.end(); keyword++)
+        for (auto keyword : list_of_keyword)
         {
-            std::cout << " \"" << *keyword << "\"";
+            std::cout << " \"" << keyword << "\"";
         }
         std::cout << std::endl;
 
@@ -107,5 +107,6 @@ size_t MamdaniFuzzySystem::getNumberOfFuzzyRule()
 
 void MamdaniFuzzySystem::addRule(std::string rule)
 {
+
     this->rule_handler.addRule(this->rule_handler.parseRule(rule));
 }
