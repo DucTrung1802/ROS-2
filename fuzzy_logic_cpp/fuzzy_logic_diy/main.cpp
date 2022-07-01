@@ -51,20 +51,20 @@ int main()
 
     MamdaniFuzzySystem mamdani_fuzzy_system = MamdaniFuzzySystem({input_1, input_2}, {output_1});
 
-    mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf2 then output1 is mf1");
+    mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf1 then output1 is mf1");
 
-    mamdani_fuzzy_system.addRule("if input1 is mf2 and input2 is mf2 then output1 is mf3");
+    mamdani_fuzzy_system.addRule("if input1 is mf2 and input2 is mf2 then output1 is mf2");
 
-    mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf1 then output1 is mf3");
+    // mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf1 then output1 is mf3");
 
     // mamdani_fuzzy_system.printAllRules();
 
     auto t1 = high_resolution_clock::now();
 
     mamdani_fuzzy_system.addInputValue("input1", 0.2);
-    mamdani_fuzzy_system.addInputValue("input2", 0.1);
+    mamdani_fuzzy_system.addInputValue("input2", 0.2);
 
-    mamdani_fuzzy_system.calculate(1);
+    mamdani_fuzzy_system.calculate(100);
 
     auto t2 = high_resolution_clock::now();
 

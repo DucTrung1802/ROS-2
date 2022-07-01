@@ -210,21 +210,21 @@ void MamdaniFuzzySystem::calculateInferenceSets()
 
         // std::cout << *min << std::endl;
 
-        // for (auto statement : rule.getConsequentList())
-        // {
-        //     for (auto &set : this->list_of_inference_set)
-        //     {
-        //         if (statement.front() == set.getOutputVarName())
-        //         {
-        //             if (*min >= set.getValueMf(statement.back()))
-        //             {
-        //                 set.setValueMf(statement.back(), *min);
-        //             }
-        //             // std::cout << statement.front() << std::endl;
-        //         }
-        //         set.printInferenceSet();
-        //     }
-        // }
+        for (auto statement : rule.getConsequentList())
+        {
+            for (auto &set : this->list_of_inference_set)
+            {
+                if (statement.front() == set.getOutputVarName())
+                {
+                    if (*min >= set.getValueMf(statement.back()))
+                    {
+                        set.setValueMf(statement.back(), *min);
+                    }
+                    // std::cout << statement.front() << std::endl;
+                }
+                // set.printInferenceSet();
+            }
+        }
 
         // std::cout << length_array << std::endl;
         // for (auto statement :)
@@ -233,12 +233,12 @@ void MamdaniFuzzySystem::calculateInferenceSets()
 
 void MamdaniFuzzySystem::defuzzify(int number_of_step)
 {
-    if (int(number_of_step) < 0)
+    if (int(number_of_step) <= 0)
     {
         throw std::invalid_argument("Integral steps must be a positive integer!");
     }
 
-    this->number_of_step = number_of_step;
+    this->number_of_step = number_of_step + 1;
 
     for (auto output_var : this->output_variables)
     {
@@ -247,15 +247,42 @@ void MamdaniFuzzySystem::defuzzify(int number_of_step)
         float min_value = output_var.getMinValue();
         float max_value = output_var.getMaxValue();
         float step = (max_value - min_value) / float(number_of_step);
-
+        float result = 0.0;
         for (float index = min_value; index <= max_value; index += step)
         {
             std::pair<std::string, float> temp_max_fuzzificated_set = output_var.getMaxFuzzificatedSet(index);
+
+            // std::cout << temp_max_fuzzificated_set.second << std::endl;
+
+            for (auto inference_set : this->list_of_inference_set)
+            {
+
+                float saturate_value = inference_set.getValueMf(temp_max_fuzzificated_set.first);
+                // std::cout << saturate_value << std::endl;
+                if (temp_max_fuzzificated_set.second > saturate_value)
+                {
+                    temp_max_fuzzificated_set.second = saturate_value;
+                }
+            }
+
+            // std::cout << temp_max_fuzzificated_set.first << " " << temp_max_fuzzificated_set.second
+            //           << std::endl;
+
+            numerator += index * temp_max_fuzzificated_set.second;
+            denominator += temp_max_fuzzificated_set.second;
         }
 
-        for (auto term : output_var.getListOfTerm())
+        if (denominator == 0.0)
         {
+            throw std::runtime_error("Cannot divde by zero!");
         }
+        else
+        {
+            result = numerator / denominator;
+        }
+
+        std::cout << result << std::endl;
+        this->map_of_result.insert({output_var.getName(), result});
     }
 }
 

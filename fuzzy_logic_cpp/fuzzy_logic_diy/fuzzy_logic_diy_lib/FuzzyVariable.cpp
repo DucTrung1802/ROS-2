@@ -31,22 +31,17 @@ void FuzzyVariable::calculateFuzzificatedSet()
 std::pair<std::string, float> FuzzyVariable::getMaxFuzzificatedSet(float input_value)
 {
     std::pair<std::string, float> temp_max_fuzzificated_set;
-    std::string first_name = this->list_of_term.front().getName();
-    float first_value = this->list_of_term.front().compute(input_value);
+    temp_max_fuzzificated_set.first = this->list_of_term.front().getName();
+    temp_max_fuzzificated_set.second = this->list_of_term.front().compute(input_value);
     for (auto term : this->list_of_term)
     {
-        std::cout << "hello" << std::endl;
+        // std::cout << "hello" << std::endl;
         float value = term.compute(input_value);
-        if (value > first_value)
+
+        if (value > temp_max_fuzzificated_set.second)
         {
             temp_max_fuzzificated_set.first = term.getName();
             temp_max_fuzzificated_set.second = value;
-        }
-
-        else
-        {
-            temp_max_fuzzificated_set.first = first_name;
-            temp_max_fuzzificated_set.second = first_value;
         }
     }
     // std::cout << temp_max_fuzzificated_set.second << std::endl;
