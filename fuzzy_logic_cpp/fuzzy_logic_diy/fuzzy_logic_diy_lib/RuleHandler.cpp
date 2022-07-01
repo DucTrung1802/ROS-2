@@ -6,6 +6,16 @@
 
 using namespace FLD;
 
+template <typename T>
+bool contains(std::set<T> &listOfElements, const T &element)
+{
+    // Find the iterator if element in list
+    auto it = std::find(listOfElements.begin(), listOfElements.end(), element);
+    // return if iterator points to end or not. It points to end then it means element
+    //  does not exists in list
+    return it != listOfElements.end();
+}
+
 std::string removeSpaces(std::string str)
 {
     str.erase(remove(str.begin(), str.end(), ' '), str.end());
@@ -15,7 +25,7 @@ std::string removeSpaces(std::string str)
 void printListStr(std::list<std::string> const &list)
 {
     std::cout << "list string: [";
-    for (auto &i : list)
+    for (auto i : list)
     {
         std::cout << " " << i << " ";
     }
@@ -26,10 +36,10 @@ void printNestedListStr(std::list<std::list<std::string>> const &list)
 {
     std::cout << "1-layer nested list string: [";
 
-    for (auto &i : list)
+    for (auto i : list)
     {
         std::cout << "[";
-        for (auto &j : i)
+        for (auto j : i)
         {
             std::cout << " " << j << " ";
         }
@@ -104,7 +114,9 @@ std::list<std::list<std::string>> RuleHandler::antecedentParser(std::string ante
 
     // ANTECEDENT_LIST
 
-    for (auto &statement : list_of_statement_between_AND)
+    std::list<std::list<std::string>> _antecedent_list;
+
+    for (auto statement : list_of_statement_between_AND)
     {
         // std::cout << statement << std::endl;
 
@@ -165,7 +177,9 @@ std::list<std::list<std::string>> RuleHandler::consequentParser(std::string cons
 
     // consequent_LIST
 
-    for (auto &statement : list_of_statement_between_AND)
+    std::list<std::list<std::string>> _consequent_list;
+
+    for (auto statement : list_of_statement_between_AND)
     {
         // std::cout << statement << std::endl;
 
@@ -193,8 +207,55 @@ std::list<std::list<std::string>> RuleHandler::consequentParser(std::string cons
     return _consequent_list;
 }
 
-bool RuleHandler::FuzzyRuleCheck(FuzzyRule rule)
+void RuleHandler::FuzzyRuleCheck(FuzzyRule rule)
 {
+    std::list<std::list<std::string>>
+        temp_antecedent_list = rule.getAntecedentList();
+    for (auto list_str : temp_antecedent_list)
+    {
+        std::list<std::string> temp_list_str = list_str;
+        std::string temp_variable_name = temp_list_str.front();
+        std::string temp_term_name = temp_list_str.back();
+
+        if (!(contains(this->input_variable_names, temp_variable_name)))
+        {
+            throw std::invalid_argument("Error occured: \"" + temp_variable_name + "\" is not a name of an input variable!");
+        }
+
+        if (!(contains(this->input_variable_term_names, temp_term_name)))
+        {
+            throw std::invalid_argument("Error occured: \"" + temp_term_name + "\" is not a name of a term of an input variable!");
+        }
+
+        // for (auto name : temp_list_str)
+        // {
+        //     std::cout << name << std::endl;
+        // }
+    }
+
+    std::list<std::list<std::string>>
+        temp_consequent_list = rule.getConsequentList();
+    for (auto list_str : temp_consequent_list)
+    {
+        std::list<std::string> temp_list_str = list_str;
+        std::string temp_variable_name = temp_list_str.front();
+        std::string temp_term_name = temp_list_str.back();
+
+        if (!(contains(this->output_variable_names, temp_variable_name)))
+        {
+            throw std::invalid_argument("Error occured: \"" + temp_variable_name + "\" is not a name of an output variable!");
+        }
+
+        if (!(contains(this->output_variable_term_names, temp_term_name)))
+        {
+            throw std::invalid_argument("Error occured: \"" + temp_term_name + "\" is not a name of a term of an output variable!");
+        }
+
+        // for (auto name : temp_list_str)
+        // {
+        //     std::cout << name << std::endl;
+        // }
+    }
 }
 
 FuzzyRule RuleHandler::parseRule(std::string rule)
@@ -245,37 +306,31 @@ size_t RuleHandler::getNumberOfFuzzyRule()
 
 void RuleHandler::addRule(FuzzyRule rule)
 {
-    if (FuzzyRuleCheck(rule))
-    {
-        this->list_of_fuzzy_rules.push_back(temp_fuzzy_rule);
-    }
-    else
-    {
-        throw std::invalid_argument("Invalid argument in rule: " + temp_fuzzy_rule.getTextFormOfRule());
-    }
+    FuzzyRuleCheck(rule);
+    this->list_of_fuzzy_rules.push_back(rule);
 }
 
-void RuleHandler::addInputFuzzyVariableList(std::list<FuzzyVariable> input_variables)
+void RuleHandler::addInputFuzzyVariableList(std::list<FuzzyVariable> &input_variables)
 {
     this->input_variables = input_variables;
 }
 
-void RuleHandler::addOutputFuzzyVariableList(std::list<FuzzyVariable> output_variables)
+void RuleHandler::addOutputFuzzyVariableList(std::list<FuzzyVariable> &output_variables)
 {
     this->output_variables = output_variables;
 }
 
 void RuleHandler::makeListInputVariableParameters()
 {
-    for (auto variable = this->input_variables.begin(); variable != this->input_variables.end(); variable++)
+    for (auto variable : this->input_variables)
     {
-        this->input_variable_names.insert(variable->getName());
+        this->input_variable_names.insert(variable.getName());
 
-        std::list<std::string> list_name = variable->getListNameOfTerm();
+        std::list<std::string> list_name = variable.getListNameOfTerm();
 
-        for (auto name = list_name.begin(); name != list_name.end(); name++)
+        for (auto name : list_name)
         {
-            this->input_variable_term_names.insert(*name);
+            this->input_variable_term_names.insert(name);
         }
     }
 
@@ -292,19 +347,19 @@ void RuleHandler::makeListInputVariableParameters()
 
 void RuleHandler::makeListOutputVariableParameters()
 {
-    for (auto variable = this->output_variables.begin(); variable != this->output_variables.end(); variable++)
+    for (auto variable : this->output_variables)
     {
-        this->output_variable_names.insert(variable->getName());
+        this->output_variable_names.insert(variable.getName());
 
-        std::list<std::string> list_name = variable->getListNameOfTerm();
+        std::list<std::string> list_name = variable.getListNameOfTerm();
 
-        for (auto name = list_name.begin(); name != list_name.end(); name++)
+        for (auto name : list_name)
         {
-            this->output_variable_term_names.insert(*name);
+            this->output_variable_term_names.insert(name);
         }
     }
 
-    // for (auto name = this->output_variable_names.begin(); name != this->output_variable_names.end(); name++)
+    // for (auto name = thi->output_variable_names.begin(); name != this->output_variable_names.end(); name++)
     // {
     //     std::cout << *name << std::endl;
     // }
@@ -313,4 +368,51 @@ void RuleHandler::makeListOutputVariableParameters()
     // {
     //     std::cout << *name << std::endl;
     // }
+}
+
+void RuleHandler::printAllRules()
+{
+    if (this->list_of_fuzzy_rules.size() == 0)
+    {
+        std::cout << "This system has no rule!" << std::endl;
+        return;
+    }
+
+    int i = 1;
+    for (auto rule : this->list_of_fuzzy_rules)
+    {
+        std::cout << "Rule " << i << ": " << std::endl;
+        std::cout << "[";
+        for (auto statement : rule.getAntecedentList())
+        {
+            std::cout << "[";
+            for (auto element : statement)
+            {
+                std::cout << " " << element << " ";
+            }
+            std::cout << "]";
+        }
+        std::cout << "]";
+        std::cout << " => ";
+
+        std::cout << "[";
+        for (auto statement : rule.getConsequentList())
+        {
+            std::cout << "[";
+            for (auto element : statement)
+            {
+                std::cout << " " << element << " ";
+            }
+            std::cout << "]";
+        }
+        std::cout << "]";
+
+        std::cout << std::endl;
+        i++;
+    }
+}
+
+std::list<FuzzyRule> RuleHandler::getListOfFuzzyRule()
+{
+    return this->list_of_fuzzy_rules;
 }

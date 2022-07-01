@@ -14,8 +14,7 @@ namespace FLD
     {
     public:
         std::list<std::string> keywords = {"if", "then", "and", "or", "is"};
-        std::list<std::list<std::string>> _antecedent_list;
-        std::list<std::list<std::string>> _consequent_list;
+
         std::list<FuzzyRule> list_of_fuzzy_rules;
         FuzzyRule temp_fuzzy_rule;
 
@@ -37,7 +36,7 @@ namespace FLD
 
         bool checkKeyword(std::string word);
 
-        bool FuzzyRuleCheck(FuzzyRule rule);
+        void FuzzyRuleCheck(FuzzyRule rule);
 
         std::list<std::list<std::string>> antecedentParser(std::string antecedent);
 
@@ -47,11 +46,15 @@ namespace FLD
 
         size_t getNumberOfFuzzyRule();
 
-        void addInputFuzzyVariableList(std::list<FuzzyVariable> input_variables);
-        void addOutputFuzzyVariableList(std::list<FuzzyVariable> output_variables);
+        std::list<FuzzyRule> getListOfFuzzyRule();
+
+        void addInputFuzzyVariableList(std::list<FuzzyVariable> &input_variables);
+        void addOutputFuzzyVariableList(std::list<FuzzyVariable> &output_variables);
 
         void makeListInputVariableParameters();
         void makeListOutputVariableParameters();
+
+        void printAllRules();
     };
 }
 
