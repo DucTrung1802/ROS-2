@@ -411,3 +411,8 @@ void RuleHandler::printAllRules()
         i++;
     }
 }
+
+std::list<FuzzyRule> RuleHandler::getListOfFuzzyRule()
+{
+    return this->list_of_fuzzy_rules;
+}
