@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "MamdaniFuzzySystem.h"
 
 using namespace FLD;
@@ -116,6 +117,10 @@ MamdaniFuzzySystem::MamdaniFuzzySystem(std::list<FuzzyVariable> input_variables,
     this->rule_handler.makeListInputVariableParameters();
     this->rule_handler.makeListOutputVariableParameters();
     this->initializeInferenceSet(output_variables);
+    // for (auto set : this->list_of_inference_set)
+    // {
+    //     set.printInferenceSet();
+    // }
 }
 
 size_t MamdaniFuzzySystem::getNumberOfFuzzyRule()
@@ -163,20 +168,82 @@ void MamdaniFuzzySystem::checkAllInputValues()
         }
     }
 }
-void MamdaniFuzzySystem::calculateFuzzificatedSet()
+void MamdaniFuzzySystem::calculateFuzzificatedSets()
 {
     for (auto &input_var : this->input_variables)
     {
         input_var.calculateFuzzificatedSet();
-        input_var.printFuzzificatedSet();
+        // input_var.printFuzzificatedSet();
     }
+}
+
+void MamdaniFuzzySystem::calculateInferenceSets()
+{
+    for (auto rule : this->rule_handler.getListOfFuzzyRule())
+    {
+        float *array_of_mf_value;
+        int length_array = rule.getAntecedentList().size();
+        array_of_mf_value = new float[length_array];
+
+        int index = 0;
+
+        for (auto statement : rule.getAntecedentList())
+        {
+            for (auto input_var : this->input_variables)
+            {
+                if (input_var.getName() == statement.front())
+                {
+                    for (auto pair : input_var.getFuzzificatedSet())
+                    {
+                        if (pair.first == statement.back())
+                        {
+                            array_of_mf_value[index] = pair.second;
+                            index++;
+                            // std::cout << pair.first << std::endl;
+                        }
+                    }
+                }
+            }
+        }
+
+        float *min = std::min_element(array_of_mf_value, array_of_mf_value + sizeof(array_of_mf_value) / sizeof(array_of_mf_value[0]));
+
+        // std::cout << *min << std::endl;
+
+        for (auto statement : rule.getConsequentList())
+        {
+            for (auto &set : this->list_of_inference_set)
+            {
+                if (statement.front() == set.getOutputVarName())
+                {
+                    if (*min >= set.getValueMf(statement.back()))
+                    {
+                        set.setValueMf(statement.back(), *min);
+                    }
+                    // std::cout << statement.front() << std::endl;
+                }
+                set.printInferenceSet();
+            }
+        }
+
+        // std::cout << length_array << std::endl;
+        // for (auto statement :)
+    }
+}
+
+void MamdaniFuzzySystem::defuzzify()
+{
 }
 
 float MamdaniFuzzySystem::calculate()
 {
     checkAllInputValues();
 
-    calculateFuzzificatedSet();
+    calculateFuzzificatedSets();
+
+    calculateInferenceSets();
+
+    defuzzify();
     // std::cout << "hello" << std::endl;
 }
 
