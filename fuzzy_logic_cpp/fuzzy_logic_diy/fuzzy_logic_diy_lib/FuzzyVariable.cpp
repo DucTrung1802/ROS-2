@@ -30,11 +30,13 @@ void FuzzyVariable::calculateFuzzificatedSet()
 
 void FuzzyVariable::printFuzzificatedSet()
 {
+    std::cout << "Variable: " << this->name << std::endl;
     for (auto output : this->fuzzificated_set)
     {
         std::cout << "key: " << output.first << ", "
                   << "value: " << output.second << std::endl;
     }
+    std::cout << std::endl;
 }
 
 std::string FuzzyVariable::getName()
@@ -60,4 +62,9 @@ void FuzzyVariable::setInputValue(float input_value)
 float FuzzyVariable::getInputValue()
 {
     return this->input_value;
+}
+
+std::map<std::string, float> FuzzyVariable::getFuzzificatedSet()
+{
+    return this->fuzzificated_set;
 }

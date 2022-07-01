@@ -32,6 +32,7 @@ namespace FLD
         std::string getName();
         std::list<Term> getListOfTerm();
         std::list<std::string> getListNameOfTerm();
+        std::map<std::string, float> getFuzzificatedSet();
     };
 }
 #endif
