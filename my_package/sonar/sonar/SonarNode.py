@@ -70,6 +70,7 @@ def task_1(sonar):
         raise Exception("Task 1: parameter sonar is not an instance of Sonar!")
 
     while True:
+        time.sleep(0.01)
 
         if flag_1:
             break
@@ -85,6 +86,7 @@ def task_2(sonar):
         raise Exception("Task 2: parameter sonar is not an instance of Sonar!")
 
     while True:
+        time.sleep(0.01)
 
         if flag_2:
             break
@@ -100,6 +102,7 @@ def task_3(sonar):
         raise Exception("Task 3: parameter sonar is not an instance of Sonar!")
 
     while True:
+        time.sleep(0.01)
 
         if flag_3:
             break
@@ -115,6 +118,7 @@ def task_4(sonar):
         raise Exception("Task 4: parameter sonar is not an instance of Sonar!")
 
     while True:
+        time.sleep(0.01)
 
         if flag_4:
             break
@@ -130,6 +134,7 @@ def task_5(sonar):
         raise Exception("Task 5: parameter sonar is not an instance of Sonar!")
 
     while True:
+        time.sleep(0.01)
 
         if flag_5:
             break
@@ -142,6 +147,7 @@ def task_6(sonar_node):
     global flag_6
     print("Start thread 6")
     while True:
+        time.sleep(0.01)
 
         if flag_6:
             break
