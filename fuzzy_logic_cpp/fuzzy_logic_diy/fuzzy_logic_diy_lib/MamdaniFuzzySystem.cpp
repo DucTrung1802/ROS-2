@@ -210,32 +210,56 @@ void MamdaniFuzzySystem::calculateInferenceSets()
 
         // std::cout << *min << std::endl;
 
-        for (auto statement : rule.getConsequentList())
-        {
-            for (auto &set : this->list_of_inference_set)
-            {
-                if (statement.front() == set.getOutputVarName())
-                {
-                    if (*min >= set.getValueMf(statement.back()))
-                    {
-                        set.setValueMf(statement.back(), *min);
-                    }
-                    // std::cout << statement.front() << std::endl;
-                }
-                set.printInferenceSet();
-            }
-        }
+        // for (auto statement : rule.getConsequentList())
+        // {
+        //     for (auto &set : this->list_of_inference_set)
+        //     {
+        //         if (statement.front() == set.getOutputVarName())
+        //         {
+        //             if (*min >= set.getValueMf(statement.back()))
+        //             {
+        //                 set.setValueMf(statement.back(), *min);
+        //             }
+        //             // std::cout << statement.front() << std::endl;
+        //         }
+        //         set.printInferenceSet();
+        //     }
+        // }
 
         // std::cout << length_array << std::endl;
         // for (auto statement :)
     }
 }
 
-void MamdaniFuzzySystem::defuzzify()
+void MamdaniFuzzySystem::defuzzify(int number_of_step)
 {
+    if (int(number_of_step) < 0)
+    {
+        throw std::invalid_argument("Integral steps must be a positive integer!");
+    }
+
+    this->number_of_step = number_of_step;
+
+    for (auto output_var : this->output_variables)
+    {
+        float numerator = 0.0;
+        float denominator = 0.0;
+        float min_value = output_var.getMinValue();
+        float max_value = output_var.getMaxValue();
+        float step = (max_value - min_value) / float(number_of_step);
+
+        for (float index = min_value; index <= max_value; index += step)
+        {
+            std::pair<std::string, float> temp_max_fuzzificated_set = output_var.getMaxFuzzificatedSet(index);
+        }
+
+        for (auto term : output_var.getListOfTerm())
+        {
+        }
+    }
 }
 
-float MamdaniFuzzySystem::calculate()
+float MamdaniFuzzySystem::calculate(int number_of_step)
 {
     checkAllInputValues();
 
@@ -243,7 +267,7 @@ float MamdaniFuzzySystem::calculate()
 
     calculateInferenceSets();
 
-    defuzzify();
+    defuzzify(number_of_step);
     // std::cout << "hello" << std::endl;
 }
 

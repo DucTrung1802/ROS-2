@@ -28,6 +28,31 @@ void FuzzyVariable::calculateFuzzificatedSet()
     }
 }
 
+std::pair<std::string, float> FuzzyVariable::getMaxFuzzificatedSet(float input_value)
+{
+    std::pair<std::string, float> temp_max_fuzzificated_set;
+    std::string first_name = this->list_of_term.front().getName();
+    float first_value = this->list_of_term.front().compute(input_value);
+    for (auto term : this->list_of_term)
+    {
+        std::cout << "hello" << std::endl;
+        float value = term.compute(input_value);
+        if (value > first_value)
+        {
+            temp_max_fuzzificated_set.first = term.getName();
+            temp_max_fuzzificated_set.second = value;
+        }
+
+        else
+        {
+            temp_max_fuzzificated_set.first = first_name;
+            temp_max_fuzzificated_set.second = first_value;
+        }
+    }
+    // std::cout << temp_max_fuzzificated_set.second << std::endl;
+    return temp_max_fuzzificated_set;
+}
+
 void FuzzyVariable::printFuzzificatedSet()
 {
     std::cout << "Variable: " << this->name << std::endl;
@@ -67,4 +92,14 @@ float FuzzyVariable::getInputValue()
 std::map<std::string, float> FuzzyVariable::getFuzzificatedSet()
 {
     return this->fuzzificated_set;
+}
+
+float FuzzyVariable::getMinValue()
+{
+    return this->min_value;
+}
+
+float FuzzyVariable::getMaxValue()
+{
+    return this->max_value;
 }

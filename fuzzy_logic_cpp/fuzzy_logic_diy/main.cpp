@@ -51,18 +51,20 @@ int main()
 
     MamdaniFuzzySystem mamdani_fuzzy_system = MamdaniFuzzySystem({input_1, input_2}, {output_1});
 
-    auto t1 = high_resolution_clock::now();
+    mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf2 then output1 is mf1");
 
-    mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf2 then output1 is mf3");
+    mamdani_fuzzy_system.addRule("if input1 is mf2 and input2 is mf2 then output1 is mf3");
 
-    mamdani_fuzzy_system.addRule("if input1 is mf2 and input2 is mf2 then output1 is mf3"); // output2 does not exist in system, write antecedentCheck() and consequentCheck()
+    mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf1 then output1 is mf3");
 
     // mamdani_fuzzy_system.printAllRules();
 
-    mamdani_fuzzy_system.addInputValue("input1", 0.5);
-    mamdani_fuzzy_system.addInputValue("input2", 0.75);
+    auto t1 = high_resolution_clock::now();
 
-    mamdani_fuzzy_system.calculate();
+    mamdani_fuzzy_system.addInputValue("input1", 0.2);
+    mamdani_fuzzy_system.addInputValue("input2", 0.1);
+
+    mamdani_fuzzy_system.calculate(1);
 
     auto t2 = high_resolution_clock::now();
 
@@ -71,7 +73,7 @@ int main()
     /* Getting number of milliseconds as a double. */
     duration<double, std::milli> ms_double = t2 - t1;
 
-    // std::cout << ms_double.count() << "ms\n";
+    std::cout << ms_double.count() << "ms\n";
 
     return 0;
 }
