@@ -16,7 +16,7 @@ TRIGGER_PIN = 19
 ECHO_PIN = 13
 
 NUMBER_OF_MEDIAN_FILTER_ELEMENT = 9
-PUBLISH_FREQUENCY = 20
+PUBLISH_FREQUENCY = 10
 NODE_NAME = "sonar" + str(ORDER)
 
 
@@ -43,9 +43,11 @@ class SonarNode(Node):
         self.__sonar = sonar_instance
         self.__value_list = []
         self.__sorted_list = []
+        self.__old_value = 0.0
         self.__sonar_publisher = self.create_publisher(
             Range, "/ultrasonic_sensor_" + str(ORDER), 1
         )
+        self.__error_time = 0
 
         self.__timer = self.create_timer(PUBLISH_PERIOD, self.timer_callback)
 
@@ -61,19 +63,25 @@ class SonarNode(Node):
             self.__sonar.measureRange()
             self.__value_list.append(self.__sonar.getRange())
 
-        self.__sonar.measureRange()
+        try:
+            self.__sonar.measureRange()
+        except:
+            self.__error_time = self.__error_time + 1
+            print("Error " + str(self.__error_time) + " occured!")
+            self.__sonar.setOutputValue(self.__old_value)
+
         self.__value_list.append(self.__sonar.getRange())
         self.__sorted_list = self.__value_list.copy()
         self.__sorted_list.sort()
 
-        for i in range(len(self.__sorted_list)):
-            print(round(self.__sorted_list[i], 3), end="\t")
-        print()
+        # for i in range(len(self.__sorted_list)):
+        #     print(round(self.__sorted_list[i], 3), end="\t")
+        # print()
 
         self.__sonar.setOutputValue(
             self.__sorted_list[floor(NUMBER_OF_MEDIAN_FILTER_ELEMENT / 2)]
         )
-
+        self.__old_value = self.__sonar.getOutputValue()
         del self.__value_list[0]
 
     def timer_callback(self):
@@ -87,7 +95,7 @@ class SonarNode(Node):
         )  # rad ~ 15 degree (according to feature of HC-SR 04)
         msg.min_range = self.__sonar.getMinRange()
         msg.max_range = self.__sonar.getMaxRange()
-        msg.range = self.__sonar.getRange()
+        msg.range = self.__sonar.getOutputValue()
         self.__sonar_publisher.publish(msg)
 
 
