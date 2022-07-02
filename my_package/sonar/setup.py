@@ -21,6 +21,10 @@ setup(
         "console_scripts": [
             "sonar = sonar.SonarNode:main",
             "sonar1 = sonar.sonar1:main",
+            "sonar2 = sonar.sonar2:main",
+            "sonar3 = sonar.sonar3:main",
+            "sonar4 = sonar.sonar4:main",
+            "sonar5 = sonar.sonar5:main",
         ]
     },
 )
