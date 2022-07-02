@@ -37,7 +37,7 @@ namespace FLD
         std::list<Term> getListOfTerm();
         std::list<std::string> getListNameOfTerm();
         std::map<std::string, float> getFuzzificatedSet();
-        std::pair<std::string, float> getMaxFuzzificatedSet(float input_value);
+        std::map<std::string, float> directlyCalculateFuzzificatedSet(float input_value);
     };
 }
 #endif

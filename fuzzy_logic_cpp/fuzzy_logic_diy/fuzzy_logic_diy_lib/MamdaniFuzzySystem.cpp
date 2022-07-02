@@ -250,26 +250,81 @@ void MamdaniFuzzySystem::defuzzify(int number_of_step)
         float result = 0.0;
         for (float index = min_value; index <= max_value; index += step)
         {
-            std::pair<std::string, float> temp_max_fuzzificated_set = output_var.getMaxFuzzificatedSet(index);
+            std::map<std::string, float> temp_calculated_fuzzificated_map;
 
-            // std::cout << temp_max_fuzzificated_set.second << std::endl;
+            temp_calculated_fuzzificated_map = output_var.directlyCalculateFuzzificatedSet(index);
 
-            for (auto inference_set : this->list_of_inference_set)
+            std::map<std::string, std::pair<float, float>> temp_saturate_map;
+
+            for (auto map : temp_calculated_fuzzificated_map)
             {
-
-                float saturate_value = inference_set.getValueMf(temp_max_fuzzificated_set.first);
-                // std::cout << saturate_value << std::endl;
-                if (temp_max_fuzzificated_set.second > saturate_value)
+                std::string name = map.first;
+                float value = map.second;
+                float range = 0.0;
+                for (auto inference_set : this->list_of_inference_set)
                 {
-                    temp_max_fuzzificated_set.second = saturate_value;
+                    if (output_var.getName() == inference_set.getOutputVarName())
+                    {
+                        range = inference_set.getValueMf(name);
+                        temp_saturate_map.insert({name, {map.second, range}});
+                        break;
+                    }
                 }
             }
 
-            // std::cout << temp_max_fuzzificated_set.first << " " << temp_max_fuzzificated_set.second
-            //           << std::endl;
+            // for (auto map : temp_saturate_map)
+            // {
+            //     std::cout << index << " " << map.second.first << " " << map.second.second << std::endl;
+            // }
+            // std::cout << std::endl;
 
-            numerator += index * temp_max_fuzzificated_set.second;
-            denominator += temp_max_fuzzificated_set.second;
+            int size_of_array = temp_saturate_map.size();
+            float *saturate_value_array = new float[size_of_array];
+
+            int i = 0;
+            for (auto map : temp_saturate_map)
+            {
+                saturate_value_array[i] = map.second.first;
+                i++;
+            }
+
+            std::sort(saturate_value_array, saturate_value_array + size_of_array);
+
+            // for (int i = 0; i < size_of_array; i++)
+            // {
+            //     std::cout << saturate_value_array[i] << std::endl;
+            // }
+            // std::cout << std::endl;
+
+            float current_value = 0.0;
+            float max = 0.0;
+            for (int i = size_of_array - 1; i >= 0; i--)
+            {
+                for (auto map : temp_saturate_map)
+                {
+                    if ((saturate_value_array[i] == map.second.first))
+                    {
+                        if (map.second.first >= map.second.second)
+                        {
+                            current_value = map.second.second;
+                        }
+                        else if (map.second.first < map.second.second)
+                        {
+                            current_value = map.second.first;
+                        }
+
+                        if (current_value > max)
+                        {
+                            max = current_value;
+                        }
+                    }
+                }
+            }
+
+            // std::cout << index << " " << max << std::endl;
+
+            numerator += index * max;
+            denominator += max;
         }
 
         if (denominator == 0.0)
@@ -281,12 +336,12 @@ void MamdaniFuzzySystem::defuzzify(int number_of_step)
             result = numerator / denominator;
         }
 
-        std::cout << result << std::endl;
+        // std::cout << result << std::endl;
         this->map_of_result.insert({output_var.getName(), result});
     }
 }
 
-float MamdaniFuzzySystem::calculate(int number_of_step)
+void MamdaniFuzzySystem::calculate(int number_of_step)
 {
     checkAllInputValues();
 
@@ -306,4 +361,9 @@ std::list<FuzzyVariable> MamdaniFuzzySystem::getInputVariables()
 std::list<FuzzyVariable> MamdaniFuzzySystem::getOutputVariables()
 {
     return this->output_variables;
+}
+
+std::map<std::string, float> MamdaniFuzzySystem::getResultMap()
+{
+    return this->map_of_result;
 }

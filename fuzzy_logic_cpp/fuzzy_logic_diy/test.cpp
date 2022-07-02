@@ -127,10 +127,11 @@ int main()
 
     // std::cout << std::endl;
 
-    int init_list[] = {1, 2, 3, -10, 5, 6, 4, 3, 2, -99};
+    // int init_list[] = {1, 2, 3, -10, 5, 6, 4, 3, 2, -99};
 
-    int min_val = min_in_list(init_list);
+    // int min_val = min_in_list(init_list);
 
-    std::cout << min_val << std::endl;
-    return 0;
+    // std::cout << min_val << std::endl;
+
+        return 0;
 }

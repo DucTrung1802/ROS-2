@@ -19,33 +19,30 @@ void FuzzyVariable::addTerm(Term new_term)
 
 void FuzzyVariable::calculateFuzzificatedSet()
 {
-    auto term = list_of_term.begin();
-    // std::cout << this->list_of_term.begin() << std::endl;
-    for (int i = 0; i < number_of_term; i++)
-    {
-        this->fuzzificated_set.insert(std::pair<std::string, float>(term->getName(), term->compute(this->input_value)));
-        std::advance(term, 1);
-    }
-}
-
-std::pair<std::string, float> FuzzyVariable::getMaxFuzzificatedSet(float input_value)
-{
-    std::pair<std::string, float> temp_max_fuzzificated_set;
-    temp_max_fuzzificated_set.first = this->list_of_term.front().getName();
-    temp_max_fuzzificated_set.second = this->list_of_term.front().compute(input_value);
     for (auto term : this->list_of_term)
     {
-        // std::cout << "hello" << std::endl;
-        float value = term.compute(input_value);
-
-        if (value > temp_max_fuzzificated_set.second)
-        {
-            temp_max_fuzzificated_set.first = term.getName();
-            temp_max_fuzzificated_set.second = value;
-        }
+        this->fuzzificated_set.insert({term.getName(), term.compute(this->input_value)});
     }
-    // std::cout << temp_max_fuzzificated_set.second << std::endl;
-    return temp_max_fuzzificated_set;
+    // this->printFuzzificatedSet();
+}
+
+std::map<std::string, float> FuzzyVariable::directlyCalculateFuzzificatedSet(float input_value)
+{
+    std::map<std::string, float> temp_fuzzificated_set;
+    for (auto &term : this->list_of_term)
+    {
+        temp_fuzzificated_set.insert({term.getName(), term.compute(input_value)});
+    }
+
+    // std::cout << "Variable: " << this->name << std::endl;
+    // for (auto output : temp_fuzzificated_set)
+    // {
+    //     std::cout << "key: " << output.first << ", "
+    //               << "value: " << output.second << std::endl;
+    // }
+    // std::cout << std::endl;
+
+    return temp_fuzzificated_set;
 }
 
 void FuzzyVariable::printFuzzificatedSet()
