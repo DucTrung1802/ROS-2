@@ -111,8 +111,8 @@ def loop():
     sonar = Sonar(
         trigger_pin=TRIGGER_PIN,
         echo_pin=ECHO_PIN,
-        min_range=0.04,
-        max_range=1.5,
+        min_range=0.02,
+        max_range=1.05,
         field_of_view=0.244,
     )
     sonar_node = SonarNode(node_name=NODE_NAME, sonar_instance=sonar)
