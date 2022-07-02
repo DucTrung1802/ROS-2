@@ -32,6 +32,7 @@ class Sonar(object):
             self.__range = 0.0
             self.__radiation_type = 0
             self.__sonar = sensor.Measurement
+            self.__output_value = 0.0
 
             # set GPIO direction (IN / OUT)
             GPIO.setup(self.__trigger_pin, GPIO.OUT)
@@ -81,8 +82,16 @@ class Sonar(object):
             return index
 
     def measureRange(self):
-        range = self.__sonar.basic_distance(self.__trigger_pin, self.__echo_pin) / 100.0 # m
+        range = (
+            self.__sonar.basic_distance(self.__trigger_pin, self.__echo_pin) / 100.0
+        )  # m
         self.__range = self.__saturate(range, self.__min_range, self.__max_range)
+
+    def setOutputValue(self, output_value):
+        self.__output_value = output_value
+
+    def getOutputValue(self):
+        return self.__output_value
 
     def getMinRange(self):
         return self.__min_range

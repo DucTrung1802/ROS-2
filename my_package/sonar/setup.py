@@ -17,5 +17,10 @@ setup(
     description="TODO: Package description",
     license="TODO: License declaration",
     tests_require=["pytest"],
-    entry_points={"console_scripts": ["sonar = sonar.SonarNode:main"]},
+    entry_points={
+        "console_scripts": [
+            "sonar = sonar.SonarNode:main",
+            "sonar1 = sonar.sonar1:main",
+        ]
+    },
 )
