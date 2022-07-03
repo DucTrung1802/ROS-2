@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -flto -shared  -o fuzzy_logic.cpython-38-x86_64-linux-gnu.so CMakeFiles/fuzzy_logic.dir/fuzzy_logic_test.cpp.o 
