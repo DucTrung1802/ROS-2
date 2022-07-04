@@ -1,4 +1,5 @@
 # Libraries
+from distutils.log import error
 import rclpy
 from rclpy.node import Node
 import time
@@ -68,14 +69,19 @@ def task_1(sonar):
     print("Start thread 1")
     if not isinstance(sonar, Sonar):
         raise Exception("Task 1: parameter sonar is not an instance of Sonar!")
+    error_number = 0
 
     while True:
+        time.sleep(0.01)
 
         if flag_1:
             break
 
-        sonar.measureRange()
-        print("Task 1 is running...")
+        try:
+            sonar.measureRange()
+            print("Task 1 is running...")
+        except:
+            print("Sonar 1 occured error " + str(error_number) + " times")
 
 
 def task_2(sonar):
@@ -83,14 +89,19 @@ def task_2(sonar):
     print("Start thread 2")
     if not isinstance(sonar, Sonar):
         raise Exception("Task 2: parameter sonar is not an instance of Sonar!")
+    error_number = 0
 
     while True:
+        time.sleep(0.01)
 
         if flag_2:
             break
 
-        sonar.measureRange()
-        print("Task 2 is running...")
+        try:
+            sonar.measureRange()
+            print("Task 2 is running...")
+        except:
+            print("Sonar 2 occured error " + str(error_number) + " times")
 
 
 def task_3(sonar):
@@ -98,14 +109,20 @@ def task_3(sonar):
     print("Start thread 3")
     if not isinstance(sonar, Sonar):
         raise Exception("Task 3: parameter sonar is not an instance of Sonar!")
+    error_number = 0
 
     while True:
+        time.sleep(0.01)
 
         if flag_3:
             break
 
-        sonar.measureRange()
-        print("Task 3 is running...")
+        try:
+            sonar.measureRange()
+            print("Task 3 is running...")
+        except:
+            error_number += 1
+            print("Sonar 3 occured error " + str(error_number) + " times")
 
 
 def task_4(sonar):
@@ -113,14 +130,19 @@ def task_4(sonar):
     print("Start thread 4")
     if not isinstance(sonar, Sonar):
         raise Exception("Task 4: parameter sonar is not an instance of Sonar!")
+    error_number = 0
 
     while True:
+        time.sleep(0.01)
 
         if flag_4:
             break
 
-        sonar.measureRange()
-        print("Task 4 is running...")
+        try:
+            sonar.measureRange()
+            print("Task 4 is running...")
+        except:
+            print("Sonar 4 occured error " + str(error_number) + " times")
 
 
 def task_5(sonar):
@@ -128,20 +150,26 @@ def task_5(sonar):
     print("Start thread 5")
     if not isinstance(sonar, Sonar):
         raise Exception("Task 5: parameter sonar is not an instance of Sonar!")
+    error_number = 0
 
     while True:
+        time.sleep(0.01)
 
         if flag_5:
             break
 
-        sonar.measureRange()
-        print("Task 5 is running...")
+        try:
+            sonar.measureRange()
+            print("Task 5 is running...")
+        except:
+            print("Sonar 5 occured error " + str(error_number) + " times")
 
 
 def task_6(sonar_node):
     global flag_6
     print("Start thread 6")
     while True:
+        time.sleep(0.01)
 
         if flag_6:
             break
@@ -200,19 +228,19 @@ def loop():
 
     # Configure this when add more sonar sensors
     sonar_1 = Sonar(
-        trigger_pin=27, echo_pin=17, min_range=0.04, max_range=1.5, field_of_view=0.244
+        trigger_pin=27, echo_pin=17, min_range=0.02, max_range=1.05, field_of_view=0.558
     )
     sonar_2 = Sonar(
-        trigger_pin=9, echo_pin=10, min_range=0.04, max_range=1.5, field_of_view=0.244
+        trigger_pin=9, echo_pin=10, min_range=0.02, max_range=1.05, field_of_view=0.558
     )
     sonar_3 = Sonar(
-        trigger_pin=6, echo_pin=5, min_range=0.04, max_range=1.5, field_of_view=0.244
+        trigger_pin=6, echo_pin=5, min_range=0.02, max_range=1.05, field_of_view=0.558
     )
     sonar_4 = Sonar(
-        trigger_pin=19, echo_pin=13, min_range=0.04, max_range=1.5, field_of_view=0.244
+        trigger_pin=19, echo_pin=13, min_range=0.02, max_range=1.05, field_of_view=0.558
     )
     sonar_5 = Sonar(
-        trigger_pin=24, echo_pin=23, min_range=0.04, max_range=1.5, field_of_view=0.244
+        trigger_pin=24, echo_pin=23, min_range=0.02, max_range=1.05, field_of_view=0.558
     )
 
     sonar_array.append(sonar_1)

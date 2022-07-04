@@ -4,6 +4,7 @@
 #include <map>
 #include <cstring>
 #include <algorithm>
+#include <math.h>
 
 using namespace std;
 
@@ -54,14 +55,83 @@ std::string removeSpaces(std::string str)
     return str;
 }
 
+void add(std::list<int> &a)
+{
+    for (auto &index : a)
+    {
+        index += 1;
+    }
+}
+
+void display(std::list<int> a)
+{
+    for (auto i : a)
+    {
+        std::cout << i << std::endl;
+    }
+}
+
+bool comp(int a, int b)
+{
+    return (a < b);
+}
+
+int min_in_list(std::list<int> the_list)
+{
+    int *min_value = std::min_element(the_list, the_list + sizeof(the_list) / sizeof(the_list[0]), comp);
+    return *min_value;
+}
+
 int main()
 {
-    std::list<int> test_list = {1, 2, 3, 4, 5, 6, 7};
+    // std::list<int> test_list = {1, 2, 3, 4, 5, 6, 7};
 
-    for (auto i : test_list)
-    {
-        std::cout << typeid(i).name() << std::endl;
-    }
+    // for (auto &i : test_list)
+    // {
+    //     i += 1;
+    // }
 
-    return 0;
+    // for (auto index : test_list)
+    // {
+    //     std::cout << index << std::endl;
+    // }
+
+    // std::map<std::string, float> gquiz1;
+
+    // gquiz1.insert({"mf1", 40});
+    // gquiz1.insert({"mf2", 30});
+    // gquiz1.insert({"mf3", 60});
+    // gquiz1.insert({"mf4", 20});
+    // gquiz1.insert({"mf5", 50});
+
+    // // for (auto _pair : gquiz1)
+    // // {
+    // //     std::cout << _pair.first << " " << _pair.second << std::endl;
+    // // }
+
+    // std::map<std::string, float> gquiz2 = gquiz1;
+
+    // for (auto _pair : gquiz2)
+    // {
+    //     std::cout << _pair.first << " " << _pair.second << std::endl;
+    // }
+    // C++ program to demonstrate the use of std::min
+
+    // int a = 5;
+    // int b = 7;
+    // std::cout << std::min(a, b) << "\n";
+
+    // // Returns the first one if both the numbers
+    // // are same
+    // std::cout << std::min(5, 6);
+
+    // std::cout << std::endl;
+
+    // int init_list[] = {1, 2, 3, -10, 5, 6, 4, 3, 2, -99};
+
+    // int min_val = min_in_list(init_list);
+
+    // std::cout << min_val << std::endl;
+
+        return 0;
 }

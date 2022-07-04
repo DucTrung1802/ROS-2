@@ -51,27 +51,47 @@ int main()
 
     MamdaniFuzzySystem mamdani_fuzzy_system = MamdaniFuzzySystem({input_1, input_2}, {output_1});
 
-    auto t1 = high_resolution_clock::now();
+    mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf1 then output1 is mf1");
 
-    mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf2 then output1 is mf3");
+    mamdani_fuzzy_system.addRule("if input1 is mf2 and input2 is mf2 then output1 is mf2");
 
-    mamdani_fuzzy_system.addRule("if input1 is mf2 and input2 is mf2 then output1 is mf3"); // output2 does not exist in system, write antecedentCheck() and consequentCheck()
+    // mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf1 then output1 is mf3");
 
     // mamdani_fuzzy_system.printAllRules();
 
-    mamdani_fuzzy_system.addInputValue("input1", 0.5);
-    mamdani_fuzzy_system.addInputValue("input2", 0.75);
+    auto t1 = high_resolution_clock::now();
 
-    mamdani_fuzzy_system.calculate();
+    mamdani_fuzzy_system.addInputValue("input1", 0.36);
+    mamdani_fuzzy_system.addInputValue("input2", 0.69);
+
+    mamdani_fuzzy_system.calculate(100);
 
     auto t2 = high_resolution_clock::now();
+
+    std::map<std::string, float> map_of_result = mamdani_fuzzy_system.getResultMap();
+
+    std::cout << std::endl;
+
+    for (auto input : mamdani_fuzzy_system.getInputVariables())
+    {
+        std::cout << input.getName() << ": " << input.getInputValue() << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    for (auto pair : map_of_result)
+    {
+        std::cout << "Output \"" << pair.first << "\": " << pair.second << std::endl;
+    }
+
+    std::cout << std::endl;
 
     auto ms_int = duration_cast<milliseconds>(t2 - t1);
 
     /* Getting number of milliseconds as a double. */
     duration<double, std::milli> ms_double = t2 - t1;
 
-    // std::cout << ms_double.count() << "ms\n";
+    std::cout << "Runtime: " << ms_double.count() << "ms\n";
 
     return 0;
 }
