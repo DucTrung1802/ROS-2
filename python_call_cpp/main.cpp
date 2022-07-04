@@ -1,12 +1,12 @@
 #include "lib.h"
 
-using namespace hello;
+// using namespace hello;
 
-extern "C"
-{
-    void My_Function(float a)
-    {
-        Test test = Test();
-        test.print(a);
-    }
-}
+// extern "C"
+// {
+//     void My_Function(float a)
+//     {
+//         Test test = Test();
+//         test.print(a);
+//     }
+// }

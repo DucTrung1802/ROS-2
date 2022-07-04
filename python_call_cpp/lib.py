@@ -7,8 +7,11 @@ name_of_cpp_shared_library = "/lib_cpp.so"
 dir_path = os.path.dirname(os.path.realpath(__file__))
 handle = ctypes.CDLL(dir_path + name_of_cpp_shared_library)
 
-handle.My_Function.argtypes = [ctypes.c_float]
+# For input
+handle.calculateFuzzy.argtypes = [ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
+# For output
+handle.calculateFuzzy.restype = ctypes.c_float
 
 
-def My_Function(num):
-    return handle.My_Function(num)
+def calculateFuzzy(argu_1, argu_2, output_name):
+    return handle.calculateFuzzy(argu_1, argu_2, output_name)
