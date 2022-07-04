@@ -34,7 +34,7 @@ using std::chrono::milliseconds;
 
 extern "C"
 {
-    float *calculateFuzzy(float argu_1, float argu_2, char *output_name)
+    float *calculateFuzzy(float error_left_motor, float derivative_left_motor, float error_right_motor, float derivative_right_motor, char *output_name)
     {
 
         auto t1 = high_resolution_clock::now();
@@ -140,16 +140,22 @@ extern "C"
         mamdani_fuzzy_system.addRule("if input1 is PB and input2 is InF then output is B");
         // mamdani_fuzzy_system.printAllRules();
 
-        // 6. Input values for input variables
-        mamdani_fuzzy_system.addInputValue("input1", argu_1);
-        mamdani_fuzzy_system.addInputValue("input2", argu_2);
+        // 6. Left motor
+        mamdani_fuzzy_system.addInputValue("input1", error_left_motor);
+        mamdani_fuzzy_system.addInputValue("input2", derivative_left_motor);
 
-        // 7. Calculate
         mamdani_fuzzy_system.calculate(33);
 
-        auto t2 = high_resolution_clock::now();
+        std::map<std::string, float> result_left_motor = mamdani_fuzzy_system.getResultMap();
 
-        std::map<std::string, float> map_of_result = mamdani_fuzzy_system.getResultMap();
+        mamdani_fuzzy_system.addInputValue("input1", error_right_motor);
+        mamdani_fuzzy_system.addInputValue("input2", derivative_right_motor);
+
+        mamdani_fuzzy_system.calculate(33);
+
+        std::map<std::string, float> result_right_motor = mamdani_fuzzy_system.getResultMap();
+
+        // 7. Right motor
 
         // // 8. Print all results
 
@@ -171,6 +177,7 @@ extern "C"
 
         // auto ms_int = duration_cast<milliseconds>(t2 - t1);
 
+        auto t2 = high_resolution_clock::now();
         // /* Getting number of milliseconds as a double. */
         duration<double, std::milli> ms_double = t2 - t1;
 
@@ -179,9 +186,9 @@ extern "C"
 
         // std::cout << output_name << std::endl;
 
-        float *list2 = (float *)malloc(sizeof(float) * 10);
-        for (unsigned int i = 0; i < 10; i++)
-            list2[i] = i;
-        return list2;
+        float *list_of_result = (float *)malloc(sizeof(float) * 2);
+        list_of_result[0] = result_left_motor.find(output_name)->second;
+        list_of_result[1] = result_right_motor.find(output_name)->second;
+        return list_of_result;
     }
 }
