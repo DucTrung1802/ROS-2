@@ -1,6 +1,6 @@
 #include <iostream>
 #include <chrono>
-#include "lib.h"
+#include <python2.7/Python.h>
 #include "fuzzy_logic/Term.h"
 #include "fuzzy_logic/FuzzyVariable.h"
 #include "fuzzy_logic/RuleHandler.h"
@@ -34,7 +34,7 @@ using std::chrono::milliseconds;
 
 extern "C"
 {
-    float calculateFuzzy(float argu_1, float argu_2, char *output_name)
+    float *calculateFuzzy(float argu_1, float argu_2, char *output_name)
     {
 
         auto t1 = high_resolution_clock::now();
@@ -179,6 +179,9 @@ extern "C"
 
         // std::cout << output_name << std::endl;
 
-        return map_of_result.find("output")->second;
+        float *list2 = (float *)malloc(sizeof(float) * 10);
+        for (unsigned int i = 0; i < 10; i++)
+            list2[i] = i;
+        return list2;
     }
 }

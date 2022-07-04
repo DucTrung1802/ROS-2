@@ -10,7 +10,7 @@ handle = ctypes.CDLL(dir_path + name_of_cpp_shared_library)
 # For input
 handle.calculateFuzzy.argtypes = [ctypes.c_float, ctypes.c_float, ctypes.c_char_p]
 # For output
-handle.calculateFuzzy.restype = ctypes.c_float
+handle.calculateFuzzy.restype = ctypes.POINTER(ctypes.c_float)
 
 
 def calculateFuzzy(argu_1, argu_2, output_name):
