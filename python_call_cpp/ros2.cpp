@@ -1,6 +1,5 @@
 #include <iostream>
 #include <chrono>
-#include <python2.7/Python.h>
 #include "fuzzy_logic/Term.h"
 #include "fuzzy_logic/FuzzyVariable.h"
 #include "fuzzy_logic/RuleHandler.h"

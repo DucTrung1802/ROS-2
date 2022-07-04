@@ -15,4 +15,5 @@ for i in range(100):
     sum += end - start
 
 sum /= 100
+
 print(sum)
