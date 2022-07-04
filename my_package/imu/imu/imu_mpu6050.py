@@ -19,7 +19,7 @@ YAW = 0.0
 
 # Node parameters
 NODE_NAME = "imu_mpu6050"
-PUBLISH_FREQUENCY = 100
+PUBLISH_FREQUENCY = 50
 
 # Node parameters
 PUBLISH_PERIOD = 0
@@ -75,29 +75,35 @@ def getIMUData(mpu):
     try:
         accel_data = mpu.acceleration
         gyro_data = mpu.gyro
+        print("IMU is normally running...")
+
     except:
         print("An error has occurred while getting data from IMU MPU 6050!")
+
+    # finally:
+    #     print("accel data: " + str(accel_data))
+    #     print("gyro data: " + str(gyro_data))
+    #     print()
 
 
 def task_1():
     global flag_1
     i2c = board.I2C()  # uses board.SCL and board.SDA
     mpu = adafruit_mpu6050.MPU6050(i2c)
-    time.sleep(0.01)
     while True:
 
         if flag_1:
             break
 
         getIMUData(mpu)
-        time.sleep(0.005)
+        time.sleep(0.01)
 
 
 def task_2():
     global flag_2
     rclpy.init()
     imu_publisher = IMUPublisher()
-    time.sleep(0.01)
+    time.sleep(0.1)
     while True:
 
         if flag_2:
