@@ -1,6 +1,5 @@
 #include <iostream>
 #include <chrono>
-#include <pybind11/pybind11.h>
 #include "fuzzy_logic/Term.h"
 #include "fuzzy_logic/FuzzyVariable.h"
 #include "fuzzy_logic/RuleHandler.h"
@@ -13,26 +12,15 @@ using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
-namespace py = pybind11;
-
-float some_fn(float arg1, float arg2)
-{
-    return arg1 + arg2;
-}
-
-PYBIND11_MODULE(fuzzy_logic, module_handle)
-{
-    module_handle.doc() = "I'm a docstring hehe";
-    module_handle.def("some_fn_python_name", &some_fn);
-}
-
 int main()
 {
 
+    // 1. List all terms
     Term term_1 = Term("mf1", new TriangularMF(0.0, 0.0, 0.5));
     Term term_2 = Term("mf2", new TriangularMF(0.0, 0.5, 1.0));
     Term term_3 = Term("mf3", new TriangularMF(0.5, 1.0, 1.0));
 
+    // 2. Inputs
     FuzzyVariable input_1 = FuzzyVariable("input1", 0.0, 1.0);
     input_1.addTerm(term_1);
     input_1.addTerm(term_2);
@@ -58,13 +46,16 @@ int main()
     // input_4.addTerm(term_2);
     // input_4.addTerm(term_3);
 
+    // 3. Outputs
     FuzzyVariable output_1 = FuzzyVariable("output1", 0.0, 1.0);
     output_1.addTerm(term_1);
     output_1.addTerm(term_2);
     output_1.addTerm(term_3);
 
+    // 4. Create system
     MamdaniFuzzySystem mamdani_fuzzy_system = MamdaniFuzzySystem({input_1, input_2}, {output_1});
 
+    // 5. Add rules
     mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf1 then output1 is mf1");
 
     mamdani_fuzzy_system.addRule("if input1 is mf2 and input2 is mf2 then output1 is mf2");
@@ -77,13 +68,16 @@ int main()
 
     auto t1 = high_resolution_clock::now();
 
+    // 6. Input values for input variables
     mamdani_fuzzy_system.addInputValue("input1", 0.142);
     mamdani_fuzzy_system.addInputValue("input2", 0.659);
 
+    // 7. Calculate
     mamdani_fuzzy_system.calculate(100);
 
     auto t2 = high_resolution_clock::now();
 
+    // 8. Print all results
     std::map<std::string, float> map_of_result = mamdani_fuzzy_system.getResultMap();
 
     std::cout << std::endl;
