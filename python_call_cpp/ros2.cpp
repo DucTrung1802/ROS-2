@@ -33,7 +33,7 @@ using std::chrono::milliseconds;
 
 extern "C"
 {
-    float *calculateFuzzy(float error_left_motor, float derivative_left_motor, float error_right_motor, float derivative_right_motor, char *output_name)
+    float calculateFuzzy(float error_motor, float derivative_motor, char *output_name)
     {
 
         auto t1 = high_resolution_clock::now();
@@ -140,19 +140,12 @@ extern "C"
         // mamdani_fuzzy_system.printAllRules();
 
         // 6. Left motor
-        mamdani_fuzzy_system.addInputValue("input1", error_left_motor);
-        mamdani_fuzzy_system.addInputValue("input2", derivative_left_motor);
+        mamdani_fuzzy_system.addInputValue("input1", error_motor);
+        mamdani_fuzzy_system.addInputValue("input2", derivative_motor);
 
-        mamdani_fuzzy_system.calculate(33);
+        mamdani_fuzzy_system.calculate(100);
 
-        std::map<std::string, float> result_left_motor = mamdani_fuzzy_system.getResultMap();
-
-        mamdani_fuzzy_system.addInputValue("input1", error_right_motor);
-        mamdani_fuzzy_system.addInputValue("input2", derivative_right_motor);
-
-        mamdani_fuzzy_system.calculate(33);
-
-        std::map<std::string, float> result_right_motor = mamdani_fuzzy_system.getResultMap();
+        std::map<std::string, float> result_motor = mamdani_fuzzy_system.getResultMap();
 
         // 7. Right motor
 
@@ -185,9 +178,6 @@ extern "C"
 
         // std::cout << output_name << std::endl;
 
-        float *list_of_result = (float *)malloc(sizeof(float) * 2);
-        list_of_result[0] = result_left_motor.find(output_name)->second;
-        list_of_result[1] = result_right_motor.find(output_name)->second;
-        return list_of_result;
+        return result_motor.find(output_name)->second;
     }
 }
