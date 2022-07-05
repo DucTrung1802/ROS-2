@@ -67,6 +67,24 @@ class IMUPublisher(Node):
         msg.angular_velocity.y = gyro_data[1]
         msg.angular_velocity.z = gyro_data[2]
 
+        for i in range(9):
+            if i == 0:
+                msg.orientation_covariance[i] = 1000000000000.0
+                msg.angular_velocity_covariance[i] = 1000000000000.0
+                msg.linear_acceleration_covariance[i] = 1.0e-5
+            elif i == 4:
+                msg.orientation_covariance[i] = 1000000000000.0
+                msg.angular_velocity_covariance[i] = 1000000000000.0
+                msg.linear_acceleration_covariance[i] = 1.0e-5
+            elif i == 8:
+                msg.orientation_covariance[i] = 0.001
+                msg.angular_velocity_covariance[i] = 0.001
+                msg.linear_acceleration_covariance[i] = 1000000000000.0
+            else:
+                msg.orientation_covariance[i] = 0.0
+                msg.angular_velocity_covariance[i] = 0.0
+                msg.linear_acceleration_covariance[i] = 0.0
+
         self.imu_pub.publish(msg)
 
 
@@ -75,7 +93,7 @@ def getIMUData(mpu):
     try:
         accel_data = mpu.acceleration
         gyro_data = mpu.gyro
-        print("IMU is normally running...")
+        # print(".")
 
     except:
         print("An error has occurred while getting data from IMU MPU 6050!")
