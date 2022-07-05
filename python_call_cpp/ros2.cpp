@@ -1,16 +1,27 @@
-// #include <chrono>
+#include <chrono>
+#include <thread>
 #include "fuzzy_logic/Term.h"
 #include "fuzzy_logic/FuzzyVariable.h"
 #include "fuzzy_logic/RuleHandler.h"
 #include "fuzzy_logic/MamdaniFuzzySystem.h"
 
 using namespace FLD;
-// using std::chrono::duration;
-// using std::chrono::high_resolution_clock;
+using std::chrono::duration;
+using std::chrono::high_resolution_clock;
+
+void evaluateValue(MamdaniFuzzySystem system, float error, float derivative, float &result, std::string output_name)
+{
+    system.addInputValue("input1", error);
+    system.addInputValue("input2", derivative);
+
+    system.calculate(25);
+
+    result = system.getResultMap().find(output_name)->second;
+}
 
 extern "C"
 {
-    float calculateFuzzy(float error_motor, float derivative_motor, char *output_name)
+    float *calculateFuzzy(float error_left_motor, float derivative_left_motor, float error_right_motor, float derivative_right_motor, char *output_name)
     {
 
         // auto t1 = high_resolution_clock::now();
@@ -120,15 +131,26 @@ extern "C"
 
         // auto t3 = high_resolution_clock::now();
 
-        // 6. Left motor
-        mamdani_fuzzy_system.addInputValue("input1", error_motor);
-        mamdani_fuzzy_system.addInputValue("input2", derivative_motor);
+        float left_motor_result = 0.0;
+        float right_motor_result = 0.0;
 
-        mamdani_fuzzy_system.calculate(40);
+        // auto t1 = high_resolution_clock::now();
+
+        std::thread th1(evaluateValue, mamdani_fuzzy_system, error_left_motor, derivative_left_motor, std::ref(left_motor_result), output_name);
+
+        std::thread th2(evaluateValue, mamdani_fuzzy_system, error_right_motor, derivative_right_motor, std::ref(right_motor_result), output_name);
+
+        th1.join();
+        th2.join();
+
+        // auto t2 = high_resolution_clock::now();
+
+        // mamdani_fuzzy_system.addInputValue("input1", error_motor);
+        // mamdani_fuzzy_system.addInputValue("input2", derivative_motor);
+
+        // mamdani_fuzzy_system.calculate(40);
 
         // auto t4 = high_resolution_clock::now();
-
-        std::map<std::string, float> result_motor = mamdani_fuzzy_system.getResultMap();
 
         // 7. Right motor
 
@@ -159,7 +181,7 @@ extern "C"
         // duration<double, std::milli> calculate = t4 - t3;
         // duration<double, std::milli> total = t4 - t1;
 
-        // std::cout << "Term: " << term.count() << "ms\n";
+        // std::cout << "Runtime: " << term.count() << "ms\n";
         // std::cout << "Rule: " << rule.count() << "ms\n";
         // std::cout << "Calculate: " << calculate.count() << "ms\n";
         // std::cout << "Total: " << total.count() << "ms\n";
@@ -167,6 +189,10 @@ extern "C"
 
         // std::cout << output_name << std::endl;
 
-        return result_motor.find(output_name)->second;
+        float *list_of_result = (float *)malloc(sizeof(float) * 2);
+        list_of_result[0] = left_motor_result;
+        list_of_result[1] = right_motor_result;
+
+        return list_of_result;
     }
 }
