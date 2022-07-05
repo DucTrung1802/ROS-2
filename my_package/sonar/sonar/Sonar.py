@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 import time
 
 from hcsr04sensor import sensor
+from sonar.MedianFilter import MedianFilter
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -20,9 +21,22 @@ class Sonar(object):
     field_of_view (float): unit: radian
     """
 
-    def __init__(self, trigger_pin, echo_pin, min_range, max_range, field_of_view):
+    def __init__(
+        self,
+        trigger_pin,
+        echo_pin,
+        min_range,
+        max_range,
+        field_of_view,
+        number_of_value_median_filter,
+    ):
         if self.__checkCondition(
-            trigger_pin, echo_pin, min_range, max_range, field_of_view
+            trigger_pin,
+            echo_pin,
+            min_range,
+            max_range,
+            field_of_view,
+            number_of_value_median_filter,
         ):
             self.__trigger_pin = trigger_pin
             self.__echo_pin = echo_pin
@@ -33,6 +47,10 @@ class Sonar(object):
             self.__radiation_type = 0
             self.__sonar = sensor.Measurement
             self.__output_value = 0.0
+            self.__number_of_value = number_of_value_median_filter
+            self.__median_filter = MedianFilter(self.__number_of_value)
+            self.__number_of_run = 0.0
+            self.__number_of_error = 0.0
 
             # set GPIO direction (IN / OUT)
             GPIO.setup(self.__trigger_pin, GPIO.OUT)
@@ -52,7 +70,13 @@ class Sonar(object):
         )
 
     def __checkCondition(
-        self, trigger_pin, echo_pin, min_range, max_range, field_of_view
+        self,
+        trigger_pin,
+        echo_pin,
+        min_range,
+        max_range,
+        field_of_view,
+        number_of_value_median_filter,
     ):
         trigger_pin_condition = isinstance(trigger_pin, int) and 2 <= trigger_pin <= 27
         echo_pin_condition = (
@@ -62,12 +86,16 @@ class Sonar(object):
         )
         range_condition = 0 < min_range <= max_range
         field_of_view_condition = field_of_view > 0
+        number_of_value_median_filter_condition = (
+            int(number_of_value_median_filter) and number_of_value_median_filter >= 1
+        )
 
         if (
             trigger_pin_condition
             and echo_pin_condition
             and range_condition
             and field_of_view_condition
+            and number_of_value_median_filter_condition
         ):
             return True
         else:
@@ -82,16 +110,28 @@ class Sonar(object):
             return index
 
     def measureRange(self):
-        range = (
-            self.__sonar.basic_distance(self.__trigger_pin, self.__echo_pin) / 100.0
-        )  # m
-        self.__range = self.__saturate(range, self.__min_range, self.__max_range)
+        try:
+            self.__number_of_run += 1
+            range = (
+                self.__sonar.basic_distance(self.__trigger_pin, self.__echo_pin) / 100.0
+            )  # m
+        except:
+            self.__number_of_run += 1
+            self.__number_of_error += 1
+            print(
+                "Rate of error of Sonar with TRIGGER PIN "
+                + str(self.__trigger_pin)
+                + ": "
+                + str((self.__number_of_error * 100) / self.__number_of_run)
+                + " %"
+            )
+            return
 
-    def setOutputValue(self, output_value):
-        self.__output_value = output_value
+        self.__median_filter.addValue(range)
 
-    def getOutputValue(self):
-        return self.__output_value
+        self.__range = self.__saturate(
+            self.__median_filter.getResult(), self.__min_range, self.__max_range
+        )
 
     def getMinRange(self):
         return self.__min_range
