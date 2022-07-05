@@ -1,6 +1,5 @@
 from time import time
 
-from pkg_resources import resource_listdir
 from lib import *
 import timeit
 

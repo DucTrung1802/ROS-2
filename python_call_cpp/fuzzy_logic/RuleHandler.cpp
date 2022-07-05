@@ -306,7 +306,7 @@ size_t RuleHandler::getNumberOfFuzzyRule()
 
 void RuleHandler::addRule(FuzzyRule rule)
 {
-    FuzzyRuleCheck(rule);
+    // FuzzyRuleCheck(rule);
     this->list_of_fuzzy_rules.push_back(rule);
 }
 

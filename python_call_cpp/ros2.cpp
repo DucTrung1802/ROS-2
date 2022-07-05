@@ -1,42 +1,19 @@
-#include <iostream>
-#include <chrono>
+// #include <chrono>
 #include "fuzzy_logic/Term.h"
 #include "fuzzy_logic/FuzzyVariable.h"
 #include "fuzzy_logic/RuleHandler.h"
 #include "fuzzy_logic/MamdaniFuzzySystem.h"
 
 using namespace FLD;
-using namespace std;
-using std::chrono::duration;
-using std::chrono::duration_cast;
-using std::chrono::high_resolution_clock;
-using std::chrono::milliseconds;
-
-// using namespace hello;
-
-// MamdaniFuzzySystem mamdani_fuzzy_system = ;
-
-// Test test = Test();
-
-// extern "C"
-// {
-//     void My_Function(float a)
-//     {
-//         a += 200;
-//         test.print(a);
-//     }
-// }
-
-// int main()
-// {
-// }
+// using std::chrono::duration;
+// using std::chrono::high_resolution_clock;
 
 extern "C"
 {
     float calculateFuzzy(float error_motor, float derivative_motor, char *output_name)
     {
 
-        auto t1 = high_resolution_clock::now();
+        // auto t1 = high_resolution_clock::now();
 
         // 1. List all terms
 
@@ -83,6 +60,8 @@ extern "C"
         output.addTerm(Med);
         output.addTerm(MedBig);
         output.addTerm(Big);
+
+        // auto t2 = high_resolution_clock::now();
 
         // 4. Create system
         MamdaniFuzzySystem mamdani_fuzzy_system = MamdaniFuzzySystem({error, derivative_error}, {output});
@@ -139,11 +118,15 @@ extern "C"
         mamdani_fuzzy_system.addRule("if input1 is PB and input2 is InF then output is B");
         // mamdani_fuzzy_system.printAllRules();
 
+        // auto t3 = high_resolution_clock::now();
+
         // 6. Left motor
         mamdani_fuzzy_system.addInputValue("input1", error_motor);
         mamdani_fuzzy_system.addInputValue("input2", derivative_motor);
 
-        mamdani_fuzzy_system.calculate(100);
+        mamdani_fuzzy_system.calculate(40);
+
+        // auto t4 = high_resolution_clock::now();
 
         std::map<std::string, float> result_motor = mamdani_fuzzy_system.getResultMap();
 
@@ -169,11 +152,17 @@ extern "C"
 
         // auto ms_int = duration_cast<milliseconds>(t2 - t1);
 
-        auto t2 = high_resolution_clock::now();
+        // auto t2 = high_resolution_clock::now();
         // /* Getting number of milliseconds as a double. */
-        duration<double, std::milli> ms_double = t2 - t1;
+        // duration<double, std::milli> term = t2 - t1;
+        // duration<double, std::milli> rule = t3 - t2;
+        // duration<double, std::milli> calculate = t4 - t3;
+        // duration<double, std::milli> total = t4 - t1;
 
-        // std::cout << "Runtime: " << ms_double.count() << "ms\n";
+        // std::cout << "Term: " << term.count() << "ms\n";
+        // std::cout << "Rule: " << rule.count() << "ms\n";
+        // std::cout << "Calculate: " << calculate.count() << "ms\n";
+        // std::cout << "Total: " << total.count() << "ms\n";
         // std::cout << map_of_result.find("output")->second << std::endl;
 
         // std::cout << output_name << std::endl;

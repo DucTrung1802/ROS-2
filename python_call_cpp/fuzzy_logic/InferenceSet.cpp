@@ -38,6 +38,7 @@ float InferenceSet::getValueMf(std::string mf_name)
     }
 
     std::cout << "Output variable \"" << this->output_var_name << "\" does not have any term name \"" << mf_name << "\"!" << std::endl;
+    return 0.0;
 }
 
 void InferenceSet::printInferenceSet()
