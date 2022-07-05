@@ -28,7 +28,7 @@ from motor.DataRecoder import DataRecoder
 from motor.PIDController import PIDController
 from motor.ReadLine import ReadLine
 from motor.PoseCalculator import PoseCalculator
-from fuzzy_logic.lib import *
+from motor.lib import *
 
 
 # =========== Configurable parameters =============
@@ -71,15 +71,27 @@ RIGHT_MOTOR_Q = 0
 RIGHT_MOTOR_R = 273
 
 # PID Controller parameters
-LEFT_MOTOR_Kp = 0.65
-LEFT_MOTOR_Ki = 6.5
-LEFT_MOTOR_Kd = 0.0032
+# LEFT_MOTOR_Kp = 0.65
+# LEFT_MOTOR_Ki = 6.5
+# LEFT_MOTOR_Kd = 0.0032
+# LEFT_MOTOR_MIN = 0
+# LEFT_MOTOR_MAX = 12
+
+# RIGHT_MOTOR_Kp = 0.73
+# RIGHT_MOTOR_Ki = 7.1
+# RIGHT_MOTOR_Kd = 0.0036
+# RIGHT_MOTOR_MIN = 0
+# RIGHT_MOTOR_MAX = 12
+
+LEFT_MOTOR_Kp = 1
+LEFT_MOTOR_Ki = 10
+LEFT_MOTOR_Kd = 0.002
 LEFT_MOTOR_MIN = 0
 LEFT_MOTOR_MAX = 12
 
-RIGHT_MOTOR_Kp = 0.73
-RIGHT_MOTOR_Ki = 7.1
-RIGHT_MOTOR_Kd = 0.0036
+RIGHT_MOTOR_Kp = 1
+RIGHT_MOTOR_Ki = 10
+RIGHT_MOTOR_Kd = 0.002
 RIGHT_MOTOR_MIN = 0
 RIGHT_MOTOR_MAX = 12
 
@@ -87,14 +99,14 @@ RIGHT_MOTOR_MAX = 12
 # Test data
 TEST_ONLY_ON_LAPTOP = False
 MANUALLY_TUNE_PID = False
-DATA_RECORDING = False
+DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 0
 
 # DataRecorder parameters
-DATA_AMOUNT = 750
+DATA_AMOUNT = 2000
 
 if not (float(WHEEL_BASE) and WHEEL_BASE > 0):
     raise Exception("Invalid value of wheel base length!")
@@ -423,7 +435,7 @@ def driveMotors():
     # linear_RPM_left = 42.4
     # linear_RPM_right = -42.4
 
-    start = time.time()
+    start = timeit.default_timer()
 
     direction_1 = getDirection(linear_RPM_left)
     direction_2 = getDirection(linear_RPM_right)
@@ -434,6 +446,7 @@ def driveMotors():
     pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
     pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
+    # start = timeit.default_timer()
     # Add fuzzy logic here
     fuzzy_logic_factor = calculateFuzzy(
         LEFT_MOTOR_PID_CONTROLLER.getError(),
@@ -442,6 +455,34 @@ def driveMotors():
         RIGHT_MOTOR_PID_CONTROLLER.getDerivative(),
         b"output",
     )
+    # end = timeit.default_timer()
+
+    # print()
+    # print("=====================")
+    # print(
+    #     str(LEFT_MOTOR_PID_CONTROLLER.getError())
+    #     + "\t"
+    #     + str(LEFT_MOTOR_PID_CONTROLLER.getDerivative())
+    #     + "\t"
+    #     + str(fuzzy_logic_factor[0])
+    # )
+
+    # print()
+
+    # print(
+    #     str(RIGHT_MOTOR_PID_CONTROLLER.getError())
+    #     + "\t"
+    #     + str(RIGHT_MOTOR_PID_CONTROLLER.getDerivative())
+    #     + "\t"
+    #     + str(fuzzy_logic_factor[1])
+    # )
+    # print("=====================")
+    # print()
+
+    # print(fuzzy_logic_factor[0])
+    # print(fuzzy_logic_factor[1])
+    # print(end - start)
+    # print()
 
     LEFT_MOTOR_PID_CONTROLLER.updateFuzzyFactor(fuzzy_logic_factor[0])
     RIGHT_MOTOR_PID_CONTROLLER.updateFuzzyFactor(fuzzy_logic_factor[1])
@@ -479,16 +520,16 @@ def driveMotors():
     # print(data)
     MCUSerialObject.write(formSerialData(data))
 
-    end = time.time()
+    end = timeit.default_timer()
 
     # print(end - start)
 
-    start = time.time()
+    # start = time.time()
 
     if LEFT_MOTOR.getSampleTime() - (end - start) >= 0:
         time.sleep((LEFT_MOTOR.getSampleTime() - (end - start)) * 5 / 5.11)
 
-    end = time.time()
+    # end = time.time()
 
     # print(end - start)
 
@@ -715,8 +756,8 @@ def task_2():
 
         comp_start = time.time()
 
-        if not DATA_RECORDING:
-            driveMotors()
+        # if not DATA_RECORDING:
+        driveMotors()
 
         comp_end = time.time()
 
@@ -736,6 +777,7 @@ def task_3():
 
 def task_4():
     global flag_4
+    global linear_RPM_left, linear_RPM_right
 
     index = 1
     delta_time = 0
@@ -746,7 +788,7 @@ def task_4():
     # All testing must be after the "Ready" line!
     # ============ TESTING ============
 
-    varyPWM(TEST_PWM)
+    # varyPWM(TEST_PWM)
 
     # =================================
 
@@ -762,17 +804,15 @@ def task_4():
 
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
-        WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
-        WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
-        WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
-        WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
-        WORKBOOK.writeData(index + 1, 9, total_receive)
-        WORKBOOK.writeData(index + 1, 10, error_receive)
-        WORKBOOK.writeData(
-            index + 1,
-            11,
-            round((total_receive - error_receive) / total_receive * 100, 2),
-        )
+        WORKBOOK.writeData(index + 1, 4, LEFT_MOTOR_PID_CONTROLLER.getKp())
+        WORKBOOK.writeData(index + 1, 5, LEFT_MOTOR_PID_CONTROLLER.getKi())
+        WORKBOOK.writeData(index + 1, 6, LEFT_MOTOR_PID_CONTROLLER.getKd())
+
+        WORKBOOK.writeData(index + 1, 8, linear_RPM_right)
+        WORKBOOK.writeData(index + 1, 9, RIGHT_RPM)
+        WORKBOOK.writeData(index + 1, 10, RIGHT_MOTOR_PID_CONTROLLER.getKp())
+        WORKBOOK.writeData(index + 1, 11, RIGHT_MOTOR_PID_CONTROLLER.getKi())
+        WORKBOOK.writeData(index + 1, 12, RIGHT_MOTOR_PID_CONTROLLER.getKd())
 
         index += 1
 

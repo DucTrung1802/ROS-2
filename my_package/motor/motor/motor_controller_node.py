@@ -21,20 +21,28 @@ TOPIC = "/cmd_vel"
 BUTTON_DELAY = 0.001
 
 # Controling parameters
-STEP = 3
+STEP = 1
 
 # Motor parameters
 LEFT_MOTOR_DIAMETER = 0.09
 RIGHT_MOTOR_DIAMETER = 0.09
 
 
+def MPStoRPM(mps):
+    return mps / (LEFT_MOTOR_DIAMETER * math.pi) * 60
+
+
+def RPMtoMPS(rpm):
+    return rpm * (LEFT_MOTOR_DIAMETER * math.pi) / 60
+
+
 # Velocity: m/s
-LINEAR_SPEED_MAX = 0.6  # m/s
+LINEAR_SPEED_MAX = RPMtoMPS(100)  # m/s
 LINEAR_SPEED_MIN = -LINEAR_SPEED_MAX  # m/s
 LINEAR_SPEED_STEP = LINEAR_SPEED_MAX / STEP
 
 # Degree: positive-clockwise; negative-counterclockwise
-ANGULAR_SPPEED_MAX = 0.6  # rad/s
+ANGULAR_SPPEED_MAX = RPMtoMPS(100)  # rad/s
 ANGULAR_SPPEED_MIN = -ANGULAR_SPPEED_MAX  # rad/s
 ANGULAR_SPPEED_STEP = ANGULAR_SPPEED_MAX / STEP  # rad/s
 
@@ -46,14 +54,6 @@ target_linear_velocity = 0.0
 target_angular_velocity = 0.0
 control_linear_velocity = 0.0
 control_angular_velocity = 0.0
-
-
-def MPStoRPM(mps):
-    return mps / (LEFT_MOTOR_DIAMETER * math.pi) * 60
-
-
-def RPMtoMPS(rpm):
-    return rpm * (LEFT_MOTOR_DIAMETER * math.pi) / 60
 
 
 DASHBOARD = """

@@ -19,9 +19,13 @@ class PIDController:
             raise Exception("Minimum value must smaller or equal to maximum value!")
 
     def __applyCoefficients(self, Kp, Ki, Kd, T):
+        self.__const_Kp = Kp
+        self.__const_Ki = Ki
+        self.__const_Kd = Kd
+        self.__const_T = T
+
         self.__Kp = Kp
         self.__Ki = Ki
-        self.__Ki_on = Ki
         self.__Kd = Kd
         self.__T = T
 
@@ -46,6 +50,8 @@ class PIDController:
         self.__ek = 0
         self.__ek_1 = 0
         self.__ek_2 = 0
+
+        self.__delta_ek = 0
 
         self.__state = 0
 
@@ -77,7 +83,8 @@ class PIDController:
         if self.__is_saturating and self.__same_sign:
             self.__Ki = 0
         else:
-            self.__Ki = self.__Ki_on
+            # self.__Ki = self.
+            pass
 
         self.__computeCoefficients()
 
@@ -97,6 +104,8 @@ class PIDController:
 
     def evaluate(self, setpoint, current_measure_value):
         self.__ek = setpoint - current_measure_value
+        self.__delta_ek = self.__ek - self.__ek_1
+        # print(self.__ek)
 
         if self.__state == 0:
             self.__uk = self.__alpha * self.__ek / self.__delta
@@ -126,19 +135,24 @@ class PIDController:
     def getOutputValue(self):
         return self.__saturate(self.__uk)
 
+    def getKp(self):
+        return self.__Kp
+
     def getKi(self):
         return self.__Ki
+
+    def getKd(self):
+        return self.__Kd
 
     def getError(self):
         return self.__ek
 
     def getDerivative(self):
-        return (self.__ek - self.__ek_1) / self.__T
+        return self.__delta_ek / self.__T
 
     def updateFuzzyFactor(self, factor):
-        self.__Kp *= factor
-        self.__Ki *= factor
-        self.__Ki_on *= factor
-        self.__Kd *= factor
+        self.__Kp = self.__const_Kp * factor
+        self.__Ki = self.__const_Ki * factor
+        self.__Kd = self.__const_Kd * factor
 
         self.__computeCoefficients()
