@@ -19,7 +19,7 @@ YAW = 0.0
 
 # Node parameters
 NODE_NAME = "imu_mpu6050"
-PUBLISH_FREQUENCY = 50
+PUBLISH_FREQUENCY = 30
 
 # Node parameters
 PUBLISH_PERIOD = 0
