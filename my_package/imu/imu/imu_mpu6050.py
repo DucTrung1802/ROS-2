@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
+from logging import exception
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Imu
@@ -19,10 +20,50 @@ YAW = 0.0
 
 # Node parameters
 NODE_NAME = "imu_mpu6050"
-PUBLISH_FREQUENCY = 30
+PUBLISH_FREQUENCY = 100
 
 # Node parameters
 PUBLISH_PERIOD = 0
+
+
+class Calibrator(object):
+    def __init__(self):
+        self.__mpu = adafruit_mpu6050.MPU6050(board.I2C())
+        self.__cali_accel_data = [0.0, 0.0, 0.0]
+        self.__cali_gyro_data = [0.0, 0.0, 0.0]
+
+    def calibrate(self, number_of_run=1):
+        if int(number_of_run) and number_of_run > 0:
+            for i in range(number_of_run):
+                self.__cali_accel_data[0] += self.__mpu.acceleration[0]
+                self.__cali_accel_data[1] += self.__mpu.acceleration[1]
+                self.__cali_accel_data[2] += self.__mpu.acceleration[2]
+
+                self.__cali_gyro_data[0] += self.__mpu.gyro[0]
+                self.__cali_gyro_data[1] += self.__mpu.gyro[1]
+                self.__cali_gyro_data[2] += self.__mpu.gyro[2]
+
+                time.sleep(0.01)
+
+            self.__cali_accel_data[0] /= float(number_of_run)
+            self.__cali_accel_data[1] /= float(number_of_run)
+            self.__cali_accel_data[2] /= float(number_of_run)
+
+            self.__cali_gyro_data[0] /= float(number_of_run)
+            self.__cali_gyro_data[1] /= float(number_of_run)
+            self.__cali_gyro_data[2] /= float(number_of_run)
+
+        else:
+            raise exception("Invalid number of run!")
+
+    def getCalibratedAccelData(self):
+        return self.__cali_accel_data
+
+    def getCalibratedGyroData(self):
+        return self.__cali_gyro_data
+
+
+CALIBRATOR = Calibrator()
 
 
 def checkConditions():
@@ -59,13 +100,17 @@ class IMUPublisher(Node):
         # msg.orientation.z = initial_pose_quaternion[2]
         # msg.orientation.w = initial_pose_quaternion[3]
 
-        msg.linear_acceleration.x = accel_data[0]
-        msg.linear_acceleration.y = accel_data[1]
+        msg.linear_acceleration.x = (
+            accel_data[0] - CALIBRATOR.getCalibratedAccelData()[0]
+        )
+        msg.linear_acceleration.y = (
+            accel_data[1] - CALIBRATOR.getCalibratedAccelData()[1]
+        )
         msg.linear_acceleration.z = accel_data[2]
 
-        msg.angular_velocity.x = gyro_data[0]
-        msg.angular_velocity.y = gyro_data[1]
-        msg.angular_velocity.z = gyro_data[2]
+        msg.angular_velocity.x = gyro_data[0] - CALIBRATOR.getCalibratedGyroData()[0]
+        msg.angular_velocity.y = gyro_data[1] - CALIBRATOR.getCalibratedGyroData()[1]
+        msg.angular_velocity.z = gyro_data[2] - CALIBRATOR.getCalibratedGyroData()[2]
 
         for i in range(9):
             if i == 0:
@@ -150,8 +195,13 @@ def threadingHandler():
     # thread_3.join()
 
 
+def calibrate():
+    CALIBRATOR.calibrate(100)
+
+
 def setup():
     checkConditions()
+    calibrate()
 
 
 def loop(args=None):
