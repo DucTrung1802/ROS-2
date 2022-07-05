@@ -30,6 +30,7 @@ from motor.ReadLine import ReadLine
 from motor.PoseCalculator import PoseCalculator
 from fuzzy_logic.lib import *
 
+
 # =========== Configurable parameters =============
 # Serial parameters
 SKIP_SERIAL_LINES = 12
@@ -434,13 +435,16 @@ def driveMotors():
     pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
 
     # Add fuzzy logic here
-    fuzzy_logic_factor_left_motor = calculateFuzzy(
+    fuzzy_logic_factor = calculateFuzzy(
         LEFT_MOTOR_PID_CONTROLLER.getError(),
         LEFT_MOTOR_PID_CONTROLLER.getDerivative(),
+        RIGHT_MOTOR_PID_CONTROLLER.getError(),
+        RIGHT_MOTOR_PID_CONTROLLER.getDerivative(),
         b"output",
     )
 
-    LEFT_MOTOR_PID_CONTROLLER.updateFuzzyFactor(fuzzy_logic_factor_left_motor)
+    LEFT_MOTOR_PID_CONTROLLER.updateFuzzyFactor(fuzzy_logic_factor[0])
+    RIGHT_MOTOR_PID_CONTROLLER.updateFuzzyFactor(fuzzy_logic_factor[1])
 
     LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_RPM_left_abs, LEFT_RPM)
     RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_RPM_right_abs, RIGHT_RPM)

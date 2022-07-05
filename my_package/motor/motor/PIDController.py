@@ -16,8 +16,7 @@ class PIDController:
         if T <= 0:  # T is sample time
             raise Exception("T must be positive!")
         if min > max:
-            raise Exception(
-                "Minimum value must smaller or equal to maximum value!")
+            raise Exception("Minimum value must smaller or equal to maximum value!")
 
     def __applyCoefficients(self, Kp, Ki, Kd, T):
         self.__Kp = Kp
@@ -129,3 +128,17 @@ class PIDController:
 
     def getKi(self):
         return self.__Ki
+
+    def getError(self):
+        return self.__ek
+
+    def getDerivative(self):
+        return (self.__ek - self.__ek_1) / self.__T
+
+    def updateFuzzyFactor(self, factor):
+        self.__Kp *= factor
+        self.__Ki *= factor
+        self.__Ki_on *= factor
+        self.__Kd *= factor
+
+        self.__computeCoefficients()

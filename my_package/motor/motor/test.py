@@ -1,5 +1,16 @@
-import copy
-dict_A = {"key":"abcd1234"}
-dict_B = copy.deepcopy(dict_A)
-dict_B["hello"] = "A"
-print(dict_A)
+from time import time
+from fuzzy_logic.lib import *
+import timeit
+
+
+sum = 0
+
+for i in range(1):
+    start = timeit.default_timer()
+    result = calculateFuzzy(86.97, 18090, b"output")
+    end = timeit.default_timer()
+    print(result)
+    sum += end - start
+
+sum /= 1
+print(sum)
