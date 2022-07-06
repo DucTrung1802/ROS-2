@@ -1,2 +1,4 @@
 default:
-	g++ -fPIC -shared -o lib_cpp.so *.cpp fuzzy_logic/*.cpp
+	gcc -c *.cpp
+	g++ ../ros2.cpp *.o -o ../ros2.out -fPIC -O2 -g -Wall
+	../ros2.out

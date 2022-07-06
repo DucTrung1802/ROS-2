@@ -85,21 +85,21 @@ RIGHT_MOTOR_R = 273
 
 LEFT_MOTOR_Kp = 1
 LEFT_MOTOR_Ki = 10
-LEFT_MOTOR_Kd = 0.002
+LEFT_MOTOR_Kd = 0.001
 LEFT_MOTOR_MIN = 0
 LEFT_MOTOR_MAX = 12
 
 RIGHT_MOTOR_Kp = 1
 RIGHT_MOTOR_Ki = 10
-RIGHT_MOTOR_Kd = 0.002
+RIGHT_MOTOR_Kd = 0.001
 RIGHT_MOTOR_MIN = 0
 RIGHT_MOTOR_MAX = 12
 
 
 # Test data
 TEST_ONLY_ON_LAPTOP = False
-MANUALLY_TUNE_PID = False
-DATA_RECORDING = True
+MANUALLY_TUNE_PID = True
+DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
@@ -870,7 +870,7 @@ def manuallyTunePID():
 def task_5():
     global flag_5
 
-    index = 0
+    index = 1
     delta_time = 0
     time.sleep(1)
 
@@ -890,6 +890,8 @@ def task_5():
 
     # =================================
 
+    WORKBOOK.writeData(index + 1, 1, delta_time)
+
     while time.time() - timer <= run_time:
 
         testPIDResponse(
@@ -900,22 +902,39 @@ def task_5():
 
         comp_start = time.time()
 
-        WORKBOOK.writeData(index + 1, 1, delta_time)
+        # WORKBOOK.writeData(index + 1, 1, delta_time)
+        # WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
+        # WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
+        # # WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
+        # WORKBOOK.writeData(index + 1, 4, LEFT_MOTOR_PID_CONTROLLER.getKi())
+        # WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
+        # WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
+        # # WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
+        # WORKBOOK.writeData(index + 1, 8, RIGHT_MOTOR_PID_CONTROLLER.getKi())
+        # WORKBOOK.writeData(index + 1, 9, total_receive)
+        # WORKBOOK.writeData(index + 1, 10, error_receive)
+        # WORKBOOK.writeData(
+        #     index + 1,
+        #     11,
+        #     round((total_receive - error_receive) / total_receive * 100, 2),
+        # )
+
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
-        # WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
-        WORKBOOK.writeData(index + 1, 4, LEFT_MOTOR_PID_CONTROLLER.getKi())
-        WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
-        WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
-        # WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
-        WORKBOOK.writeData(index + 1, 8, RIGHT_MOTOR_PID_CONTROLLER.getKi())
-        WORKBOOK.writeData(index + 1, 9, total_receive)
-        WORKBOOK.writeData(index + 1, 10, error_receive)
-        WORKBOOK.writeData(
-            index + 1,
-            11,
-            round((total_receive - error_receive) / total_receive * 100, 2),
-        )
+        WORKBOOK.writeData(index + 1, 4, LEFT_MOTOR_PID_CONTROLLER.getKp())
+        WORKBOOK.writeData(index + 1, 5, LEFT_MOTOR_PID_CONTROLLER.getKi())
+        WORKBOOK.writeData(index + 1, 6, LEFT_MOTOR_PID_CONTROLLER.getKd())
+        WORKBOOK.writeData(index + 1, 7, LEFT_MOTOR_PID_CONTROLLER.getError())
+        WORKBOOK.writeData(index + 1, 8, LEFT_MOTOR_PID_CONTROLLER.getDerivative())
+
+        WORKBOOK.writeData(index + 1, 10, linear_RPM_right)
+        WORKBOOK.writeData(index + 1, 11, RIGHT_RPM)
+        WORKBOOK.writeData(index + 1, 12, RIGHT_MOTOR_PID_CONTROLLER.getKp())
+        WORKBOOK.writeData(index + 1, 13, RIGHT_MOTOR_PID_CONTROLLER.getKi())
+        WORKBOOK.writeData(index + 1, 14, RIGHT_MOTOR_PID_CONTROLLER.getKd())
+        WORKBOOK.writeData(index + 1, 15, RIGHT_MOTOR_PID_CONTROLLER.getError())
+        WORKBOOK.writeData(index + 1, 16, RIGHT_MOTOR_PID_CONTROLLER.getDerivative())
+
         index += 1
 
         comp_end = time.time()
@@ -926,6 +945,8 @@ def task_5():
         end = time.time()
 
         delta_time = end - start
+
+        WORKBOOK.writeData(index + 1, 1, delta_time)
 
     stopAllThreads()
 

@@ -40,17 +40,22 @@ class DataRecoder(object):
         # self.writeData(1, 11, "Rate of Successful (%)")
 
         self.writeData(1, 1, "Time (s)")
+
         self.writeData(1, 2, "Setpoint Motor 1 (RPM)")
         self.writeData(1, 3, "Motor 1 (RPM)")
         self.writeData(1, 4, "Kp Motor 1")
         self.writeData(1, 5, "Ki Motor 1")
         self.writeData(1, 6, "Kd Motor 1")
+        self.writeData(1, 7, "Error Motor 1")
+        self.writeData(1, 8, "Derivative Motor 1")
 
-        self.writeData(1, 8, "Setpoint Motor 2 (RPM)")
-        self.writeData(1, 9, "Motor 2 (RPM)")
-        self.writeData(1, 10, "Kp Motor 2")
-        self.writeData(1, 11, "Ki Motor 2")
-        self.writeData(1, 12, "Kd Motor 2")
+        self.writeData(1, 10, "Setpoint Motor 2 (RPM)")
+        self.writeData(1, 11, "Motor 2 (RPM)")
+        self.writeData(1, 12, "Kp Motor 2")
+        self.writeData(1, 13, "Ki Motor 2")
+        self.writeData(1, 14, "Kd Motor 2")
+        self.writeData(1, 15, "Error Motor 2")
+        self.writeData(1, 16, "Derivative Motor 2")
 
         # self.writeData(1, 9, "Successful Receive")
         # self.writeData(1, 10, "Error Receive")

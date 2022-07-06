@@ -83,7 +83,7 @@ class PIDController:
         if self.__is_saturating and self.__same_sign:
             self.__Ki = 0
         else:
-            # self.__Ki = self.
+            # self.__Ki = self.__const_Ki
             pass
 
         self.__computeCoefficients()
