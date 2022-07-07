@@ -12,13 +12,23 @@ using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
+Term NegBig = Term("NB", new TriangularMF(-200, -140, -70));
+
+// 2. Inputs
+FuzzyVariable error = FuzzyVariable("input1", -140, 140);
+error.addTerm(NegBig);
+error.addTerm(NegSmall);
+error.addTerm(Zero);
+error.addTerm(PosSmall);
+error.addTerm(PosBig);
+
 int main()
 {
 
     // 1. List all terms
 
     // Term for error
-    Term NegBig = Term("NB", new TriangularMF(-200, -140, -70));
+    // Term NegBig = Term("NB", new TriangularMF(-200, -140, -70));
     Term NegSmall = Term("NS", new TriangularMF(-105, -40, 0));
     Term Zero = Term("Z", new TriangularMF(-35, 0, 35));
     Term PosSmall = Term("PS", new TriangularMF(0, 40, 105));

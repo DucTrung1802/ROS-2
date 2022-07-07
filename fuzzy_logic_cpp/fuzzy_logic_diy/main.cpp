@@ -1,9 +1,9 @@
 #include <iostream>
 #include <chrono>
-#include "fuzzy_logic_diy_lib/Term.h"
-#include "fuzzy_logic_diy_lib/FuzzyVariable.h"
-#include "fuzzy_logic_diy_lib/RuleHandler.h"
-#include "fuzzy_logic_diy_lib/MamdaniFuzzySystem.h"
+#include "fuzzy_logic/Term.h"
+#include "fuzzy_logic/FuzzyVariable.h"
+#include "fuzzy_logic/RuleHandler.h"
+#include "fuzzy_logic/MamdaniFuzzySystem.h"
 
 using namespace FLD;
 using namespace std;
