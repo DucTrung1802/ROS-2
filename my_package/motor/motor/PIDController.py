@@ -50,6 +50,7 @@ class PIDController:
         self.__ek = 0
         self.__ek_1 = 0
         self.__ek_2 = 0
+        self.__factor = 1
 
         self.__delta_ek = 0
 
@@ -83,10 +84,8 @@ class PIDController:
         if self.__is_saturating and self.__same_sign:
             self.__Ki = 0
         else:
-            # self.__Ki = self.__const_Ki
-            pass
-
-        self.__computeCoefficients()
+            self.__Ki = self.__const_Ki * self.__factor
+            # pass
 
     def changeCoefficients(self, Kp, Ki, Kd, T):
         if Kp < 0:
@@ -103,6 +102,10 @@ class PIDController:
         self.__computeCoefficients()
 
     def evaluate(self, setpoint, current_measure_value):
+
+        self.__antiWindup()
+        self.__computeCoefficients()
+
         self.__ek = setpoint - current_measure_value
         self.__delta_ek = self.__ek - self.__ek_1
         # print(self.__ek)
@@ -130,8 +133,6 @@ class PIDController:
         self.__ek_1 = self.__ek
         self.__state += 1
 
-        self.__antiWindup()
-
     def getOutputValue(self):
         return self.__saturate(self.__uk)
 
@@ -150,9 +151,8 @@ class PIDController:
     def getDerivative(self):
         return self.__delta_ek / self.__T
 
-    def updateFuzzyFactor(self, factor):
-        self.__Kp = self.__const_Kp * factor
-        self.__Ki = self.__const_Ki * factor
-        self.__Kd = self.__const_Kd * factor
-
-        self.__computeCoefficients()
+    def updateFuzzyFactor(self, factor=1):
+        self.__factor = factor
+        self.__Kp = self.__const_Kp * self.__factor
+        self.__Ki = self.__const_Ki * self.__factor
+        self.__Kd = self.__const_Kd * self.__factor
