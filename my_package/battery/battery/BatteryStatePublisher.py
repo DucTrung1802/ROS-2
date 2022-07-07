@@ -3,10 +3,10 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import BatteryState
-
+from battery.BatteryManager import BatteryManager
 
 # Node parameters
-PUBLISH_FREQUENCY = 30
+PUBLISH_FREQUENCY = 0.05
 NODE_NAME = "battery_state_publisher"
 
 
@@ -24,30 +24,23 @@ class BatteryStatePublisher(Node):
   The class publishes the battery state of an object at a specific time interval.
   """
 
-    def __init__(self, node_name):
+    def __init__(self, node_name, battery_manager):
         """
     Class constructor to set up the node
     """
-
-        # Initiate the Node class's constructor and give it a name
         super().__init__(node_name)
+        self.battery_manager = battery_manager
 
-        # Create publisher(s)
-
-        # This node publishes the state of the battery.
-        # Maximum queue size of 10.
         self.battery_state_publisher = self.create_publisher(
             BatteryState, "/battery_status", 10
         )
 
-        # Time interval in seconds
-        timer_period = 1.0
-        self.timer = self.create_timer(timer_period, self.get_battery_state)
+        self.timer = self.create_timer(PUBLISH_PERIOD, self.publish)
 
-        # Initialize battery level
-        self.battery_voltage = 9.0  # Initialize the battery voltage level
+        self.battery_voltage = self.battery_manager.getVoltage()
+        self.percent_charge_level = self.battery_manager.getPercentChargeLevel()
 
-    def get_battery_state(self):
+    def publish(self):
         """
     Callback function.
     This function gets called at the specific time interval.
@@ -56,7 +49,7 @@ class BatteryStatePublisher(Node):
         msg = BatteryState()  # Create a message of this type
         msg.voltage = self.battery_voltage
         msg.percentage = self.percent_charge_level
-        self.publisher_battery_state.publish(msg)  # Publish BatteryState message
+        self.battery_state_publisher.publish(msg)  # Publish BatteryState message
 
 
 def setup():
@@ -68,8 +61,10 @@ def loop(args=None):
     # Initialize the rclpy library
     rclpy.init(args=args)
 
+    battery_manager = BatteryManager()
+
     # Create the node
-    battery_state_pub = BatteryStatePublisher(NODE_NAME)
+    battery_state_pub = BatteryStatePublisher(NODE_NAME, battery_manager)
 
     # Spin the node so the callback function is called.
     # Publish any pending messages to the topics.
