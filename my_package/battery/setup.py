@@ -18,6 +18,6 @@ setup(
     license="TODO: License declaration",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": ["battery_manager = battery.battery_manager:main"]
+        "console_scripts": ["battery_manager = battery.BatteryStatePublisher:main"]
     },
 )
