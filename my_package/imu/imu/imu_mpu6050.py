@@ -20,7 +20,7 @@ YAW = 0.0
 
 # Node parameters
 NODE_NAME = "imu_mpu6050"
-PUBLISH_FREQUENCY = 100
+PUBLISH_FREQUENCY = 50
 
 # Node parameters
 PUBLISH_PERIOD = 0
@@ -35,13 +35,15 @@ class Calibrator(object):
     def calibrate(self, number_of_run=1):
         if int(number_of_run) and number_of_run > 0:
             for i in range(number_of_run):
-                self.__cali_accel_data[0] += self.__mpu.acceleration[0]
-                self.__cali_accel_data[1] += self.__mpu.acceleration[1]
-                self.__cali_accel_data[2] += self.__mpu.acceleration[2]
+                data = self.__mpu.acceleration
+                self.__cali_accel_data[0] += data[0]
+                self.__cali_accel_data[1] += data[1]
+                self.__cali_accel_data[2] += data[2]
 
-                self.__cali_gyro_data[0] += self.__mpu.gyro[0]
-                self.__cali_gyro_data[1] += self.__mpu.gyro[1]
-                self.__cali_gyro_data[2] += self.__mpu.gyro[2]
+                data = self.__mpu.gyro
+                self.__cali_gyro_data[0] += data[0]
+                self.__cali_gyro_data[1] += data[1]
+                self.__cali_gyro_data[2] += data[2]
 
                 time.sleep(0.01)
 
