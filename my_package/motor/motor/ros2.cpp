@@ -43,11 +43,11 @@ extern "C"
         Term IncFast = Term("InF", new TriangularMF(14000, 28000, 42000));
 
         // Term for output
-        Term Small = Term("S", new TriangularMF(-0.25, 0, 25));
-        Term MedSmall = Term("MS", new TriangularMF(0, 0.25, 0.5));
-        Term Med = Term("M", new TriangularMF(0.25, 0.5, 0.75));
-        Term MedBig = Term("MB", new TriangularMF(0.5, 0.75, 1));
-        Term Big = Term("B", new TriangularMF(0.75, 1, 1.25));
+        Term Small = Term("S", new TriangularMF(0.325, 0.5, 0.675));
+        Term MedSmall = Term("MS", new TriangularMF(0.5, 0.675, 0.85));
+        Term Med = Term("M", new TriangularMF(0.675, 0.85, 1.025));
+        Term MedBig = Term("MB", new TriangularMF(0.85, 1.025, 1.2));
+        Term Big = Term("B", new TriangularMF(1.025, 1.2, 1.375));
 
         // 2. Inputs
         FuzzyVariable error = FuzzyVariable("input1", -140, 140);
@@ -65,7 +65,7 @@ extern "C"
         derivative_error.addTerm(IncFast);
 
         // 3. Outputs
-        FuzzyVariable output = FuzzyVariable("output", 0.0, 1.0);
+        FuzzyVariable output = FuzzyVariable("output", 0.5, 1.2);
         output.addTerm(Small);
         output.addTerm(MedSmall);
         output.addTerm(Med);
@@ -92,7 +92,7 @@ extern "C"
 
         mamdani_fuzzy_system.addRule("if input1 is NS and input2 is DS then output is MS");
 
-        mamdani_fuzzy_system.addRule("if input1 is NS and input2 is M then output is M");
+        mamdani_fuzzy_system.addRule("if input1 is NS and input2 is M then output is MS");
 
         mamdani_fuzzy_system.addRule("if input1 is NS and input2 is InS then output is M");
 
