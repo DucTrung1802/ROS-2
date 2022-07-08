@@ -253,8 +253,8 @@ def loop():
         number_of_value_median_filter=NUMBER_OF_MEDIAN_FILTER_ELEMENT,
     )
     sonar_4 = Sonar(
-        trigger_pin=19,
-        echo_pin=13,
+        trigger_pin=26,
+        echo_pin=19,
         min_range=0.02,
         max_range=1.05,
         field_of_view=0.558,
