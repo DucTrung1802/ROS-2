@@ -57,35 +57,8 @@ class SonarNode(Node):
                 "Invalid type of variable sonar_array_instance, must an array of 'Sonar' intance!"
             )
 
-    def median_filter(self):
-        while len(self.__value_list) < NUMBER_OF_MEDIAN_FILTER_ELEMENT - 1:
-            print("Getting initial values!")
-            self.__sonar.measureRange()
-            self.__value_list.append(self.__sonar.getRange())
-
-        try:
-            self.__sonar.measureRange()
-        except:
-            self.__error_time = self.__error_time + 1
-            print("Error " + str(self.__error_time) + " occured!")
-            self.__sonar.setOutputValue(self.__old_value)
-
-        self.__value_list.append(self.__sonar.getRange())
-        self.__sorted_list = self.__value_list.copy()
-        self.__sorted_list.sort()
-
-        # for i in range(len(self.__sorted_list)):
-        #     print(round(self.__sorted_list[i], 3), end="\t")
-        # print()
-
-        self.__sonar.setOutputValue(
-            self.__sorted_list[floor(NUMBER_OF_MEDIAN_FILTER_ELEMENT / 2)]
-        )
-        self.__old_value = self.__sonar.getOutputValue()
-        del self.__value_list[0]
-
     def timer_callback(self):
-        self.median_filter()
+        self.__sonar.measureRange()
         msg = Range()
         msg.header.frame_id = "ultrasonic_" + str(ORDER) + "_link"
         msg.header.stamp = self.get_clock().now().to_msg()
@@ -95,7 +68,7 @@ class SonarNode(Node):
         )  # rad ~ 15 degree (according to feature of HC-SR 04)
         msg.min_range = self.__sonar.getMinRange()
         msg.max_range = self.__sonar.getMaxRange()
-        msg.range = self.__sonar.getOutputValue()
+        msg.range = self.__sonar.getRange()
         self.__sonar_publisher.publish(msg)
 
 
@@ -114,6 +87,7 @@ def loop():
         min_range=0.02,
         max_range=1.05,
         field_of_view=0.558,
+        number_of_value_median_filter=NUMBER_OF_MEDIAN_FILTER_ELEMENT,
     )
     sonar_node = SonarNode(node_name=NODE_NAME, sonar_instance=sonar)
 

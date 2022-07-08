@@ -16,13 +16,16 @@ class PIDController:
         if T <= 0:  # T is sample time
             raise Exception("T must be positive!")
         if min > max:
-            raise Exception(
-                "Minimum value must smaller or equal to maximum value!")
+            raise Exception("Minimum value must smaller or equal to maximum value!")
 
     def __applyCoefficients(self, Kp, Ki, Kd, T):
+        self.__const_Kp = Kp
+        self.__const_Ki = Ki
+        self.__const_Kd = Kd
+        self.__const_T = T
+
         self.__Kp = Kp
         self.__Ki = Ki
-        self.__Ki_on = Ki
         self.__Kd = Kd
         self.__T = T
 
@@ -47,6 +50,9 @@ class PIDController:
         self.__ek = 0
         self.__ek_1 = 0
         self.__ek_2 = 0
+        self.__factor = 1
+
+        self.__delta_ek = 0
 
         self.__state = 0
 
@@ -78,9 +84,8 @@ class PIDController:
         if self.__is_saturating and self.__same_sign:
             self.__Ki = 0
         else:
-            self.__Ki = self.__Ki_on
-
-        self.__computeCoefficients()
+            self.__Ki = self.__const_Ki * self.__factor
+            # pass
 
     def changeCoefficients(self, Kp, Ki, Kd, T):
         if Kp < 0:
@@ -97,7 +102,13 @@ class PIDController:
         self.__computeCoefficients()
 
     def evaluate(self, setpoint, current_measure_value):
+
+        self.__antiWindup()
+        self.__computeCoefficients()
+
         self.__ek = setpoint - current_measure_value
+        self.__delta_ek = self.__ek - self.__ek_1
+        # print(self.__ek)
 
         if self.__state == 0:
             self.__uk = self.__alpha * self.__ek / self.__delta
@@ -122,10 +133,26 @@ class PIDController:
         self.__ek_1 = self.__ek
         self.__state += 1
 
-        self.__antiWindup()
-
     def getOutputValue(self):
         return self.__saturate(self.__uk)
 
+    def getKp(self):
+        return self.__Kp
+
     def getKi(self):
         return self.__Ki
+
+    def getKd(self):
+        return self.__Kd
+
+    def getError(self):
+        return self.__ek
+
+    def getDerivative(self):
+        return self.__delta_ek / self.__T
+
+    def updateFuzzyFactor(self, factor=1):
+        self.__factor = factor
+        self.__Kp = self.__const_Kp * self.__factor
+        self.__Ki = self.__const_Ki * self.__factor
+        self.__Kd = self.__const_Kd * self.__factor

@@ -1,9 +1,9 @@
 #include <iostream>
 #include <chrono>
-#include "fuzzy_logic_diy_lib/Term.h"
-#include "fuzzy_logic_diy_lib/FuzzyVariable.h"
-#include "fuzzy_logic_diy_lib/RuleHandler.h"
-#include "fuzzy_logic_diy_lib/MamdaniFuzzySystem.h"
+#include "fuzzy_logic/Term.h"
+#include "fuzzy_logic/FuzzyVariable.h"
+#include "fuzzy_logic/RuleHandler.h"
+#include "fuzzy_logic/MamdaniFuzzySystem.h"
 
 using namespace FLD;
 using namespace std;
@@ -55,14 +55,16 @@ int main()
 
     mamdani_fuzzy_system.addRule("if input1 is mf2 and input2 is mf2 then output1 is mf2");
 
-    // mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf1 then output1 is mf3");
+    mamdani_fuzzy_system.addRule("if input1 is mf3 and input2 is mf3 then output1 is mf3");
+
+    mamdani_fuzzy_system.addRule("if input1 is mf1 and input2 is mf2 then output1 is mf3");
 
     // mamdani_fuzzy_system.printAllRules();
 
     auto t1 = high_resolution_clock::now();
 
-    mamdani_fuzzy_system.addInputValue("input1", 0.36);
-    mamdani_fuzzy_system.addInputValue("input2", 0.69);
+    mamdani_fuzzy_system.addInputValue("input1", 0.142);
+    mamdani_fuzzy_system.addInputValue("input2", 0.659);
 
     mamdani_fuzzy_system.calculate(100);
 

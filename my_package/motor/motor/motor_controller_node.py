@@ -28,6 +28,14 @@ LEFT_MOTOR_DIAMETER = 0.09
 RIGHT_MOTOR_DIAMETER = 0.09
 
 
+def MPStoRPM(mps):
+    return mps / (LEFT_MOTOR_DIAMETER * math.pi) * 60
+
+
+def RPMtoMPS(rpm):
+    return rpm * (LEFT_MOTOR_DIAMETER * math.pi) / 60
+
+
 # Velocity: m/s
 LINEAR_SPEED_MAX = 0.6  # m/s
 LINEAR_SPEED_MIN = -LINEAR_SPEED_MAX  # m/s
@@ -46,14 +54,6 @@ target_linear_velocity = 0.0
 target_angular_velocity = 0.0
 control_linear_velocity = 0.0
 control_angular_velocity = 0.0
-
-
-def MPStoRPM(mps):
-    return mps / (LEFT_MOTOR_DIAMETER * math.pi) * 60
-
-
-def RPMtoMPS(rpm):
-    return rpm * (LEFT_MOTOR_DIAMETER * math.pi) / 60
 
 
 DASHBOARD = """

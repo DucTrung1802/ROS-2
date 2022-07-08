@@ -28,6 +28,8 @@ from motor.DataRecoder import DataRecoder
 from motor.PIDController import PIDController
 from motor.ReadLine import ReadLine
 from motor.PoseCalculator import PoseCalculator
+from motor.lib import *
+
 
 # =========== Configurable parameters =============
 # Serial parameters
@@ -81,6 +83,18 @@ RIGHT_MOTOR_Kd = 0.0036
 RIGHT_MOTOR_MIN = 0
 RIGHT_MOTOR_MAX = 12
 
+# LEFT_MOTOR_Kp = 1
+# LEFT_MOTOR_Ki = 10
+# LEFT_MOTOR_Kd = 0.001
+# LEFT_MOTOR_MIN = 0
+# LEFT_MOTOR_MAX = 12
+
+# RIGHT_MOTOR_Kp = 1
+# RIGHT_MOTOR_Ki = 10
+# RIGHT_MOTOR_Kd = 0.001
+# RIGHT_MOTOR_MIN = 0
+# RIGHT_MOTOR_MAX = 12
+
 
 # Test data
 TEST_ONLY_ON_LAPTOP = False
@@ -92,7 +106,7 @@ TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 0
 
 # DataRecorder parameters
-DATA_AMOUNT = 750
+DATA_AMOUNT = 2000
 
 if not (float(WHEEL_BASE) and WHEEL_BASE > 0):
     raise Exception("Invalid value of wheel base length!")
@@ -421,7 +435,7 @@ def driveMotors():
     # linear_RPM_left = 42.4
     # linear_RPM_right = -42.4
 
-    start = time.time()
+    start = timeit.default_timer()
 
     direction_1 = getDirection(linear_RPM_left)
     direction_2 = getDirection(linear_RPM_right)
@@ -431,6 +445,48 @@ def driveMotors():
 
     pwm_freq_1 = LEFT_MOTOR.getPWMFrequency()
     pwm_freq_2 = RIGHT_MOTOR.getPWMFrequency()
+
+    # start = timeit.default_timer()
+    # Add fuzzy logic here
+    fuzzy_logic_factor = calculateFuzzy(
+        LEFT_MOTOR_PID_CONTROLLER.getError(),
+        LEFT_MOTOR_PID_CONTROLLER.getDerivative(),
+        RIGHT_MOTOR_PID_CONTROLLER.getError(),
+        RIGHT_MOTOR_PID_CONTROLLER.getDerivative(),
+        b"output",
+    )
+    # end = timeit.default_timer()
+
+    # print()
+    # print("=====================")
+    # print(
+    #     str(LEFT_MOTOR_PID_CONTROLLER.getError())
+    #     + "\t"
+    #     + str(LEFT_MOTOR_PID_CONTROLLER.getDerivative())
+    #     + "\t"
+    #     + str(fuzzy_logic_factor[0])
+    # )
+
+    # print()
+
+    # print(
+    #     str(RIGHT_MOTOR_PID_CONTROLLER.getError())
+    #     + "\t"
+    #     + str(RIGHT_MOTOR_PID_CONTROLLER.getDerivative())
+    #     + "\t"
+    #     + str(fuzzy_logic_factor[1])
+    # )
+    # print("=====================")
+    # print()
+
+    # print(fuzzy_logic_factor[0])
+    # print(fuzzy_logic_factor[1])
+    # print(end - start)
+    # print()
+
+    # Start Fuzzy Logic
+    LEFT_MOTOR_PID_CONTROLLER.updateFuzzyFactor(fuzzy_logic_factor[0])
+    RIGHT_MOTOR_PID_CONTROLLER.updateFuzzyFactor(fuzzy_logic_factor[1])
 
     LEFT_MOTOR_PID_CONTROLLER.evaluate(linear_RPM_left_abs, LEFT_RPM)
     RIGHT_MOTOR_PID_CONTROLLER.evaluate(linear_RPM_right_abs, RIGHT_RPM)
@@ -465,16 +521,16 @@ def driveMotors():
     # print(data)
     MCUSerialObject.write(formSerialData(data))
 
-    end = time.time()
+    end = timeit.default_timer()
 
     # print(end - start)
 
-    start = time.time()
+    # start = time.time()
 
     if LEFT_MOTOR.getSampleTime() - (end - start) >= 0:
         time.sleep((LEFT_MOTOR.getSampleTime() - (end - start)) * 5 / 5.11)
 
-    end = time.time()
+    # end = time.time()
 
     # print(end - start)
 
@@ -701,8 +757,8 @@ def task_2():
 
         comp_start = time.time()
 
-        if not DATA_RECORDING:
-            driveMotors()
+        # if not DATA_RECORDING:
+        driveMotors()
 
         comp_end = time.time()
 
@@ -722,6 +778,7 @@ def task_3():
 
 def task_4():
     global flag_4
+    global linear_RPM_left, linear_RPM_right
 
     index = 1
     delta_time = 0
@@ -732,7 +789,7 @@ def task_4():
     # All testing must be after the "Ready" line!
     # ============ TESTING ============
 
-    varyPWM(TEST_PWM)
+    # varyPWM(TEST_PWM)
 
     # =================================
 
@@ -748,17 +805,15 @@ def task_4():
 
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
-        WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
-        WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
-        WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
-        WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
-        WORKBOOK.writeData(index + 1, 9, total_receive)
-        WORKBOOK.writeData(index + 1, 10, error_receive)
-        WORKBOOK.writeData(
-            index + 1,
-            11,
-            round((total_receive - error_receive) / total_receive * 100, 2),
-        )
+        WORKBOOK.writeData(index + 1, 4, LEFT_MOTOR_PID_CONTROLLER.getKp())
+        WORKBOOK.writeData(index + 1, 5, LEFT_MOTOR_PID_CONTROLLER.getKi())
+        WORKBOOK.writeData(index + 1, 6, LEFT_MOTOR_PID_CONTROLLER.getKd())
+
+        WORKBOOK.writeData(index + 1, 8, linear_RPM_right)
+        WORKBOOK.writeData(index + 1, 9, RIGHT_RPM)
+        WORKBOOK.writeData(index + 1, 10, RIGHT_MOTOR_PID_CONTROLLER.getKp())
+        WORKBOOK.writeData(index + 1, 11, RIGHT_MOTOR_PID_CONTROLLER.getKi())
+        WORKBOOK.writeData(index + 1, 12, RIGHT_MOTOR_PID_CONTROLLER.getKd())
 
         index += 1
 
@@ -816,7 +871,7 @@ def manuallyTunePID():
 def task_5():
     global flag_5
 
-    index = 0
+    index = 1
     delta_time = 0
     time.sleep(1)
 
@@ -836,6 +891,8 @@ def task_5():
 
     # =================================
 
+    WORKBOOK.writeData(index + 1, 1, delta_time)
+
     while time.time() - timer <= run_time:
 
         testPIDResponse(
@@ -846,22 +903,39 @@ def task_5():
 
         comp_start = time.time()
 
-        WORKBOOK.writeData(index + 1, 1, delta_time)
+        # WORKBOOK.writeData(index + 1, 1, delta_time)
+        # WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
+        # WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
+        # # WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
+        # WORKBOOK.writeData(index + 1, 4, LEFT_MOTOR_PID_CONTROLLER.getKi())
+        # WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
+        # WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
+        # # WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
+        # WORKBOOK.writeData(index + 1, 8, RIGHT_MOTOR_PID_CONTROLLER.getKi())
+        # WORKBOOK.writeData(index + 1, 9, total_receive)
+        # WORKBOOK.writeData(index + 1, 10, error_receive)
+        # WORKBOOK.writeData(
+        #     index + 1,
+        #     11,
+        #     round((total_receive - error_receive) / total_receive * 100, 2),
+        # )
+
         WORKBOOK.writeData(index + 1, 2, linear_RPM_left)
         WORKBOOK.writeData(index + 1, 3, LEFT_RPM)
-        # WORKBOOK.writeData(index + 1, 4, pwm_left / 1023.0 * 12.0)
-        WORKBOOK.writeData(index + 1, 4, LEFT_MOTOR_PID_CONTROLLER.getKi())
-        WORKBOOK.writeData(index + 1, 6, linear_RPM_right)
-        WORKBOOK.writeData(index + 1, 7, RIGHT_RPM)
-        # WORKBOOK.writeData(index + 1, 8, pwm_right / 1023.0 * 12.0)
-        WORKBOOK.writeData(index + 1, 8, RIGHT_MOTOR_PID_CONTROLLER.getKi())
-        WORKBOOK.writeData(index + 1, 9, total_receive)
-        WORKBOOK.writeData(index + 1, 10, error_receive)
-        WORKBOOK.writeData(
-            index + 1,
-            11,
-            round((total_receive - error_receive) / total_receive * 100, 2),
-        )
+        WORKBOOK.writeData(index + 1, 4, LEFT_MOTOR_PID_CONTROLLER.getKp())
+        WORKBOOK.writeData(index + 1, 5, LEFT_MOTOR_PID_CONTROLLER.getKi())
+        WORKBOOK.writeData(index + 1, 6, LEFT_MOTOR_PID_CONTROLLER.getKd())
+        WORKBOOK.writeData(index + 1, 7, LEFT_MOTOR_PID_CONTROLLER.getError())
+        WORKBOOK.writeData(index + 1, 8, LEFT_MOTOR_PID_CONTROLLER.getDerivative())
+
+        WORKBOOK.writeData(index + 1, 10, linear_RPM_right)
+        WORKBOOK.writeData(index + 1, 11, RIGHT_RPM)
+        WORKBOOK.writeData(index + 1, 12, RIGHT_MOTOR_PID_CONTROLLER.getKp())
+        WORKBOOK.writeData(index + 1, 13, RIGHT_MOTOR_PID_CONTROLLER.getKi())
+        WORKBOOK.writeData(index + 1, 14, RIGHT_MOTOR_PID_CONTROLLER.getKd())
+        WORKBOOK.writeData(index + 1, 15, RIGHT_MOTOR_PID_CONTROLLER.getError())
+        WORKBOOK.writeData(index + 1, 16, RIGHT_MOTOR_PID_CONTROLLER.getDerivative())
+
         index += 1
 
         comp_end = time.time()
@@ -872,6 +946,8 @@ def task_5():
         end = time.time()
 
         delta_time = end - start
+
+        WORKBOOK.writeData(index + 1, 1, delta_time)
 
     stopAllThreads()
 

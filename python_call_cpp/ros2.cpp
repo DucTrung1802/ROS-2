@@ -1,43 +1,30 @@
-#include <iostream>
 #include <chrono>
-#include <python2.7/Python.h>
+#include <thread>
 #include "fuzzy_logic/Term.h"
 #include "fuzzy_logic/FuzzyVariable.h"
 #include "fuzzy_logic/RuleHandler.h"
 #include "fuzzy_logic/MamdaniFuzzySystem.h"
 
 using namespace FLD;
-using namespace std;
 using std::chrono::duration;
-using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
-using std::chrono::milliseconds;
 
-// using namespace hello;
+void evaluateValue(MamdaniFuzzySystem system, float error, float derivative, float &result, std::string output_name)
+{
+    system.addInputValue("input1", error);
+    system.addInputValue("input2", derivative);
 
-// MamdaniFuzzySystem mamdani_fuzzy_system = ;
+    system.calculate(25);
 
-// Test test = Test();
-
-// extern "C"
-// {
-//     void My_Function(float a)
-//     {
-//         a += 200;
-//         test.print(a);
-//     }
-// }
-
-// int main()
-// {
-// }
+    result = system.getResultMap().find(output_name)->second;
+}
 
 extern "C"
 {
     float *calculateFuzzy(float error_left_motor, float derivative_left_motor, float error_right_motor, float derivative_right_motor, char *output_name)
     {
 
-        auto t1 = high_resolution_clock::now();
+        // auto t1 = high_resolution_clock::now();
 
         // 1. List all terms
 
@@ -84,6 +71,8 @@ extern "C"
         output.addTerm(Med);
         output.addTerm(MedBig);
         output.addTerm(Big);
+
+        // auto t2 = high_resolution_clock::now();
 
         // 4. Create system
         MamdaniFuzzySystem mamdani_fuzzy_system = MamdaniFuzzySystem({error, derivative_error}, {output});
@@ -140,20 +129,28 @@ extern "C"
         mamdani_fuzzy_system.addRule("if input1 is PB and input2 is InF then output is B");
         // mamdani_fuzzy_system.printAllRules();
 
-        // 6. Left motor
-        mamdani_fuzzy_system.addInputValue("input1", error_left_motor);
-        mamdani_fuzzy_system.addInputValue("input2", derivative_left_motor);
+        // auto t3 = high_resolution_clock::now();
 
-        mamdani_fuzzy_system.calculate(33);
+        float left_motor_result = 0.0;
+        float right_motor_result = 0.0;
 
-        std::map<std::string, float> result_left_motor = mamdani_fuzzy_system.getResultMap();
+        // auto t1 = high_resolution_clock::now();
 
-        mamdani_fuzzy_system.addInputValue("input1", error_right_motor);
-        mamdani_fuzzy_system.addInputValue("input2", derivative_right_motor);
+        std::thread th1(evaluateValue, mamdani_fuzzy_system, error_left_motor, derivative_left_motor, std::ref(left_motor_result), output_name);
 
-        mamdani_fuzzy_system.calculate(33);
+        std::thread th2(evaluateValue, mamdani_fuzzy_system, error_right_motor, derivative_right_motor, std::ref(right_motor_result), output_name);
 
-        std::map<std::string, float> result_right_motor = mamdani_fuzzy_system.getResultMap();
+        th1.join();
+        th2.join();
+
+        // auto t2 = high_resolution_clock::now();
+
+        // mamdani_fuzzy_system.addInputValue("input1", error_motor);
+        // mamdani_fuzzy_system.addInputValue("input2", derivative_motor);
+
+        // mamdani_fuzzy_system.calculate(40);
+
+        // auto t4 = high_resolution_clock::now();
 
         // 7. Right motor
 
@@ -177,18 +174,25 @@ extern "C"
 
         // auto ms_int = duration_cast<milliseconds>(t2 - t1);
 
-        auto t2 = high_resolution_clock::now();
+        // auto t2 = high_resolution_clock::now();
         // /* Getting number of milliseconds as a double. */
-        duration<double, std::milli> ms_double = t2 - t1;
+        // duration<double, std::milli> term = t2 - t1;
+        // duration<double, std::milli> rule = t3 - t2;
+        // duration<double, std::milli> calculate = t4 - t3;
+        // duration<double, std::milli> total = t4 - t1;
 
-        // std::cout << "Runtime: " << ms_double.count() << "ms\n";
+        // std::cout << "Runtime: " << term.count() << "ms\n";
+        // std::cout << "Rule: " << rule.count() << "ms\n";
+        // std::cout << "Calculate: " << calculate.count() << "ms\n";
+        // std::cout << "Total: " << total.count() << "ms\n";
         // std::cout << map_of_result.find("output")->second << std::endl;
 
         // std::cout << output_name << std::endl;
 
         float *list_of_result = (float *)malloc(sizeof(float) * 2);
-        list_of_result[0] = result_left_motor.find(output_name)->second;
-        list_of_result[1] = result_right_motor.find(output_name)->second;
+        list_of_result[0] = left_motor_result;
+        list_of_result[1] = right_motor_result;
+
         return list_of_result;
     }
 }
