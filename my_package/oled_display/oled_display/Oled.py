@@ -113,24 +113,56 @@ class Oled(object):
         self.__image = Image.new("1", (self.__width, self.__height), "black")
         self.__draw = ImageDraw.Draw(self.__image)
 
-        self.__max_length = 21
+        self.__max_length = 21  # Each character has the width of 6 pixels
+        self.__max_line = (
+            50
+        )  # Each character has the width of 10 pixels. Vertical pixel: 0 - 50
         self.__font = ImageFont.load_default()
 
         self.__oled.begin()
-        self.__clear()
+        self.clear()
 
-    def __clear(self):
+    def clear(self):
         self.__oled.clear()
+        self.__draw.rectangle((0, 0, self.__width, self.__height), outline=0, fill=0)
         self.__oled.display()
 
     def __check_length(self, text):
         text = str(text)
         if len(text) >= self.__max_length:
-            print(f'"${text}" length is larger the size of oled!')
+            print(f'"{text}" length is larger the size of oled!')
 
-    def add_text(self, text, align_type="center"):
+    def __align_calculate(self, text, horizontal_align):
+        x = 0.0
+        length_in_pixel = len(text) * 6
+        if horizontal_align in ["left", "center", "right"]:
+            if horizontal_align == "left":
+                pass
+            elif horizontal_align == "center":
+                x = (self.__width - length_in_pixel) / 2
+            elif horizontal_align == "right":
+                x = self.__width - length_in_pixel
+        else:
+            raise exception("Invalid horizontal align!")
+        return x
+
+    def add_text(self, text, horizontal_align="center", vertical_align=25):
+        """_summary_
+
+        Args:
+            text (str): _description_ \n
+            horizontal_align (str, optional): _description_. Defaults to "center". \n
+            vertical_align (int, optional): _description_. Defaults to 25. Range: 0 - 50
+        """
         self.__check_length(text)
-        self.__draw.text((0, 0), text, font=self.__font, fill=255, align=align_type)
+        x = self.__align_calculate(text, horizontal_align)
+        y = float(vertical_align)
+        self.__draw.text((x, y), text, font=self.__font, fill=255)
+        # self.__draw.text((0, 10), text, font=self.__font, fill=255)
+        # self.__draw.text((0, 20), text, font=self.__font, fill=255)
+        # self.__draw.text((0, 30), text, font=self.__font, fill=255)
+        # self.__draw.text((0, 40), text, font=self.__font, fill=255)
+        # self.__draw.text((0, 50), text, font=self.__font, fill=255)
 
     def display(self):
         self.__oled.image(self.__image)
