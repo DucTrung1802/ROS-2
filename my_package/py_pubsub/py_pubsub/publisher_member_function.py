@@ -33,22 +33,23 @@ def main(args=None):
     rclpy.init(args=args)
     minimal_publisher_1 = MinimalPublisher()
     # minimal_publisher_2 = MinimalPublisher()
+    rclpy.spin(minimal_publisher_1)
 
-    while True:
-        # rclpy.spin_once(minimal_publisher_1)
-        if time.time() - timer1 >= 0.0001:
-            print(POS)
-            POS += 1
-            timer1 = time.time()
+    # while True:
+    # rclpy.spin_once(minimal_publisher_1)
+    # if time.time() - timer1 >= 0.0001:
+    #     print(POS)
+    #     POS += 1
+    #     timer1 = time.time()
 
-        if time.time() - timer2 >= 0.001:
-            rclpy.spin_once(minimal_publisher_1)
-            timer2 = time.time()
+    # if time.time() - timer2 >= 0.001:
+    #     rclpy.spin_once(minimal_publisher_1)
+    #     timer2 = time.time()
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_publisher.destroy_node()
+    # minimal_publisher.destroy_node()
     rclpy.shutdown()
 
 
