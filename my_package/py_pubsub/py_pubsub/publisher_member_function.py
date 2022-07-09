@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 import time
 from std_msgs.msg import String
+from std_msgs.msg import Float64
 
 POS = 0
 timer1 = time.time()
@@ -11,20 +12,20 @@ timer2 = time.time()
 class MinimalPublisher(Node):
     def __init__(self):
         super().__init__("minimal_publisher")
-        self.publisher_1 = self.create_publisher(String, "topic1", 10)
+        self.publisher_1 = self.create_publisher(Float64, "topic", 10)
 
-        timer_period1 = 0  # seconds
+        timer_period1 = 1  # seconds
         # bind = lambda x: self.timer_callback(x)
         self.timer1 = self.create_timer(timer_period1, self.timer_callback)
 
-        # self.i = 0
+        self.i = 0.0
 
     def timer_callback(self):
-        msg = String()
-        msg.data = str(99)
+        msg = Float64()
+        msg.data = self.i
         self.publisher_1.publish(msg)
-        self.get_logger().info("Publishing: " + str(99))
-        # self.i += 1
+        self.get_logger().info("Publishing: " + str(self.i))
+        self.i += 1
 
 
 def main(args=None):
@@ -32,22 +33,23 @@ def main(args=None):
     rclpy.init(args=args)
     minimal_publisher_1 = MinimalPublisher()
     # minimal_publisher_2 = MinimalPublisher()
+    rclpy.spin(minimal_publisher_1)
 
-    while True:
-        # rclpy.spin_once(minimal_publisher_1)
-        if time.time() - timer1 >= 0.0001:
-            print(POS)
-            POS += 1
-            timer1 = time.time()
+    # while True:
+    # rclpy.spin_once(minimal_publisher_1)
+    # if time.time() - timer1 >= 0.0001:
+    #     print(POS)
+    #     POS += 1
+    #     timer1 = time.time()
 
-        if time.time() - timer2 >= 0.001:
-            rclpy.spin_once(minimal_publisher_1)
-            timer2 = time.time()
+    # if time.time() - timer2 >= 0.001:
+    #     rclpy.spin_once(minimal_publisher_1)
+    #     timer2 = time.time()
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_publisher.destroy_node()
+    # minimal_publisher.destroy_node()
     rclpy.shutdown()
 
 

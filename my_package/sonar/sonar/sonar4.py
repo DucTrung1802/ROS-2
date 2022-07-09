@@ -12,8 +12,8 @@ from sonar.Sonar import Sonar
 
 # Node parameters
 ORDER = 4
-TRIGGER_PIN = 19
-ECHO_PIN = 13
+TRIGGER_PIN = 26
+ECHO_PIN = 19
 
 NUMBER_OF_MEDIAN_FILTER_ELEMENT = 9
 PUBLISH_FREQUENCY = 10
