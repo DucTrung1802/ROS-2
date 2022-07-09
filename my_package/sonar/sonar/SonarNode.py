@@ -10,7 +10,7 @@ from sonar.Sonar import Sonar
 import threading
 
 # Node parameters
-PUBLISH_FREQUENCY = 10
+PUBLISH_FREQUENCY = 20
 NODE_NAME = "sonars"
 NUMBER_OF_MEDIAN_FILTER_ELEMENT = 9
 
