@@ -243,7 +243,7 @@ odom_dictionary = {
 
 LOW_BATTERY_PERCENTAGE = 15
 
-BATTERY_CHECK_PERIOD = 1  # second(s)
+BATTERY_CHECK_PERIOD = 60  # second(s)
 
 DISCHARGE_RATE = {
     12.660: 100,
@@ -392,6 +392,9 @@ class ESP32Node(Node):
 
         self.covariance_index = 0.0
 
+        self.BatteryStateInitalize()
+        self.index = 0
+
     def publisherCallback(self):
 
         self.OdometryPublishCallback()
@@ -487,6 +490,15 @@ class ESP32Node(Node):
             except:
                 return float(DISCHARGE_RATE[key])
 
+    def BatteryStateInitalize(self):
+        battery_msg = BatteryState()
+        battery_msg.header.stamp = self.get_clock().now().to_msg()
+
+        battery_msg.voltage = VOLTAGE
+        battery_msg.percentage = self.getBatteryPercentage(VOLTAGE)
+        self.battery_pub.publish(battery_msg)
+        self.last_check_battery = timeit.default_timer()
+
     def BatteryStatePublishCallback(self):
         low_battery_msg = UInt8()
 
@@ -503,12 +515,17 @@ class ESP32Node(Node):
             self.battery_pub.publish(battery_msg)
             self.last_check_battery = timeit.default_timer()
 
-        if battery_msg.percentage <= LOW_BATTERY_PERCENTAGE:
-            low_battery_msg.data = 1
-        elif battery_msg.percentage > LOW_BATTERY_PERCENTAGE:
-            low_battery_msg.data = 0
+        if self.getBatteryPercentage(VOLTAGE) <= LOW_BATTERY_PERCENTAGE:
+            low_battery_msg.data = int(1)
+        elif self.getBatteryPercentage(VOLTAGE) > LOW_BATTERY_PERCENTAGE:
+            low_battery_msg.data = int(0)
 
         self.low_battery_pub.publish(low_battery_msg)
+
+        if self.index <= 30:
+            self.BatteryStateInitalize()
+
+        self.index += 1
 
     def subscriberCallback(self, msg):
         setupSetpoint(msg)
@@ -815,7 +832,7 @@ def updateStoreRPMFromSerial():
         STORE_RIGHT_TICK = dictionaryData["rt"]
         STORE_LEFT_RPM = dictionaryData["lR"]
         STORE_RIGHT_RPM = dictionaryData["rR"]
-        STORE_VOLATGE = dictionaryData["bs"]
+        STORE_VOLATGE = dictionaryData["bv"]
         STORE_CHECKSUM = dictionaryData["ck"]
         checksum()
 
