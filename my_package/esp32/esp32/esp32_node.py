@@ -185,14 +185,14 @@ POSE_CALCULATOR = PoseCalculator(
 
 # Node parameters
 linear_velocity = 0
+angular_velocity = 0
 previous_linear_velocity = 0
 current_state_is_straight = True
 previous_current_state_is_straight = True
 linear_RPM_left = 0
 linear_RPM_right = 0
 RECEIVING_PERIOD = 1
-""" The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided\
-    callback function will be called. For no delay, set it equal ZERO. """
+""" The timer will be started and every ``PUBLISH_PERIOD`` number of seconds the provided callback function will be called. For no delay, set it equal ZERO. """
 PUBLISH_PERIOD = 0
 
 
@@ -207,15 +207,19 @@ error_receive = 0
 
 # JSON parameters
 KEY = "pwm_pulse"
+
 STORE_LEFT_TICK = 0
 STORE_RIGHT_TICK = 0
 STORE_LEFT_RPM = 0
 STORE_RIGHT_RPM = 0
+STORE_VOLATGE = 0
 STORE_CHECKSUM = ""
+
 LEFT_TICK = 0
 RIGHT_TICK = 0
 LEFT_RPM = 0
 RIGHT_RPM = 0
+VOLTAGE = 0
 CHECKSUM = ""
 
 # Publishing dictionary
@@ -233,6 +237,119 @@ odom_dictionary = {
         }
     },
 }
+
+# Battey parameters
+
+LOW_BATTERY = 
+
+BATTERY_CHECK_PERIOD = 1  # second(s)
+
+DISCHARGE_RATE = {
+    12.660: 100,
+    12.630: 99,
+    12.600: 98,
+    12.570: 97,
+    12.540: 96,
+    12.510: 95,
+    12.486: 94,
+    12.462: 93,
+    12.438: 92,
+    12.414: 91,
+    12.390: 90,
+    12.372: 89,
+    12.354: 88,
+    12.336: 87,
+    12.318: 86,
+    12.300: 85,
+    12.264: 84,
+    12.228: 83,
+    12.192: 82,
+    12.156: 81,
+    12.120: 80,
+    12.096: 79,
+    12.072: 78,
+    12.048: 77,
+    12.024: 76,
+    12.000: 75,
+    11.982: 74,
+    11.964: 73,
+    11.946: 72,
+    11.928: 71,
+    11.910: 70,
+    11.886: 69,
+    11.862: 68,
+    11.838: 67,
+    11.814: 66,
+    11.790: 65,
+    11.766: 64,
+    11.742: 63,
+    11.718: 62,
+    11.694: 61,
+    11.670: 60,
+    11.658: 59,
+    11.646: 58,
+    11.634: 57,
+    11.622: 56,
+    11.610: 55,
+    11.604: 54,
+    11.598: 53,
+    11.592: 52,
+    11.586: 51,
+    11.580: 50,
+    11.568: 49,
+    11.556: 48,
+    11.544: 47,
+    11.532: 46,
+    11.520: 45,
+    11.508: 44,
+    11.496: 43,
+    11.484: 42,
+    11.472: 41,
+    11.460: 40,
+    11.454: 39,
+    11.448: 38,
+    11.442: 37,
+    11.436: 36,
+    11.430: 35,
+    11.418: 34,
+    11.406: 33,
+    11.394: 32,
+    11.382: 31,
+    11.370: 30,
+    11.358: 29,
+    11.346: 28,
+    11.334: 27,
+    11.322: 26,
+    11.310: 25,
+    11.298: 24,
+    11.286: 23,
+    11.274: 22,
+    11.262: 21,
+    11.250: 20,
+    11.238: 19,
+    11.226: 18,
+    11.214: 17,
+    11.202: 16,
+    11.190: 15,
+    11.178: 14,
+    11.166: 13,
+    11.154: 12,
+    11.142: 11,
+    11.130: 10,
+    11.118: 9,
+    11.106: 8,
+    11.094: 7,
+    11.082: 6,
+    11.070: 5,
+    11.058: 4,
+    11.046: 3,
+    11.034: 2,
+    11.022: 1,
+    11.010: 0,
+}
+
+LIST_DISCHARGE_RATE = list(DISCHARGE_RATE)
+
 
 # Data recorder
 WORKBOOK = DataRecoder(TEST_PWM, TEST_PWM_FREQUENCY, LEFT_MOTOR.getSampleTime())
@@ -252,9 +369,12 @@ def checkConditions():
 class ESP32Node(Node):
     def __init__(self, node_name):
         super().__init__(node_name)
-        self.odom_pub = self.create_publisher(Odometry, "/wheel/odometry", 1)
 
-        # TODO: battery_state_pub...
+        self.last_check_battery = timeit.default_timer()
+
+        self.odom_pub = self.create_publisher(Odometry, "/wheel/odometry", 10)
+
+        self.battery_pub = self.create_publisher(BatteryState, "/battery_state", 10)
 
         # self.left_tick_pub = self.create_publisher(Int32, "left_tick", 1)
         # self.right_tick_pub = self.create_publisher(Int32, "right_tick", 1)
@@ -270,6 +390,12 @@ class ESP32Node(Node):
         self.covariance_index = 0.0
 
     def publisherCallback(self):
+
+        self.OdometryPublishCallback()
+
+        self.BatteryStatePublishCallback()
+
+    def OdometryPublishCallback(self):
 
         msg = Odometry()
         msg.header.stamp = self.get_clock().now().to_msg()
@@ -345,6 +471,37 @@ class ESP32Node(Node):
 
         # self.get_logger().info('Publishing: "%s"' % msg.data)
 
+    def getBatteryPercentage(self, voltage):
+        for key in DISCHARGE_RATE.keys():
+            try:
+                if (
+                    voltage <= key
+                    and voltage
+                    > LIST_DISCHARGE_RATE[LIST_DISCHARGE_RATE.index(key) + 1]
+                ):
+                    print(DISCHARGE_RATE[key])
+                    break
+
+            except:
+                print(DISCHARGE_RATE[key])
+
+    def BatteryStatePublishCallback(self):
+        msg = BatteryState()
+        msg.header.stamp = self.get_clock().now().to_msg()
+
+        if (
+            (timeit.default_timer() - self.last_check_battery >= BATTERY_CHECK_PERIOD)
+            and linear_velocity == 0
+            and angular_velocity == 0
+        ):
+            msg.voltage = VOLTAGE
+            msg.percentage = self.getBatteryPercentage(VOLTAGE)
+            
+            if msg.percentage <= 
+            
+            self.battery_pub.publish(msg)
+            self.last_check_battery = timeit.default_timer()
+
     def subscriberCallback(self, msg):
         setupSetpoint(msg)
 
@@ -394,7 +551,7 @@ def differientialDriveCalculate(linear_velocity, angular_velocity):
 
 def setupSetpoint(msg):
     global previous_linear_velocity, current_state_is_straight, previous_current_state_is_straight
-    global linear_velocity, linear_RPM_left, linear_RPM_right
+    global linear_velocity, angular_velocity, linear_RPM_left, linear_RPM_right
     global odom_dictionary
     # Evaluate to have RPM value
 
@@ -639,7 +796,7 @@ def checksum():
 
 
 def updateStoreRPMFromSerial():
-    global STORE_LEFT_TICK, STORE_RIGHT_TICK, STORE_LEFT_RPM, STORE_RIGHT_RPM, STORE_CHECKSUM, total_receive, error_receive
+    global STORE_LEFT_TICK, STORE_RIGHT_TICK, STORE_LEFT_RPM, STORE_RIGHT_RPM, STORE_VOLATGE, STORE_CHECKSUM, total_receive, error_receive
     # MCUSerialObject.write(formSerialData("{pwm_pulse:[1023,1023]}"))
     # print(
     #     "Error in serial communication: " + str(error_receive) + "/" + str(total_receive)
@@ -650,6 +807,7 @@ def updateStoreRPMFromSerial():
         STORE_RIGHT_TICK = dictionaryData["rt"]
         STORE_LEFT_RPM = dictionaryData["lR"]
         STORE_RIGHT_RPM = dictionaryData["rR"]
+        STORE_VOLATGE = dictionaryData["bs"]
         STORE_CHECKSUM = dictionaryData["ck"]
         checksum()
 
@@ -661,11 +819,12 @@ def updateStoreRPMFromSerial():
 
 
 def updateRPMFromStorePos():
-    global LEFT_TICK, RIGHT_TICK, LEFT_RPM, RIGHT_RPM, CHECKSUM
+    global LEFT_TICK, RIGHT_TICK, LEFT_RPM, RIGHT_RPM, VOLTAGE, CHECKSUM
     LEFT_TICK = STORE_LEFT_TICK
     RIGHT_TICK = STORE_RIGHT_TICK
     LEFT_RPM = STORE_LEFT_RPM
     RIGHT_RPM = STORE_RIGHT_RPM
+    VOLTAGE = STORE_VOLATGE
     CHECKSUM = STORE_CHECKSUM
 
 
