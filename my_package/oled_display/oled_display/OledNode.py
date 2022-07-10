@@ -1,6 +1,9 @@
+from ast import arg
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float64
+from sensor_msgs.msg import BatteryState
+from std_msgs.msg import Empty
+from std_msgs.msg import String
 
 
 from oled_display.Oled import Oled
@@ -23,20 +26,68 @@ class OledNode(Node):
         super().__init__(node_name)
         self.__node_name = node_name
         self.__oled = Oled()
-        self.subscription = self.create_subscription(
-            Float64, "topic", self.listener_callback, 10
-        )
-        self.subscription  # prevent unused variable warning
 
-    def listener_callback(self, msg):
+        self.__initializeBatterySubscription()
+
+        self.__initializeLowBatterySubscription()
+
+        self.__initializeSetGoalSubscription()
+
+        self.__display_cycle_timer = self.create_timer(0.03, self.__displayOled)
+
+    def __initializeBatterySubscription(self):
+        self.__battery_data = BatteryState()
+        self.__battery_subscription = self.create_subscription(
+            BatteryState, "/battery_state", self.__batteryCallback, 10
+        )
+        self.__battery_subscription  # prevent unused variable warning
+
+    def __initializeLowBatterySubscription(self):
+        self.__low_battery_alert = False
+        self.__low_battery_subscription = self.create_subscription(
+            Empty, "/low_battery", self.__lowBatteryCallback
+        )
+        self.__low_battery_subscription  # prevent unused variable warning
+
+    def __initializeSetGoalSubscription(self):
+        self.__current_goal = ""
+        self.__current_goal_subscription = self.create_subscription(
+            String, "/goal_progress", self.__currentGoalCallback
+        )
+        self.__current_goal_subscription  # prevent unused variable warning
+
+    def __lowBatteryCallback(self, msg):
+        self.__low_battery_alert = True
+
+    def __batteryCallback(self, msg):
+        self.__battery_data = msg
+
+    def __currentGoalCallback(self, msg):
+        self.__current_goal = msg
+
+    def __displayOled(self):
         self.__oled.clear()
+
         self.__oled.add_text(
-            text=str(f"{round(msg.data)}%"), horizontal_align="right", vertical_align=0
+            text=str(f"{round(self.__battery_data.percentage)}%"),
+            horizontal_align="right",
+            vertical_align=0,
         )
-        self.__oled.display()
 
-    def clear_display(self):
-        self.__oled.clear()
+        self.__oled.add_text(
+            text=str(f"==> TABLE {self.__current_goal.data}"),
+            horizontal_align="center",
+            vertical_align=25,
+        )
+
+        if self.__low_battery_alert:
+            self.__oled.add_text(
+                text=str("LOW BATTERY!"), horizontal_align="center", vertical_align=40
+            )
+
+        self.__low_battery_alert = False
+
+        self.__oled.display()
 
 
 def setup():
