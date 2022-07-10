@@ -19,6 +19,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Int32
 from std_msgs.msg import Float32
+from std_msgs.msg import UInt8
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import BatteryState
@@ -240,7 +241,7 @@ odom_dictionary = {
 
 # Battey parameters
 
-LOW_BATTERY = 
+LOW_BATTERY_PERCENTAGE = 15
 
 BATTERY_CHECK_PERIOD = 1  # second(s)
 
@@ -376,6 +377,8 @@ class ESP32Node(Node):
 
         self.battery_pub = self.create_publisher(BatteryState, "/battery_state", 10)
 
+        self.low_battery_pub = self.create_publisher(UInt8, "/low_battery", 10)
+
         # self.left_tick_pub = self.create_publisher(Int32, "left_tick", 1)
         # self.right_tick_pub = self.create_publisher(Int32, "right_tick", 1)
         # self.left_RPM_pub = self.create_publisher(Float32, "left_RPM", 1)
@@ -486,21 +489,27 @@ class ESP32Node(Node):
                 print(DISCHARGE_RATE[key])
 
     def BatteryStatePublishCallback(self):
-        msg = BatteryState()
-        msg.header.stamp = self.get_clock().now().to_msg()
+        low_battery_msg = UInt8()
+
+        battery_msg = BatteryState()
+        battery_msg.header.stamp = self.get_clock().now().to_msg()
 
         if (
             (timeit.default_timer() - self.last_check_battery >= BATTERY_CHECK_PERIOD)
             and linear_velocity == 0
             and angular_velocity == 0
         ):
-            msg.voltage = VOLTAGE
-            msg.percentage = self.getBatteryPercentage(VOLTAGE)
-            
-            if msg.percentage <= 
-            
-            self.battery_pub.publish(msg)
+            battery_msg.voltage = VOLTAGE
+            battery_msg.percentage = self.getBatteryPercentage(VOLTAGE)
+            self.battery_pub.publish(battery_msg)
             self.last_check_battery = timeit.default_timer()
+
+        if battery_msg.percentage <= LOW_BATTERY_PERCENTAGE:
+            low_battery_msg.data = 1
+        elif battery_msg.percentage > LOW_BATTERY_PERCENTAGE:
+            low_battery_msg.data = 0
+
+        self.low_battery_pub.publish(low_battery_msg)
 
     def subscriberCallback(self, msg):
         setupSetpoint(msg)
