@@ -17,5 +17,10 @@ setup(
     description="TODO: Package description",
     license="TODO: License declaration",
     tests_require=["pytest"],
-    entry_points={"console_scripts": ["esp32 = "]},
+    entry_points={
+        "console_scripts": [
+            "esp32 = esp32.esp32_node:main",
+            "motor_controller = esp32.motor_controller_node:main",
+        ]
+    },
 )
