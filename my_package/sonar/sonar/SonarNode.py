@@ -10,7 +10,7 @@ from sonar.Sonar import Sonar
 import threading
 
 # Node parameters
-PUBLISH_FREQUENCY = 20
+PUBLISH_FREQUENCY = 10
 NODE_NAME = "sonars"
 NUMBER_OF_MEDIAN_FILTER_ELEMENT = 9
 
@@ -41,7 +41,9 @@ class SonarNode(Node):
                 self.create_publisher(Range, "/ultrasonic_sensor_" + str(i + 1), 1)
             )
 
-        self.__timer = self.create_timer(PUBLISH_PERIOD, self.timer_callback)
+        self.__timer_1 = self.create_timer(PUBLISH_PERIOD, self.timer_callback_1)
+
+        self.__timer_2 = self.create_timer(PUBLISH_PERIOD / 2, self.timer_callback_2)
 
     def __checkConditions(self, sonar_array_instance):
         for i in range(len(sonar_array_instance)):
@@ -50,8 +52,12 @@ class SonarNode(Node):
                     "Invalid type of variable sonar_array_instance, must an array of 'Sonar' intance!"
                 )
 
-    def timer_callback(self):
+    def timer_callback_1(self):
         for i in range(len(self.__sonar_array)):
+
+            if i == 2:
+                continue
+
             msg = Range()
             msg.header.frame_id = "ultrasonic_" + str(i + 1) + "_link"
             msg.header.stamp = self.get_clock().now().to_msg()
@@ -63,6 +69,19 @@ class SonarNode(Node):
             msg.max_range = self.__sonar_array[i].getMaxRange()
             msg.range = self.__sonar_array[i].getRange()
             self.__sonar_publisher[i].publish(msg)
+
+    def timer_callback_2(self):
+        msg = Range()
+        msg.header.frame_id = "ultrasonic_" + str(3) + "_link"
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.radiation_type = self.__sonar_array[2].getRadiationType()
+        msg.field_of_view = self.__sonar_array[
+            2
+        ].getFieldOfView()  # rad ~ 15 degree (according to feature of HC-SR 04)
+        msg.min_range = self.__sonar_array[2].getMinRange()
+        msg.max_range = self.__sonar_array[2].getMaxRange()
+        msg.range = self.__sonar_array[2].getRange()
+        self.__sonar_publisher[2].publish(msg)
 
 
 def task_1(sonar):
