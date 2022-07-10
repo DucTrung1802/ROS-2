@@ -38,71 +38,10 @@ SPI_PORT = 0
 SPI_DEVICE = 0
 I2C_BUS = 4
 
-# disp = Adafruit_SSD1306.SSD1306_128_64(rst=RST, i2c_bus=I2C_BUS)
-
-# # Initialize library.
-# disp.begin()
-
-# # Clear display.
-# disp.clear()
-# disp.display()
-
-# # Create blank image for drawing.
-# # Make sure to create image with mode '1' for 1-bit color.
-# width = disp.width
-# height = disp.height
-# image = Image.new("1", (width, height), "black")
-
-# # Get drawing object to draw on image.
-# draw = ImageDraw.Draw(image)
-
-# # Draw a black filled box to clear the image.
-# draw.rectangle((0, 0, width, height), outline=0, fill=0)
-
-# # Draw some shapes.
-# # First define some constants to allow easy resizing of shapes.
-# padding = -2
-# top = padding
-# bottom = height - padding
-# # Move left to right keeping track of the current x position for drawing shapes.
-# x = 0
-
-
-# # Load default font.
-# font = ImageFont.load_default()
 
 # # Alternatively load a TTF font.  Make sure the .ttf font file is in the same directory as the python script!
 # # Some other nice fonts to try: http://www.dafont.com/bitmap.php
 # # font = ImageFont.truetype('Minecraftia.ttf', 8)
-
-# # while True:
-
-# # Draw a black filled box to clear the image.
-# draw.rectangle((0, 0, width, height), outline=0, fill=0)
-
-# # Shell scripts for system monitoring from here : https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
-# cmd = "hostname -I | cut -d' ' -f1"
-# IP = subprocess.check_output(cmd, shell=True)
-# cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
-# CPU = subprocess.check_output(cmd, shell=True)
-# cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'"
-# MemUsage = subprocess.check_output(cmd, shell=True)
-# cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %d/%dGB %s", $3,$2,$5}\''
-# Disk = subprocess.check_output(cmd, shell=True)
-
-# # Write two lines of text.
-
-# draw.text((x, top), "minh nghien", font=font, fill=255, align="center")
-# draw.text((x + 10, top + 10), "minh nghien", font=font, fill=255)
-# draw.text((x + 20, top + 20), "minh nghien", font=font, fill=255)
-# draw.text((x + 30, top + 30), "minh nghien", font=font, fill=255)
-# draw.text((x, top + 40), "", font=font, fill=255)
-# draw.text((x + 64, top + 50), "minh nghien", font=font, fill=255)
-
-# # Display image.
-# disp.image(image)
-# disp.display()
-# # time.sleep(0.1)
 
 
 class Oled(object):
@@ -158,11 +97,6 @@ class Oled(object):
         x = self.__align_calculate(text, horizontal_align)
         y = float(vertical_align)
         self.__draw.text((x, y), text, font=self.__font, fill=255)
-        # self.__draw.text((0, 10), text, font=self.__font, fill=255)
-        # self.__draw.text((0, 20), text, font=self.__font, fill=255)
-        # self.__draw.text((0, 30), text, font=self.__font, fill=255)
-        # self.__draw.text((0, 40), text, font=self.__font, fill=255)
-        # self.__draw.text((0, 50), text, font=self.__font, fill=255)
 
     def display(self):
         self.__oled.image(self.__image)
