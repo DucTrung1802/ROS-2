@@ -89,6 +89,9 @@ class OledNode(Node):
 
         self.__oled.display()
 
+    def clear_display(self):
+        self.__oled.clear()
+
 
 def setup():
     pass
