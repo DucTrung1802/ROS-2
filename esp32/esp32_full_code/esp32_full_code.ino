@@ -185,13 +185,13 @@ void deserializeJSON() {
 
 void driveLeftWheel() {
   if (data_receive.left_wheel_direction == 1) {
-    digitalWrite(AIN1, HIGH);
-    digitalWrite(AIN2, LOW);
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, HIGH);
   }
 
   else if (data_receive.left_wheel_direction == -1) {
-    digitalWrite(AIN1, LOW);
-    digitalWrite(AIN2, HIGH);
+    digitalWrite(AIN1, HIGH);
+    digitalWrite(AIN2, LOW);
   }
 
   else if (data_receive.left_wheel_direction == 0) {
@@ -202,13 +202,13 @@ void driveLeftWheel() {
 
 void driveRightWheel() {
   if (data_receive.right_wheel_direction == 1) {
-    digitalWrite(BIN1, LOW);
-    digitalWrite(BIN2, HIGH);
+    digitalWrite(BIN1, HIGH);
+    digitalWrite(BIN2, LOW);
   }
 
   else if (data_receive.right_wheel_direction == -1) {
-    digitalWrite(BIN1, HIGH);
-    digitalWrite(BIN2, LOW);
+    digitalWrite(BIN1, LOW);
+    digitalWrite(BIN2, HIGH);
   }
 
   else if (data_receive.right_wheel_direction == 0) {
