@@ -2,7 +2,7 @@ from ast import arg
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import BatteryState
-from std_msgs.msg import Empty
+from std_msgs.msg import UInt8
 from std_msgs.msg import String
 
 
@@ -43,9 +43,9 @@ class OledNode(Node):
         self.__battery_subscription  # prevent unused variable warning
 
     def __initializeLowBatterySubscription(self):
-        self.__low_battery_alert = False
+        self.__low_battery_alert = int(0)
         self.__low_battery_subscription = self.create_subscription(
-            Empty, "/low_battery", self.__lowBatteryCallback
+            UInt8, "/low_battery", self.__lowBatteryCallback
         )
         self.__low_battery_subscription  # prevent unused variable warning
 
@@ -80,12 +80,10 @@ class OledNode(Node):
             vertical_align=25,
         )
 
-        if self.__low_battery_alert:
+        if self.__low_battery_alert == 1:
             self.__oled.add_text(
                 text=str("LOW BATTERY!"), horizontal_align="center", vertical_align=40
             )
-
-        self.__low_battery_alert = False
 
         self.__oled.display()
 
