@@ -52,6 +52,20 @@ def generate_launch_description():
                 output="screen",
                 parameters=[],
             ),
+            Node(
+                package="oled_display",
+                executable="oled",
+                name="oled",
+                output="screen",
+                parameters=[],
+            ),
+            Node(
+                package="ir",
+                executable="ir_sensor",
+                name="ir_sensor",
+                output="screen",
+                parameters=[],
+            ),
         ]
     )
 
