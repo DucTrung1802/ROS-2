@@ -1,5 +1,6 @@
 from ast import arg
 import rclpy
+import time
 from rclpy.node import Node
 from sensor_msgs.msg import BatteryState
 from std_msgs.msg import UInt8
@@ -33,7 +34,14 @@ class OledNode(Node):
 
         self.__initializeSetGoalSubscription()
 
-        self.__display_cycle_timer = self.create_timer(0.03, self.__displayOled)
+        self.__display_cycle_timer = self.create_timer(0, self.__displayOled)
+
+        self.__oled.clear()
+        self.__oled.add_text(
+            text=str("STARTING"), horizontal_align="center", vertical_align=25
+        )
+        self.__oled.display()
+        time.sleep(2)
 
     def __initializeBatterySubscription(self):
         self.__battery_data = BatteryState()
@@ -45,19 +53,19 @@ class OledNode(Node):
     def __initializeLowBatterySubscription(self):
         self.__low_battery_alert = int(0)
         self.__low_battery_subscription = self.create_subscription(
-            UInt8, "/low_battery", self.__lowBatteryCallback
+            UInt8, "/low_battery", self.__lowBatteryCallback, 10
         )
         self.__low_battery_subscription  # prevent unused variable warning
 
     def __initializeSetGoalSubscription(self):
-        self.__current_goal = ""
+        self.__current_goal = String()
         self.__current_goal_subscription = self.create_subscription(
-            String, "/goal_progress", self.__currentGoalCallback
+            String, "/goal_progress", self.__currentGoalCallback, 10
         )
         self.__current_goal_subscription  # prevent unused variable warning
 
     def __lowBatteryCallback(self, msg):
-        self.__low_battery_alert = True
+        self.__low_battery_alert = msg.data
 
     def __batteryCallback(self, msg):
         self.__battery_data = msg
@@ -74,21 +82,33 @@ class OledNode(Node):
             vertical_align=0,
         )
 
-        self.__oled.add_text(
-            text=str(f"==> TABLE {self.__current_goal.data}"),
-            horizontal_align="center",
-            vertical_align=25,
-        )
+        if self.__current_goal.data == "":
+            self.__oled.add_text(
+                text=str("WAITING..."), horizontal_align="center", vertical_align=25
+            )
+
+        elif self.__current_goal.data != "":
+            self.__oled.add_text(
+                text=str(f"{self.__current_goal.data}"),
+                horizontal_align="center",
+                vertical_align=25,
+            )
 
         if self.__low_battery_alert == 1:
             self.__oled.add_text(
                 text=str("LOW BATTERY!"), horizontal_align="center", vertical_align=40
             )
 
+        elif self.__low_battery_alert == 0:
+            self.__oled.add_text(
+                text=str(""), horizontal_align="center", vertical_align=40
+            )
+
         self.__oled.display()
+        time.sleep(0.01)
 
     def clear_display(self):
-        self.__oled.clear()
+        self.__oled.shutdown()
 
 
 def setup():
@@ -106,6 +126,8 @@ def loop():
         print("Oled has stopped by User")
         oled_publisher.clear_display()
 
+    finally:
+        oled_publisher.clear_display()
     # oled.add_text(text="", horizontal_align="left", vertical_align=15)
     # oled.add_text(text="", horizontal_align="center", vertical_align=25)
     # oled.add_text(text="hello", horizontal_align="right", vertical_align=35)

@@ -56,12 +56,17 @@ class Oled(object):
         self.__max_line = (
             50
         )  # Each character has the width of 10 pixels. Vertical pixel: 0 - 50
+        # self.__font = ImageFont.truetype("DejaVuSerif-Bold.ttf", 15)
         self.__font = ImageFont.load_default()
 
         self.__oled.begin()
         self.clear()
 
     def clear(self):
+        self.__draw.rectangle((0, 0, self.__width, self.__height), outline=0, fill=0)
+        self.__oled.display()
+
+    def shutdown(self):
         self.__oled.clear()
         self.__draw.rectangle((0, 0, self.__width, self.__height), outline=0, fill=0)
         self.__oled.display()
