@@ -213,14 +213,14 @@ STORE_LEFT_TICK = 0
 STORE_RIGHT_TICK = 0
 STORE_LEFT_RPM = 0
 STORE_RIGHT_RPM = 0
-STORE_VOLATGE = 0
+STORE_VOLATGE = 0.0
 STORE_CHECKSUM = ""
 
 LEFT_TICK = 0
 RIGHT_TICK = 0
 LEFT_RPM = 0
 RIGHT_RPM = 0
-VOLTAGE = 0
+VOLTAGE = 0.0
 CHECKSUM = ""
 
 # Publishing dictionary
@@ -474,7 +474,7 @@ class ESP32Node(Node):
 
         # self.get_logger().info('Publishing: "%s"' % msg.data)
 
-    def getBatteryPercentage(self, voltage):
+    def getBatteryPercentage(self, voltage) -> float:
         for key in DISCHARGE_RATE.keys():
             try:
                 if (
@@ -482,11 +482,10 @@ class ESP32Node(Node):
                     and voltage
                     > LIST_DISCHARGE_RATE[LIST_DISCHARGE_RATE.index(key) + 1]
                 ):
-                    print(DISCHARGE_RATE[key])
-                    break
+                    return float(DISCHARGE_RATE[key])
 
             except:
-                print(DISCHARGE_RATE[key])
+                return float(DISCHARGE_RATE[key])
 
     def BatteryStatePublishCallback(self):
         low_battery_msg = UInt8()
