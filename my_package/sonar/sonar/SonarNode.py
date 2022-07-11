@@ -99,7 +99,7 @@ def task_1(sonar):
 
         try:
             sonar.measureRange()
-            print("Task 1 is running...")
+            # print("Task 1 is running...")
         except:
             print("Sonar 1 occured error " + str(error_number) + " times")
 
@@ -119,7 +119,7 @@ def task_2(sonar):
 
         try:
             sonar.measureRange()
-            print("Task 2 is running...")
+            # print("Task 2 is running...")
         except:
             print("Sonar 2 occured error " + str(error_number) + " times")
 
@@ -139,7 +139,7 @@ def task_3(sonar):
 
         try:
             sonar.measureRange()
-            print("Task 3 is running...")
+            # print("Task 3 is running...")
         except:
             error_number += 1
             print("Sonar 3 occured error " + str(error_number) + " times")
@@ -160,7 +160,7 @@ def task_4(sonar):
 
         try:
             sonar.measureRange()
-            print("Task 4 is running...")
+            # print("Task 4 is running...")
         except:
             print("Sonar 4 occured error " + str(error_number) + " times")
 
@@ -180,7 +180,7 @@ def task_5(sonar):
 
         try:
             sonar.measureRange()
-            print("Task 5 is running...")
+            # print("Task 5 is running...")
         except:
             print("Sonar 5 occured error " + str(error_number) + " times")
 
@@ -195,7 +195,7 @@ def task_6(sonar_node):
             break
 
         rclpy.spin_once(sonar_node)
-        print("Task 6 is running...")
+        # print("Task 6 is running...")
 
 
 def threadingHandler(sonar_array):
