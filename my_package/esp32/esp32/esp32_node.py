@@ -371,6 +371,8 @@ class ESP32Node(Node):
     def __init__(self, node_name):
         super().__init__(node_name)
 
+        self.__percentage = 0.0
+
         self.last_check_battery = timeit.default_timer()
 
         self.odom_pub = self.create_publisher(Odometry, "/wheel/odometry", 10)
@@ -392,6 +394,7 @@ class ESP32Node(Node):
 
         self.covariance_index = 0.0
 
+        time.sleep(0.5)
         self.BatteryStateInitalize()
         self.index = 0
 
@@ -511,13 +514,14 @@ class ESP32Node(Node):
             and angular_velocity == 0
         ):
             battery_msg.voltage = VOLTAGE
-            battery_msg.percentage = self.getBatteryPercentage(VOLTAGE)
+            self.__percentage = float(self.getBatteryPercentage(VOLTAGE))
+            battery_msg.percentage = self.__percentage
             self.battery_pub.publish(battery_msg)
             self.last_check_battery = timeit.default_timer()
 
-        if self.getBatteryPercentage(VOLTAGE) <= LOW_BATTERY_PERCENTAGE:
+        if self.__percentage <= LOW_BATTERY_PERCENTAGE:
             low_battery_msg.data = int(1)
-        elif self.getBatteryPercentage(VOLTAGE) > LOW_BATTERY_PERCENTAGE:
+        elif self.__percentage > LOW_BATTERY_PERCENTAGE:
             low_battery_msg.data = int(0)
 
         self.low_battery_pub.publish(low_battery_msg)
