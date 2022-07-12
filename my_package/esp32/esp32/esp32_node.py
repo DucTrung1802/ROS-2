@@ -490,7 +490,7 @@ class ESP32Node(Node):
                     return float(DISCHARGE_RATE[key])
                 elif voltage > key:
                     return 100.0
-                else:
+                elif voltage < DISCHARGE_RATE[11.010]:
                     return 0.0
 
             except:
