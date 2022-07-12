@@ -66,7 +66,10 @@ class Sonar(object):
             )
 
         print(
-            "Complete initializing Sonar with TRIGGER PIN: " + str(self.__trigger_pin)
+            "Complete initializing Sonar with TRIGGER PIN: "
+            + str(self.__trigger_pin)
+            + " and ECHO PIN: "
+            + str(self.__echo_pin)
         )
 
     def __checkCondition(

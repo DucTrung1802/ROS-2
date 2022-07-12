@@ -161,7 +161,7 @@ def task_1():
             break
 
         getIMUData(mpu)
-        time.sleep(0.01)
+        time.sleep(0.1)
 
 
 def task_2():
