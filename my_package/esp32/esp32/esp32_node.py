@@ -514,8 +514,8 @@ class ESP32Node(Node):
 
         if (
             (timeit.default_timer() - self.last_check_battery >= BATTERY_CHECK_PERIOD)
-            and linear_velocity == 0
-            and angular_velocity == 0
+            and LEFT_RPM == 0.0
+            and RIGHT_RPM == 0.0
         ):
             battery_msg.voltage = VOLTAGE
             self.__percentage = float(self.getBatteryPercentage(VOLTAGE))
