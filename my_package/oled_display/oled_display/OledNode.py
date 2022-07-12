@@ -6,20 +6,46 @@ from sensor_msgs.msg import BatteryState
 from std_msgs.msg import UInt8
 from std_msgs.msg import String
 
+from PIL import ImageFont
+
 
 from oled_display.Oled import Oled
 
 # Node parameters
 PUBLISH_FREQUENCY = 10
 NODE_NAME = "sonars"
+OLED_FREQUENCY = 60
+
+FONT_SET_DICT = {
+    "order_number": {
+        "font": ImageFont.truetype("DejaVuSerif-Bold.ttf", 45),
+        "width": 32,
+        "height": 44,
+    },
+    "battery": {"font": ImageFont.load_default(), "width": 6, "height": 10},
+    "starting": {
+        "font": ImageFont.truetype("DejaVuSerif-Bold.ttf", 20),
+        "width": 14.625,
+        "height": 15,
+    },
+    "waiting": {
+        "font": ImageFont.truetype("DejaVuSerif-Bold.ttf", 20),
+        "width": 13,
+        "height": 15,
+    },
+}
 
 
 def checkConditions():
-    global PUBLISH_PERIOD
+    global PUBLISH_PERIOD, OLED_PERIOD
 
     if PUBLISH_FREQUENCY <= 0:
         raise Exception("PUBLISH_FREQUENCY must be an positive integer!")
     PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
+
+    if OLED_FREQUENCY <= 0:
+        raise Exception("OLED_FREQUENCY must be an positive integer!")
+    OLED_PERIOD = 1 / OLED_FREQUENCY
 
 
 class OledNode(Node):
@@ -37,8 +63,12 @@ class OledNode(Node):
         self.__display_cycle_timer = self.create_timer(0, self.__displayOled)
 
         self.__oled.clear()
+
         self.__oled.add_text(
-            text=str("STARTING"), horizontal_align="center", vertical_align=25
+            text=str("STARTING"),
+            font_set=FONT_SET_DICT["starting"],
+            horizontal_align="center",
+            vertical_align=22.5,
         )
         self.__oled.display()
         time.sleep(2)
@@ -78,41 +108,51 @@ class OledNode(Node):
 
         self.__oled.add_text(
             text=str(f"{round(self.__battery_data.percentage)}%"),
+            font_set=FONT_SET_DICT["battery"],
             horizontal_align="right",
             vertical_align=0,
         )
 
         if self.__current_goal.data == "":
             self.__oled.add_text(
-                text=str("WAITING..."), horizontal_align="center", vertical_align=25
+                text=str("WAITING.."),
+                font_set=FONT_SET_DICT["waiting"],
+                horizontal_align="center",
+                vertical_align=22.5,
             )
 
         elif self.__current_goal.data != "":
             self.__oled.add_text(
                 text=str(f"{self.__current_goal.data}"),
+                font_set=FONT_SET_DICT["order_number"],
                 horizontal_align="center",
-                vertical_align=25,
+                vertical_align=10,
             )
 
         if self.__low_battery_alert == 1:
             self.__oled.add_text(
-                text=str("LOW BATTERY!"), horizontal_align="center", vertical_align=40
+                text=str("LOW BATTERY!"),
+                font_set=FONT_SET_DICT["battery"],
+                horizontal_align="left",
+                vertical_align=0,
             )
 
         elif self.__low_battery_alert == 0:
             self.__oled.add_text(
-                text=str(""), horizontal_align="center", vertical_align=40
+                text=str(""),
+                font_set=FONT_SET_DICT["battery"],
+                horizontal_align="left",
+                vertical_align=0,
             )
 
         self.__oled.display()
-        time.sleep(0.01)
 
     def clear_display(self):
         self.__oled.shutdown()
 
 
 def setup():
-    pass
+    checkConditions()
 
 
 def loop():
@@ -125,9 +165,8 @@ def loop():
     except KeyboardInterrupt:
         print("Oled has stopped by User")
         oled_publisher.clear_display()
+        exit(0)
 
-    finally:
-        oled_publisher.clear_display()
     # oled.add_text(text="", horizontal_align="left", vertical_align=15)
     # oled.add_text(text="", horizontal_align="center", vertical_align=25)
     # oled.add_text(text="hello", horizontal_align="right", vertical_align=35)

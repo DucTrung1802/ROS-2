@@ -18,6 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+from ast import expr
 from logging import exception
 import time
 
@@ -52,57 +53,60 @@ class Oled(object):
         self.__image = Image.new("1", (self.__width, self.__height), "black")
         self.__draw = ImageDraw.Draw(self.__image)
 
-        self.__max_length = 21  # Each character has the width of 6 pixels
-        self.__max_line = (
-            50
-        )  # Each character has the width of 10 pixels. Vertical pixel: 0 - 50
-        # self.__font = ImageFont.truetype("DejaVuSerif-Bold.ttf", 15)
-        self.__font = ImageFont.load_default()
+        self.__debug_index = 0
 
         self.__oled.begin()
         self.clear()
 
+    def __display(self):
+        try:
+            self.__oled.display()
+            time.sleep(0.01)
+        except KeyboardInterrupt:
+            self.__oled.display()
+            time.sleep(0.01)
+            exit(0)
+        except:
+            self.__debug_index += 1
+            print(f"skip read oled {self.__debug_index} time")
+            time.sleep(0.01)
+
     def clear(self):
         self.__draw.rectangle((0, 0, self.__width, self.__height), outline=0, fill=0)
-        self.__oled.display()
+        self.__display()
 
     def shutdown(self):
         self.__oled.clear()
         self.__draw.rectangle((0, 0, self.__width, self.__height), outline=0, fill=0)
-        self.__oled.display()
+        self.__display()
 
-    def __check_length(self, text):
+    def __check_length(self, text, font_set):
         text = str(text)
-        if len(text) >= self.__max_length:
+        if len(text) >= self.__width / font_set["width"]:
             print(f'"{text}" length is larger the size of oled!')
 
-    def __align_calculate(self, text, horizontal_align):
+    def __align_calculate(self, text, font_set, horizontal_align):
         x = 0.0
-        length_in_pixel = len(text) * 6
+        width_in_pixel = len(text) * font_set["width"]
         if horizontal_align in ["left", "center", "right"]:
             if horizontal_align == "left":
                 pass
             elif horizontal_align == "center":
-                x = (self.__width - length_in_pixel) / 2
+                x = (self.__width - width_in_pixel) / 2.0
             elif horizontal_align == "right":
-                x = self.__width - length_in_pixel
+                x = self.__width - width_in_pixel
         else:
             raise exception("Invalid horizontal align!")
         return x
 
-    def add_text(self, text, horizontal_align="center", vertical_align=25):
-        """_summary_
+    def add_text(self, text, font_set, horizontal_align="center", vertical_align=0):
 
-        Args:
-            text (str): _description_ \n
-            horizontal_align (str, optional): _description_. Defaults to "center". \n
-            vertical_align (int, optional): _description_. Defaults to 25. Range: 0 - 50
-        """
-        self.__check_length(text)
-        x = self.__align_calculate(text, horizontal_align)
+        self.__check_length(text, font_set)
+        x = self.__align_calculate(text, font_set, horizontal_align)
         y = float(vertical_align)
-        self.__draw.text((x, y), text, font=self.__font, fill=255)
+        self.__draw.text((x, y), text, font=font_set["font"], fill=255)
 
     def display(self):
         self.__oled.image(self.__image)
-        self.__oled.display()
+        self.__display()
+

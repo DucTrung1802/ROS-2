@@ -97,7 +97,8 @@ x = 0
 
 # Load default font.
 battery_font = ImageFont.load_default()
-content_font = ImageFont.truetype("DejaVuSerif-Bold.ttf", 45)
+order_number_font = ImageFont.truetype("DejaVuSerif-Bold.ttf", 45)
+waiting_font = ImageFont.truetype("DejaVuSerif-Bold.ttf", 20)
 
 
 # Alternatively load a TTF font.  Make sure the .ttf font file is in the same directory as the python script!
@@ -122,8 +123,12 @@ while True:
 
         # Write two lines of text.
 
-        draw.text((110, 0), "10%", font=battery_font, fill=255)
-        draw.text((48, 8), "3", font=content_font, fill=255)
+        # draw.text((110, 0), "10%", font=battery_font, fill=255)
+        # draw.text((48, 10), "3", font=order_number_font, fill=255)
+        draw.text((0, 0), "minh minh minh", font=waiting_font, fill=255)
+        draw.text((0, 15), "minh minh minh", font=waiting_font, fill=255)
+        draw.text((0, 30), "minh minh minh", font=waiting_font, fill=255)
+        draw.text((0, 45), "minh minh minh", font=waiting_font, fill=255)
         # draw.text((x, top + 8), str(CPU), font=font, fill=255)
         # draw.text((x, top + 16), str(MemUsage), font=font, fill=255)
         # draw.text((x, top + 25), str(Disk), font=font, fill=255)
