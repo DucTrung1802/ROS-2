@@ -51,12 +51,12 @@ RIGHT_MOTOR_MAX_RPM = 190
 
 WHEEL_BASE = 0.44
 
-LEFT_MOTOR_DIAMETER = 0.09  # m
+LEFT_MOTOR_DIAMETER = 0.095  # m
 LEFT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
 LEFT_MOTOR_PWM_FREQUENCY = 1000  # Hz
 LEFT_MOTOR_SAMPLE_TIME = 0.005  # s
 
-RIGHT_MOTOR_DIAMETER = 0.09  # m
+RIGHT_MOTOR_DIAMETER = 0.095  # m
 RIGHT_MOTOR_PULSE_PER_ROUND_OF_ENCODER = 480  # ticks
 RIGHT_MOTOR_PWM_FREQUENCY = 1000  # Hz
 RIGHT_MOTOR_SAMPLE_TIME = 0.005  # s
@@ -394,7 +394,6 @@ class ESP32Node(Node):
 
         self.covariance_index = 0.0
 
-        time.sleep(0.5)
         self.BatteryStateInitalize()
         self.index = 0
 
@@ -489,6 +488,10 @@ class ESP32Node(Node):
                     > LIST_DISCHARGE_RATE[LIST_DISCHARGE_RATE.index(key) + 1]
                 ):
                     return float(DISCHARGE_RATE[key])
+                elif voltage > key:
+                    return 100.0
+                else:
+                    return 0.0
 
             except:
                 return float(DISCHARGE_RATE[key])
@@ -498,7 +501,8 @@ class ESP32Node(Node):
         battery_msg.header.stamp = self.get_clock().now().to_msg()
 
         battery_msg.voltage = VOLTAGE
-        battery_msg.percentage = self.getBatteryPercentage(VOLTAGE)
+        self.__percentage = float(self.getBatteryPercentage(VOLTAGE))
+        battery_msg.percentage = self.__percentage
         self.battery_pub.publish(battery_msg)
         self.last_check_battery = timeit.default_timer()
 
