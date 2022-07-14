@@ -101,14 +101,14 @@ RIGHT_MOTOR_MAX = 12
 # Test data
 TEST_ONLY_ON_LAPTOP = False
 MANUALLY_TUNE_PID = False
-DATA_RECORDING = False
+DATA_RECORDING = True
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 0
 
 # DataRecorder parameters
-DATA_AMOUNT = 2000
+DATA_AMOUNT = 500
 
 if not (float(WHEEL_BASE) and WHEEL_BASE > 0):
     raise Exception("Invalid value of wheel base length!")
@@ -383,8 +383,8 @@ class ESP32Node(Node):
 
         # self.left_tick_pub = self.create_publisher(Int32, "left_tick", 1)
         # self.right_tick_pub = self.create_publisher(Int32, "right_tick", 1)
-        # self.left_RPM_pub = self.create_publisher(Float32, "left_RPM", 1)
-        # self.right_RPM_pub = self.create_publisher(Float32, "right_RPM", 1)
+        self.left_RPM_pub = self.create_publisher(Float32, "left_RPM", 1)
+        self.right_RPM_pub = self.create_publisher(Float32, "right_RPM", 1)
         self.timer = self.create_timer(PUBLISH_PERIOD, self.publisherCallback)
 
         self.controller_sub = self.create_subscription(
@@ -447,28 +447,28 @@ class ESP32Node(Node):
         #     else:
         #         msg.pose.covariance[i] = 0.0
 
-        for i in range(36):
-            if i == 0 or i == 7:
-                msg.pose.covariance[i] = 1.0e-5
-                msg.twist.covariance[i] = 1.0e-5
-            elif i == 14 or i == 21 or i == 28:
-                msg.pose.covariance[i] = 1000000000000.0
-                msg.twist.covariance[i] = 1000000000000.0
-            elif i == 35:
-                msg.pose.covariance[i] = 0.001
-                msg.twist.covariance[i] = 0.001
-            else:
-                msg.pose.covariance[i] = 0.0
-                msg.twist.covariance[i] = 0.0
+        # for i in range(36):
+        #     if i == 0 or i == 7:
+        #         msg.pose.covariance[i] = 1.0e-5
+        #         msg.twist.covariance[i] = 1.0e-5
+        #     elif i == 14 or i == 21 or i == 28:
+        #         msg.pose.covariance[i] = 1000000000000.0
+        #         msg.twist.covariance[i] = 1000000000000.0
+        #     elif i == 35:
+        #         msg.pose.covariance[i] = 0.001
+        #         msg.twist.covariance[i] = 0.001
+        #     else:
+        #         msg.pose.covariance[i] = 0.0
+        #         msg.twist.covariance[i] = 0.0
 
         self.odom_pub.publish(msg)
 
-        # left_RPM = Float32()
-        # right_RPM = Float32()
-        # left_RPM.data = float(LEFT_RPM)
-        # right_RPM.data = float(RIGHT_RPM)
-        # self.left_RPM_pub.publish(left_RPM)
-        # self.right_RPM_pub.publish(right_RPM)
+        left_RPM = Float32()
+        right_RPM = Float32()
+        left_RPM.data = float(LEFT_RPM)
+        right_RPM.data = float(RIGHT_RPM)
+        self.left_RPM_pub.publish(left_RPM)
+        self.right_RPM_pub.publish(right_RPM)
 
         # left_tick = Int32()
         # right_tick = Int32()
@@ -943,6 +943,8 @@ def task_1():
         POSE_CALCULATOR.calculatePose(LEFT_TICK, RIGHT_TICK)
         updatePublishDictionary()
 
+        # print("Thread 1 is running...")
+
 
 def task_2():
     global flag_2
@@ -951,12 +953,13 @@ def task_2():
         if flag_2:
             break
 
-        comp_start = time.time()
+        # comp_start = time.time()
 
         # if not DATA_RECORDING:
         driveMotors()
 
-        comp_end = time.time()
+        # comp_end = time.time()
+        # print("Thread 2 is running...")
 
 
 def task_3():
@@ -969,7 +972,9 @@ def task_3():
         if flag_3:
             break
 
-        rclpy.spin(esp32_node)
+        rclpy.spin_once(esp32_node)
+
+        # print("Thread 3 is running...")
 
 
 def task_4():
@@ -1029,6 +1034,8 @@ def task_4():
         WORKBOOK.writeData(index + 1, 1, end - start)
 
         # print(delta_time)
+
+    # print("Thread 4 is running...")
 
     stopAllThreads()
 
@@ -1144,6 +1151,8 @@ def task_5():
         delta_time = end - start
 
         WORKBOOK.writeData(index + 1, 1, delta_time)
+
+        # print("Thread 5 is running...")
 
     stopAllThreads()
 
