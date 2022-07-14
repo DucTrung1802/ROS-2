@@ -101,14 +101,14 @@ RIGHT_MOTOR_MAX = 12
 # Test data
 TEST_ONLY_ON_LAPTOP = False
 MANUALLY_TUNE_PID = False
-DATA_RECORDING = True
+DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
 TEST_PWM_FREQUENCY = 1000
 TEST_PWM = 0
 
 # DataRecorder parameters
-DATA_AMOUNT = 500
+DATA_AMOUNT = 1000
 
 if not (float(WHEEL_BASE) and WHEEL_BASE > 0):
     raise Exception("Invalid value of wheel base length!")
@@ -1022,9 +1022,8 @@ def task_4():
 
         if comp_end - comp_start <= LEFT_MOTOR_SAMPLE_TIME:
             # Run a test code to find the exceeding of time.sleep() then multiply the coefficient again
-            target_time = (
-                timeit.default_timer()
-                + (LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start)) * 5 / 5.6
+            target_time = timeit.default_timer() + (
+                LEFT_MOTOR_SAMPLE_TIME - (comp_end - comp_start)
             )
             while timeit.default_timer() <= target_time:
                 time.sleep(0.0001)
