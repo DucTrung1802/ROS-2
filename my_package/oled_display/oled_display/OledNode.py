@@ -13,7 +13,7 @@ from oled_display.Oled import Oled
 
 # Node parameters
 PUBLISH_FREQUENCY = 10
-NODE_NAME = "sonars"
+NODE_NAME = "oled_node"
 OLED_FREQUENCY = 60
 
 FONT_SET_DICT = {
