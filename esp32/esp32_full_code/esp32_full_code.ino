@@ -217,12 +217,13 @@ void driveRightWheel() {
   }
 }
 
-void drive_motors() {
+// void drive_motors() {
   //  JSON form: {"motor_data": [DIRECTION_LEFT, PWM_FREQUENCY_LEFT, PWM_LEFT, DIRECTION_RIGHT, PWM_FREQUENCY_RIGHT, PWM_RIGHT]}
   //  DIRECTION_RIGHT / DIRECTION_LEFT: 1 is forward, 0 is stop, -1 is backward
   //  PWM_FREQUENCY_LEFT / PWM_FREQUENCY_RIGHT: 1000 - 100000 Hz
   //  PWM: 0 - 1023
-  deserializeJSON();
+
+void drive_motors() {
 
   if (is_received) {
     driveLeftWheel();
@@ -241,6 +242,7 @@ void drive_motors() {
 void serial_receive() {
   serialChar = Serial.read();
   if (serialChar == '\n' || serialChar == '#') {
+    deserializeJSON();
     drive_motors();
     serialLine = "";
   } else {
@@ -333,6 +335,7 @@ void setup() {
 
   // Enable the weak pull down resistors
   //ESP32Encoder::useInternalWeakPullResistors=DOWN;
+
   // Enable the weak pull up resistors
   ESP32Encoder::useInternalWeakPullResistors = UP;
 
@@ -345,12 +348,10 @@ void setup() {
   pinMode(PWMA, OUTPUT);
   pinMode(ENC1_A, INPUT);
   pinMode(ENC1_B, INPUT);
+
   encoder_1.attachSingleEdge(ENC1_A, ENC1_B);
   encoder_1.setFilter(1023);
   encoder_1.clearCount();
-  // void attachHalfQuad(int aPintNumber, int bPinNumber);
-  // void attachFullQuad(int aPintNumber, int bPinNumber);
-  // void attachSingleEdge(int aPintNumber, int bPinNumber);
 
   pinMode(BIN1, OUTPUT);
   pinMode(BIN2, OUTPUT);
@@ -375,13 +376,10 @@ void setup() {
   ledcWrite(CHANNEL_PWMA, 0);
   ledcWrite(CHANNEL_PWMB, 0);
 
-  // set starting count value after attaching
-  // encoder.setCount(37);
+  // void attachHalfQuad(int aPintNumber, int bPinNumber);
+  // void attachFullQuad(int aPintNumber, int bPinNumber);
+  // void attachSingleEdge(int aPintNumber, int bPinNumber);
 
-  // clear the encoder's raw count and set the tracked count to zero
-  // encoder.clearCount();
-  // encoder2.clearCount();
-  // Serial.println("Encoder Start = " + String((int32_t)encoder.getCount()));
 }
 
 void loop() {
@@ -393,28 +391,10 @@ void loop() {
   rpm_calculator_1.calculate((int32_t)encoder_1.getCount());
   rpm_calculator_2.calculate((int32_t)encoder_2.getCount());
 
-  // if (millis() < RUNNING_TIME){
-  //   readRPM();
-  // }
-
-  // if (millis() >= RUNNING_TIME) {
-  //   ledcWrite(CHANNEL_PWMA, 0);
-  //   ledcWrite(CHANNEL_PWMB, 0);
-  // }
-
-  readData();
+  packageData();
 
   if (micros() - timerPivot >= PERIOD) {
-    // Serial.println(PERIOD);
-    // unsigned long delta_time = micros() - timerPivot;
-    // Serial.println(delta_time);
-    // Serial.println("Encoder count = " + String((int32_t)encoder_1.getCount()) + " " + String((int32_t)encoder_2.getCount()));
     sendJSON();
-
-    // Serial.print("left_tick: ");
-    // Serial.println((int32_t)encoder_1.getCount());
-    // Serial.print("right_tick: ");
-    // Serial.println((int32_t)encoder_2.getCount());
     timerPivot = micros();
   }
 }

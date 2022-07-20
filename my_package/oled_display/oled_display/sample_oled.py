@@ -96,10 +96,7 @@ x = 0
 
 
 # Load default font.
-battery_font = ImageFont.load_default()
-order_number_font = ImageFont.truetype("DejaVuSerif-Bold.ttf", 45)
-waiting_font = ImageFont.truetype("DejaVuSerif-Bold.ttf", 20)
-
+font = ImageFont.load_default()
 
 # Alternatively load a TTF font.  Make sure the .ttf font file is in the same directory as the python script!
 # Some other nice fonts to try: http://www.dafont.com/bitmap.php
@@ -123,15 +120,10 @@ while True:
 
         # Write two lines of text.
 
-        # draw.text((110, 0), "10%", font=battery_font, fill=255)
-        # draw.text((48, 10), "3", font=order_number_font, fill=255)
-        draw.text((0, 0), "minh minh minh", font=waiting_font, fill=255)
-        draw.text((0, 15), "minh minh minh", font=waiting_font, fill=255)
-        draw.text((0, 30), "minh minh minh", font=waiting_font, fill=255)
-        draw.text((0, 45), "minh minh minh", font=waiting_font, fill=255)
-        # draw.text((x, top + 8), str(CPU), font=font, fill=255)
-        # draw.text((x, top + 16), str(MemUsage), font=font, fill=255)
-        # draw.text((x, top + 25), str(Disk), font=font, fill=255)
+        draw.text((x, top), "minhnghien", font=font, fill=255)
+        draw.text((x, top + 8), str(CPU), font=font, fill=255)
+        draw.text((x, top + 16), str(MemUsage), font=font, fill=255)
+        draw.text((x, top + 25), str(Disk), font=font, fill=255)
 
         # Display image.
         disp.image(image)

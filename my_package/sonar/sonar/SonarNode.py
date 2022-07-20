@@ -11,12 +11,13 @@ import threading
 
 # Node parameters
 PUBLISH_FREQUENCY = 10
-NODE_NAME = "sonars"
-NUMBER_OF_MEDIAN_FILTER_ELEMENT = 9
+NODE_NAME = "sonars_node"
+NUMBER_OF_MEDIAN_FILTER_ELEMENT = 20
+SAMPLE_RATE = 100
 
 
 def checkConditions():
-    global PUBLISH_PERIOD
+    global PUBLISH_PERIOD, SAMPLE_PERIOD
 
     # GPIO Mode (BOARD / BCM)
     GPIO.setmode(GPIO.BCM)
@@ -24,6 +25,10 @@ def checkConditions():
     if PUBLISH_FREQUENCY <= 0:
         raise Exception("PUBLISH_FREQUENCY must be an positive integer!")
     PUBLISH_PERIOD = 1 / PUBLISH_FREQUENCY
+
+    if SAMPLE_RATE <= 0:
+        raise Exception("SAMPLE_RATE must be an positive integer!")
+    SAMPLE_PERIOD = 1 / SAMPLE_RATE
 
 
 class SonarNode(Node):
@@ -64,7 +69,7 @@ class SonarNode(Node):
             msg.radiation_type = self.__sonar_array[i].getRadiationType()
             msg.field_of_view = self.__sonar_array[
                 i
-            ].getFieldOfView()  # rad ~ 15 degree (according to feature of HC-SR 04)
+            ].getFieldOfView()  # rad ~ 30 degree (according to feature of HC-SR 04)
             msg.min_range = self.__sonar_array[i].getMinRange()
             msg.max_range = self.__sonar_array[i].getMaxRange()
             msg.range = self.__sonar_array[i].getRange()
@@ -77,7 +82,7 @@ class SonarNode(Node):
         msg.radiation_type = self.__sonar_array[2].getRadiationType()
         msg.field_of_view = self.__sonar_array[
             2
-        ].getFieldOfView()  # rad ~ 15 degree (according to feature of HC-SR 04)
+        ].getFieldOfView()  # rad ~ 30 degree (according to feature of HC-SR 04)
         msg.min_range = self.__sonar_array[2].getMinRange()
         msg.max_range = self.__sonar_array[2].getMaxRange()
         msg.range = self.__sonar_array[2].getRange()
@@ -92,7 +97,7 @@ def task_1(sonar):
     error_number = 0
 
     while True:
-        time.sleep(0.01)
+        time.sleep(SAMPLE_PERIOD)
 
         if flag_1:
             break
@@ -112,7 +117,7 @@ def task_2(sonar):
     error_number = 0
 
     while True:
-        time.sleep(0.01)
+        time.sleep(SAMPLE_PERIOD)
 
         if flag_2:
             break
@@ -132,7 +137,7 @@ def task_3(sonar):
     error_number = 0
 
     while True:
-        time.sleep(0.01)
+        time.sleep(SAMPLE_PERIOD)
 
         if flag_3:
             break
@@ -153,7 +158,7 @@ def task_4(sonar):
     error_number = 0
 
     while True:
-        time.sleep(0.01)
+        time.sleep(SAMPLE_PERIOD)
 
         if flag_4:
             break
@@ -173,7 +178,7 @@ def task_5(sonar):
     error_number = 0
 
     while True:
-        time.sleep(0.01)
+        time.sleep(SAMPLE_PERIOD)
 
         if flag_5:
             break
@@ -189,12 +194,11 @@ def task_6(sonar_node):
     global flag_6
     print("Start thread 6")
     while True:
-        time.sleep(0.01)
 
         if flag_6:
             break
 
-        rclpy.spin_once(sonar_node)
+        rclpy.spin(sonar_node)
         # print("Task 6 is running...")
 
 
@@ -251,7 +255,7 @@ def loop():
         trigger_pin=27,
         echo_pin=17,
         min_range=0.02,
-        max_range=1.05,
+        max_range=0.75,
         field_of_view=0.558,
         number_of_value_median_filter=NUMBER_OF_MEDIAN_FILTER_ELEMENT,
     )
@@ -259,7 +263,7 @@ def loop():
         trigger_pin=9,
         echo_pin=10,
         min_range=0.02,
-        max_range=1.05,
+        max_range=1.00,
         field_of_view=0.558,
         number_of_value_median_filter=NUMBER_OF_MEDIAN_FILTER_ELEMENT,
     )
@@ -275,7 +279,7 @@ def loop():
         trigger_pin=26,
         echo_pin=19,
         min_range=0.02,
-        max_range=1.05,
+        max_range=1.00,
         field_of_view=0.558,
         number_of_value_median_filter=NUMBER_OF_MEDIAN_FILTER_ELEMENT,
     )
@@ -283,7 +287,7 @@ def loop():
         trigger_pin=24,
         echo_pin=23,
         min_range=0.02,
-        max_range=1.05,
+        max_range=0.75,
         field_of_view=0.558,
         number_of_value_median_filter=NUMBER_OF_MEDIAN_FILTER_ELEMENT,
     )

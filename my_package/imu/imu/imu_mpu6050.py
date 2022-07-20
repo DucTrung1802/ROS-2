@@ -19,7 +19,7 @@ PITCH = 0.0
 YAW = 0.0
 
 # Node parameters
-NODE_NAME = "imu_mpu6050"
+NODE_NAME = "imu_node"
 PUBLISH_FREQUENCY = 50
 
 # Node parameters
@@ -161,7 +161,7 @@ def task_1():
             break
 
         getIMUData(mpu)
-        time.sleep(0.1)
+        time.sleep(0.02)
 
 
 def task_2():

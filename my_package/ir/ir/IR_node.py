@@ -18,7 +18,7 @@ IR_PIN = 4
 # Set up GPIO pins
 
 # pull_up_down=GPIO.PUD_DOWN or pull_up_down=GPIO.PUD_UP
-GPIO.setup(IR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(IR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 class IRPublisher(Node):
