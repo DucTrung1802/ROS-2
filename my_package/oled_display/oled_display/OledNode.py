@@ -19,7 +19,7 @@ OLED_FREQUENCY = 60
 FONT_SET_DICT = {
     "order_number": {
         "font": ImageFont.truetype("DejaVuSerif-Bold.ttf", 45),
-        "width": 32,
+        "width": 25,
         "height": 44,
     },
     "battery": {"font": ImageFont.load_default(), "width": 6, "height": 10},
@@ -123,7 +123,7 @@ class OledNode(Node):
 
         elif self.__current_goal.data != "":
             self.__oled.add_text(
-                text=str(f"{round(int(self.__current_goal.data))}"),
+                text=str(f"{float(self.__current_goal.data)}"),
                 font_set=FONT_SET_DICT["order_number"],
                 horizontal_align="center",
                 vertical_align=10,
