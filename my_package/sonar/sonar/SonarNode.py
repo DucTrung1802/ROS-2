@@ -263,7 +263,7 @@ def loop():
         trigger_pin=9,
         echo_pin=10,
         min_range=0.02,
-        max_range=1.05,
+        max_range=1.00,
         field_of_view=0.558,
         number_of_value_median_filter=NUMBER_OF_MEDIAN_FILTER_ELEMENT,
     )
@@ -279,7 +279,7 @@ def loop():
         trigger_pin=26,
         echo_pin=19,
         min_range=0.02,
-        max_range=1.05,
+        max_range=1.00,
         field_of_view=0.558,
         number_of_value_median_filter=NUMBER_OF_MEDIAN_FILTER_ELEMENT,
     )
