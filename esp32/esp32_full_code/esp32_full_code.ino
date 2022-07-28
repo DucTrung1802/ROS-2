@@ -50,7 +50,7 @@ public:
     this->_previous_RPM_coefficient = previous_RPM_coefficient;
   }
 
-  void calculate(int32_t current_tick) {
+  void calculate(int64_t current_tick) {
     long curr_T = micros();
     if (((float)(curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
       float delta_T = ((float)(curr_T - this->_previous_T)) / 1.0e6;
@@ -388,8 +388,8 @@ void loop() {
     serialReceive();
   }
 
-  rpm_calculator_1.calculate((int32_t)encoder_1.getCount());
-  rpm_calculator_2.calculate((int32_t)encoder_2.getCount());
+  rpm_calculator_1.calculate((int64_t)encoder_1.getCount());
+  rpm_calculator_2.calculate((int64_t)encoder_2.getCount());
 
   packageData();
 
