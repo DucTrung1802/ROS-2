@@ -11,7 +11,7 @@
 
 float VOLTAGE_DIVIDER_FACTOR = 4.1166610794;
 float VOLTAGE_TO_ANALOG_FACTOR = 1.0/ 1240.909;
-float CALIBRATION_FACTOR = 1.0024788723;
+float CALIBRATION_FACTOR = 0.97404968944;
 
 RunningMedian samples = RunningMedian(1000);
 
@@ -50,7 +50,7 @@ public:
     this->_previous_RPM_coefficient = previous_RPM_coefficient;
   }
 
-  void calculate(int32_t current_tick) {
+  void calculate(int64_t current_tick) {
     long curr_T = micros();
     if (((float)(curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
       float delta_T = ((float)(curr_T - this->_previous_T)) / 1.0e6;
@@ -217,13 +217,13 @@ void driveRightWheel() {
   }
 }
 
-// void drive_motors() {
+// void driveMotors() {
   //  JSON form: {"motor_data": [DIRECTION_LEFT, PWM_FREQUENCY_LEFT, PWM_LEFT, DIRECTION_RIGHT, PWM_FREQUENCY_RIGHT, PWM_RIGHT]}
   //  DIRECTION_RIGHT / DIRECTION_LEFT: 1 is forward, 0 is stop, -1 is backward
   //  PWM_FREQUENCY_LEFT / PWM_FREQUENCY_RIGHT: 1000 - 100000 Hz
   //  PWM: 0 - 1023
 
-void drive_motors() {
+void driveMotors() {
 
   if (is_received) {
     driveLeftWheel();
@@ -239,11 +239,11 @@ void drive_motors() {
   }
 }
 
-void serial_receive() {
+void serialReceive() {
   serialChar = Serial.read();
   if (serialChar == '\n' || serialChar == '#') {
     deserializeJSON();
-    drive_motors();
+    driveMotors();
     serialLine = "";
   } else {
     serialLine += serialChar;
@@ -258,7 +258,7 @@ void initializeMotor() {
   digitalWrite(STBY, HIGH);
 }
 
-void readData() {
+void packageData() {
   long start = micros();
 
   char* md5str;
@@ -385,11 +385,11 @@ void setup() {
 void loop() {
 
   while (Serial.available()) {
-    serial_receive();
+    serialReceive();
   }
 
-  rpm_calculator_1.calculate((int32_t)encoder_1.getCount());
-  rpm_calculator_2.calculate((int32_t)encoder_2.getCount());
+  rpm_calculator_1.calculate((int64_t)encoder_1.getCount());
+  rpm_calculator_2.calculate((int64_t)encoder_2.getCount());
 
   packageData();
 
