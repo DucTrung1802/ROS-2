@@ -101,6 +101,7 @@ RIGHT_MOTOR_MAX = 12
 # Test data
 TEST_ONLY_ON_LAPTOP = False
 MANUALLY_TUNE_PID = False
+ODOMETRY_TEST = True
 DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
@@ -243,7 +244,7 @@ odom_dictionary = {
 
 LOW_BATTERY_PERCENTAGE = 15
 
-BATTERY_CHECK_PERIOD = 60  # second(s)
+BATTERY_CHECK_PERIOD = 1  # second(s)
 
 DISCHARGE_RATE = {
     12.660: 100,
@@ -518,6 +519,7 @@ class ESP32Node(Node):
             and RIGHT_RPM == 0.0
         ):
             battery_msg.voltage = VOLTAGE
+            # print(VOLTAGE)
             self.__percentage = float(self.getBatteryPercentage(VOLTAGE))
             battery_msg.percentage = self.__percentage
             self.battery_pub.publish(battery_msg)
@@ -528,7 +530,7 @@ class ESP32Node(Node):
         elif self.__percentage > LOW_BATTERY_PERCENTAGE:
             low_battery_msg.data = int(0)
 
-        self.low_battery_pub.publish(low_battery_msg)
+        # self.low_battery_pub.publish(low_battery_msg)
 
         if self.index <= 30:
             self.BatteryStateInitalize()
@@ -722,7 +724,7 @@ def driveMotors():
     # start = time.time()
 
     if LEFT_MOTOR.getSampleTime() - (end - start) >= 0:
-        time.sleep((LEFT_MOTOR.getSampleTime() - (end - start)) * 5 / 5.11)
+        time.sleep((LEFT_MOTOR.getSampleTime() - (end - start)) * 5 / 5.6)
 
     # end = time.time()
 
@@ -750,13 +752,13 @@ def getMCUSerial():
                 # print(MCUSerial)
                 break
 
-        # elif (device.find(LIDAR_USB_NAME) > 0 and not foundLidar):
-        #     if (device.find("disconnected") > 0):
-        #         raise Exception("Lidar is disconnected!")
-        #     else:
-        #         # print("Lidar in serial: " + device.split()[-1])
-        #         foundLidar = True
-        #         continue
+        elif device.find(LIDAR_USB_NAME) > 0 and not foundLidar:
+            if device.find("disconnected") > 0:
+                raise Exception("Lidar is disconnected!")
+            else:
+                # print("Lidar in serial: " + device.split()[-1])
+                foundLidar = True
+                continue
 
     return MCUSerial
 
@@ -922,13 +924,14 @@ def testPIDResponse(max_range, step, time_interval=0):
 
 
 def stopAllThreads():
-    global flag_1, flag_2, flag_3, flag_4, flag_5
+    global flag_1, flag_2, flag_3, flag_4, flag_5, flag_6
 
     flag_1 = True
     flag_2 = True
     flag_3 = True
     flag_4 = True
     flag_5 = True
+    flag_6 = True
 
 
 def task_1():
@@ -1156,8 +1159,45 @@ def task_5():
     stopAllThreads()
 
 
+def task_6():
+    global flag_6
+    global linear_RPM_left, linear_RPM_right
+
+    time.sleep(0.5)
+    print("Odometry test")
+
+    radius = 1.5
+    lin_vel = float(input("Input linear velocity: "))
+    ang_vel = lin_vel / radius
+
+    differiential_drive_matrix = differientialDriveCalculate(lin_vel, ang_vel)
+
+    differiential_drive_matrix = RAD_PER_SEC_to_RPM(differiential_drive_matrix)
+
+    # Differential drive
+    linear_RPM_right = differiential_drive_matrix.item(0)
+    linear_RPM_left = differiential_drive_matrix.item(1)
+
+    linear_RPM_left = saturate(linear_RPM_left, -LEFT_MOTOR_MAX_RPM, LEFT_MOTOR_MAX_RPM)
+
+    linear_RPM_right = saturate(
+        linear_RPM_right, -RIGHT_MOTOR_MAX_RPM, RIGHT_MOTOR_MAX_RPM
+    )
+
+    print("Start")
+
+    start = time.time()
+
+    right_tick_max = (radius + 0.22) / 0.095 * 480
+
+    while RIGHT_TICK <= (right_tick_max):
+        time.sleep(0.0001)
+
+    stopAllThreads()
+
+
 def threadingHandler():
-    global flag_1, flag_2, flag_3, flag_4, flag_5
+    global flag_1, flag_2, flag_3, flag_4, flag_5, flag_6
 
     # Setup flags (Thread will be stopped when the flag is set to True)
     flag_1 = False
@@ -1165,6 +1205,7 @@ def threadingHandler():
     flag_3 = False
     flag_4 = False
     flag_5 = False
+    flag_6 = False
 
     # Create threads
     thread_1 = threading.Thread(target=task_1)
@@ -1176,6 +1217,9 @@ def threadingHandler():
 
     if MANUALLY_TUNE_PID:
         thread_5 = threading.Thread(target=task_5)
+
+    if ODOMETRY_TEST:
+        thread_6 = threading.Thread(target=task_6)
 
     # Start threads
     if not TEST_ONLY_ON_LAPTOP:
@@ -1190,6 +1234,9 @@ def threadingHandler():
         # pass
         thread_5.start()
 
+    if ODOMETRY_TEST:
+        thread_6.start()
+
     # Wait for all threads to stop
     if not TEST_ONLY_ON_LAPTOP:
         thread_1.join()
@@ -1203,6 +1250,9 @@ def threadingHandler():
     if MANUALLY_TUNE_PID:
         # pass
         thread_5.join()
+
+    if ODOMETRY_TEST:
+        thread_6.join()
 
     # Do something after all threads stop
     # do_something()
