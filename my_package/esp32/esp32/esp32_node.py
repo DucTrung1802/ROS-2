@@ -99,9 +99,10 @@ RIGHT_MOTOR_MAX = 12
 
 
 # Test data
+SHOW_VOLATGE = True
 TEST_ONLY_ON_LAPTOP = False
 MANUALLY_TUNE_PID = False
-ODOMETRY_TEST = True
+ODOMETRY_TEST = False
 DATA_RECORDING = False
 DIRECTION_LEFT = 1
 DIRECTION_RIGHT = 1
@@ -518,8 +519,9 @@ class ESP32Node(Node):
             and LEFT_RPM == 0.0
             and RIGHT_RPM == 0.0
         ):
-            battery_msg.voltage = VOLTAGE
-            # print(VOLTAGE)
+            battery_msg.voltage = float(VOLTAGE)
+            if SHOW_VOLATGE:
+                print(VOLTAGE)
             self.__percentage = float(self.getBatteryPercentage(VOLTAGE))
             battery_msg.percentage = self.__percentage
             self.battery_pub.publish(battery_msg)
