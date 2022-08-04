@@ -132,9 +132,7 @@ class Sonar(object):
 
         self.__median_filter.addValue(range)
 
-        self.__range = self.__saturate(
-            self.__median_filter.getResult(), self.__min_range, self.__max_range
-        )
+        self.__range = self.__median_filter.getResult()
 
     def getMinRange(self):
         return self.__min_range
