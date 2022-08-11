@@ -3,77 +3,80 @@
   Complete project details at https://randomnerdtutorials.com
 *********/
 
+#include "esp_adc_cal.h"
 #include <ESP32Encoder.h>
 #include <ArduinoJson.h>
 #include <MD5.h>
 
 #include "RunningMedian.h"
 
-float VOLTAGE_DIVIDER_FACTOR = 4.1166610794;
-float VOLTAGE_TO_ANALOG_FACTOR = 1.0/ 1240.909;
-float CALIBRATION_FACTOR = 0.97404968944;
-
 RunningMedian samples = RunningMedian(1000);
 
-const int potPin = 34;
+float VREF = 1100;
+float REFERENCE_VOLTAGE = 3.072; 
+float VOLTAGE_DIVIDER_COEFFICIENT = 3.99;
+float VOLTAGE_DROP = 0.25;
+float CALIBRATION = 1.031271; // Adjust for ultimate accuracy when input is measured using an accurate DVM, if reading too high then use e.g. 0.99, too low use 1.01
+
+const int ADC_PIN = 34;
 float potValue = 0;
 
 class RPMCalculator {
-  // Declare private variable of class
-private:
-  float _sample_time = 0.005;
-  float _encoder_tick_per_round = 480;
+    // Declare private variable of class
+  private:
+    float _sample_time = 0.005;
+    float _encoder_tick_per_round = 480;
 
-  float _RPM_Filter = 0;
-  float _previous_RPM = 0;
+    float _RPM_Filter = 0;
+    float _previous_RPM = 0;
 
-  float _RPM_Filter_coefficient = 0.854;
-  float _RPM_coefficient = 0.0728;
-  float _previous_RPM_coefficient = 0.0728;
+    float _RPM_Filter_coefficient = 0.854;
+    float _RPM_coefficient = 0.0728;
+    float _previous_RPM_coefficient = 0.0728;
 
-  int32_t _current_tick = 0;
-  int32_t _previous_tick = 0;
-  long _previous_T = 0;
+    int32_t _current_tick = 0;
+    int32_t _previous_tick = 0;
+    long _previous_T = 0;
 
-public:
-  void setupSampleTime(float sample_time) {
-    this->_sample_time = sample_time;
-  }
-
-  void setupEncoderTickPerRound(unsigned int encoder_tick_per_round) {
-    this->_encoder_tick_per_round = encoder_tick_per_round;
-  }
-
-  void setupLowPassFilter(float RPM_Filter_coefficient, float RPM_coefficient, float previous_RPM_coefficient) {
-    this->_RPM_Filter_coefficient = RPM_Filter_coefficient;
-    this->_RPM_coefficient = RPM_coefficient;
-    this->_previous_RPM_coefficient = previous_RPM_coefficient;
-  }
-
-  void calculate(int64_t current_tick) {
-    long curr_T = micros();
-    if (((float)(curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
-      float delta_T = ((float)(curr_T - this->_previous_T)) / 1.0e6;
-      this->_current_tick = current_tick;
-      float encoder_tick_per_sec = abs(this->_current_tick - this->_previous_tick) / delta_T;
-      float RPM = encoder_tick_per_sec / this->_encoder_tick_per_round * 60.0;
-
-      // Low-pass filter (over 25Hz cut off)
-      this->_RPM_Filter = this->_RPM_Filter_coefficient * this->_RPM_Filter + RPM * this->_RPM_coefficient + this->_previous_RPM * this->_previous_RPM_coefficient;
-
-      this->_previous_RPM = this->_RPM_Filter;
-      this->_previous_tick = current_tick;
-      this->_previous_T = curr_T;
+  public:
+    void setupSampleTime(float sample_time) {
+      this->_sample_time = sample_time;
     }
-  }
 
-  float getRPM() {
-    return this->_RPM_Filter;
-  }
+    void setupEncoderTickPerRound(unsigned int encoder_tick_per_round) {
+      this->_encoder_tick_per_round = encoder_tick_per_round;
+    }
 
-  float getTick() {
-    return this->_current_tick;
-  }
+    void setupLowPassFilter(float RPM_Filter_coefficient, float RPM_coefficient, float previous_RPM_coefficient) {
+      this->_RPM_Filter_coefficient = RPM_Filter_coefficient;
+      this->_RPM_coefficient = RPM_coefficient;
+      this->_previous_RPM_coefficient = previous_RPM_coefficient;
+    }
+
+    void calculate(int64_t current_tick) {
+      long curr_T = micros();
+      if (((float)(curr_T - this->_previous_T)) / 1.0e6 >= this->_sample_time) {
+        float delta_T = ((float)(curr_T - this->_previous_T)) / 1.0e6;
+        this->_current_tick = current_tick;
+        float encoder_tick_per_sec = abs(this->_current_tick - this->_previous_tick) / delta_T;
+        float RPM = encoder_tick_per_sec / this->_encoder_tick_per_round * 60.0;
+
+        // Low-pass filter (over 25Hz cut off)
+        this->_RPM_Filter = this->_RPM_Filter_coefficient * this->_RPM_Filter + RPM * this->_RPM_coefficient + this->_previous_RPM * this->_previous_RPM_coefficient;
+
+        this->_previous_RPM = this->_RPM_Filter;
+        this->_previous_tick = current_tick;
+        this->_previous_T = curr_T;
+      }
+    }
+
+    float getRPM() {
+      return this->_RPM_Filter;
+    }
+
+    float getTick() {
+      return this->_current_tick;
+    }
 };
 
 struct DataSend {
@@ -158,6 +161,12 @@ DataReceive data_receive;
 // Timer
 long read_timer = 0;
 
+float readVoltage(byte ADC_Pin) {
+  esp_adc_cal_characteristics_t adc_chars;
+  esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
+  VREF = adc_chars.vref; // Obtain the device ADC reference voltage
+  return (analogRead(ADC_PIN) / 4095.0) * 3.3 * (1100 / VREF) * CALIBRATION;  // ESP by design reference voltage in mV
+}
 
 void deserializeJSON() {
   StaticJsonDocument<200> JSON_DOC_RECEIVE;
@@ -218,10 +227,10 @@ void driveRightWheel() {
 }
 
 // void driveMotors() {
-  //  JSON form: {"motor_data": [DIRECTION_LEFT, PWM_FREQUENCY_LEFT, PWM_LEFT, DIRECTION_RIGHT, PWM_FREQUENCY_RIGHT, PWM_RIGHT]}
-  //  DIRECTION_RIGHT / DIRECTION_LEFT: 1 is forward, 0 is stop, -1 is backward
-  //  PWM_FREQUENCY_LEFT / PWM_FREQUENCY_RIGHT: 1000 - 100000 Hz
-  //  PWM: 0 - 1023
+//  JSON form: {"motor_data": [DIRECTION_LEFT, PWM_FREQUENCY_LEFT, PWM_LEFT, DIRECTION_RIGHT, PWM_FREQUENCY_RIGHT, PWM_RIGHT]}
+//  DIRECTION_RIGHT / DIRECTION_LEFT: 1 is forward, 0 is stop, -1 is backward
+//  PWM_FREQUENCY_LEFT / PWM_FREQUENCY_RIGHT: 1000 - 100000 Hz
+//  PWM: 0 - 1023
 
 void driveMotors() {
 
@@ -270,10 +279,11 @@ void packageData() {
   data_send.right_RPM = rpm_calculator_2.getRPM();
   data_send.right_tick = rpm_calculator_2.getTick();
 
-  potValue = analogRead(potPin) * VOLTAGE_DIVIDER_FACTOR * VOLTAGE_TO_ANALOG_FACTOR * CALIBRATION_FACTOR;
-  samples.add(potValue);
-  data_send.battery_voltage = samples.getAverage(100);
-  
+  float read_voltage = readVoltage(ADC_PIN);
+  float adjusted_voltage = REFERENCE_VOLTAGE - (REFERENCE_VOLTAGE - read_voltage) * 3.99 / 1.668 + VOLTAGE_DROP;
+  samples.add(adjusted_voltage);
+  data_send.battery_voltage = samples.getAverage(10);
+
   if (data_send.left_RPM < 1) {
     data_send.left_RPM = 0;
   }
